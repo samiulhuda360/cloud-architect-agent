@@ -165,4 +165,6 @@ Each design is scored on:
 - A Cosmos DB replica becomes a second `geo_location` on the same account, with automatic failover.
 - Front Door gets one origin per web app: priority 1 in the primary region, priority 2 in the DR region. A health probe and an HTTPS route connect them. Premium adds a WAF policy with the Microsoft Default and Bot Manager rule sets.
 
+**No keys.** Apps use managed identities. Functions reach their storage with a system-assigned identity and role assignments (Storage Blob Data Owner, Storage Queue Data Contributor), so no storage key or connection string appears in the code. A test fails if `access_key` shows up in any generated file.
+
 **Formatting.** `_fmt` aligns attributes exactly as `terraform fmt` does. Tests run a `terraform fmt` round-trip and `terraform validate` on every scenario design when Terraform is installed (CI installs it).

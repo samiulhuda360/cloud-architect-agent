@@ -192,7 +192,7 @@ cloud_architect/
   api.py, mcp_server.py, __main__.py   web API, MCP server, CLI
 ui/index.html    single-page UI
 eval/            scenarios and results
-tests/           92 tests; offline price fixture; live checks behind LIVE_PRICES=1
+tests/           93 tests; offline price fixture; live checks behind LIVE_PRICES=1
 ```
 
 More detail is in [docs/architecture.md](docs/architecture.md).

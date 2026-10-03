@@ -417,14 +417,34 @@ resource "azurerm_function_app_flex_consumption" "functions_{i}" {{
   service_plan_id = azurerm_service_plan.functions_{i}.id
   storage_container_type = "blobContainer"
   storage_container_endpoint = "${{azurerm_storage_account.functions_{i}.primary_blob_endpoint}}${{azurerm_storage_container.functions_{i}.name}}"
-  storage_authentication_type = "StorageAccountConnectionString"
-  storage_access_key = azurerm_storage_account.functions_{i}.primary_access_key
+  storage_authentication_type = "SystemAssignedIdentity"
   runtime_name = "python"
   runtime_version = "3.12"
   maximum_instance_count = 40
   instance_memory_in_mb = 2048
 
+  app_settings = {{
+    AzureWebJobsStorage__accountName = azurerm_storage_account.functions_{i}.name
+  }}
+
+  identity {{
+    type = "SystemAssigned"
+  }}
+
   site_config {{}}
+}}
+
+# The app reaches its storage with its own identity, so no storage key appears anywhere.
+resource "azurerm_role_assignment" "functions_{i}_blob" {{
+  scope = azurerm_storage_account.functions_{i}.id
+  role_definition_name = "Storage Blob Data Owner"
+  principal_id = azurerm_function_app_flex_consumption.functions_{i}.identity[0].principal_id
+}}
+
+resource "azurerm_role_assignment" "functions_{i}_queue" {{
+  scope = azurerm_storage_account.functions_{i}.id
+  role_definition_name = "Storage Queue Data Contributor"
+  principal_id = azurerm_function_app_flex_consumption.functions_{i}.identity[0].principal_id
 }}
 '''
 

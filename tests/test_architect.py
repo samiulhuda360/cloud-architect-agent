@@ -134,6 +134,7 @@ def test_terraform_only_references_resources_it_declares(book, sid, w, expect):
     declared |= {f"data.{t}.{n}" for t, n in re.findall(r'^data "(\w+)" "(\w+)"', tf, re.M)}
     refs = {f"{d}{t}.{n}" for d, t, n in re.findall(r"(data\.)?\b((?:azurerm|random)_\w+)\.(\w+)", tf)}
     assert refs <= declared, f"undeclared: {sorted(refs - declared)}"
+    assert "access_key" not in tf, "use managed identities, not storage keys"
 
 
 @pytest.mark.skipif(not os.getenv("TERRAFORM"), reason="set TERRAFORM=path/to/terraform to run")
@@ -299,3 +300,9 @@ def test_terraform_is_fmt_clean(book, sid, w, expect):
     tf = generate(architect(w, book), w)
     out = subprocess.run([os.environ["TERRAFORM"], "fmt", "-"], input=tf, capture_output=True, text=True, check=True).stdout
     assert out == tf
+
+
+def test_functions_reach_storage_with_their_identity(book):
+    tf = generate(Design(region="newzealandnorth", components=[comp("functions", "flex", zone_redundant=True)]), web(needs=["background_jobs"]))
+    assert "SystemAssignedIdentity" in tf and tf.count("azurerm_role_assignment") == 2
+    assert "access_key" not in tf and "connection_string" not in tf.lower()
