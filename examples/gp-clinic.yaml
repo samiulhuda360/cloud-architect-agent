@@ -1,0 +1,12 @@
+# python -m cloud_architect design examples/gp-clinic.yaml --terraform build/gp-clinic
+name: GP clinic patient portal
+description: Patients book appointments, read results and message their GP.
+needs: [web_app, relational_db, object_storage]
+monthly_users: 8000
+peak_rps: 30
+data_gb: 120
+blob_gb: 600
+residency: nz          # health information stays in New Zealand
+availability: high     # 99.95%
+pii: true
+budget_nzd_month: 4000

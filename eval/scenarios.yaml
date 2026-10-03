@@ -1,0 +1,210 @@
+# Evaluation workloads. Each one exercises a constraint an architect has to get right.
+# `expect` lists properties of a good answer that the scorer checks in addition to the generic metrics.
+- id: s01
+  name: Cafe online ordering (dev)
+  needs: [web_app, relational_db]
+  environment: dev
+  budget_nzd_month: 120
+  expect: {max_total: 120}
+
+- id: s02
+  name: Plumbing business booking site
+  needs: [web_app, relational_db]
+  monthly_users: 3000
+  peak_rps: 3
+  budget_nzd_month: 600
+  expect: {max_total: 600}
+
+- id: s03
+  name: GP clinic patient portal
+  description: Patients book appointments and read results. Health information.
+  needs: [web_app, relational_db, object_storage]
+  residency: nz
+  availability: high
+  pii: true
+  peak_rps: 25
+  data_gb: 80
+  blob_gb: 400
+  budget_nzd_month: 4000
+  expect: {all_in: [newzealandnorth], private_data: true, zone_redundant_db: true}
+
+- id: s04
+  name: Council policy assistant
+  description: Staff and residents ask questions about council policies; answers cite the documents.
+  needs: [web_app, llm, search, relational_db]
+  residency: nz
+  availability: high
+  peak_rps: 10
+  data_gb: 20
+  llm_input_mtokens: 40
+  llm_output_mtokens: 8
+  budget_nzd_month: 4000
+  expect: {llm_exception: true}
+
+- id: s05
+  name: Retail chain e-commerce
+  needs: [web_app, api, relational_db, cache, object_storage]
+  monthly_users: 120000
+  peak_rps: 120
+  data_gb: 300
+  blob_gb: 2000
+  availability: high
+  pii: true
+  residency: anz
+  budget_nzd_month: 9000
+  expect: {has: [redis], zone_redundant_db: true}
+
+- id: s06
+  name: Iwi land records archive
+  description: Scanned land records and genealogy; must stay in Aotearoa.
+  needs: [web_app, object_storage, relational_db, search]
+  residency: nz
+  availability: standard
+  pii: true
+  blob_gb: 5000
+  data_gb: 40
+  budget_nzd_month: 2500
+  expect: {all_in: [newzealandnorth], no_tier: [hot_grs]}
+
+- id: s07
+  name: Freight tracking API
+  needs: [api, nosql_db, background_jobs]
+  peak_rps: 60
+  data_gb: 150
+  availability: high
+  residency: anz
+  budget_nzd_month: 5000
+  expect: {has: [cosmos_db, functions]}
+
+- id: s08
+  name: Startup SaaS MVP
+  needs: [web_app, api, relational_db]
+  monthly_users: 500
+  peak_rps: 2
+  budget_nzd_month: 250
+  expect: {max_total: 250}
+
+- id: s09
+  name: Insurance claims triage with AI
+  description: Claim descriptions are classified and summarised. Contains personal and health information.
+  needs: [web_app, llm, relational_db, object_storage]
+  residency: anz
+  availability: high
+  pii: true
+  peak_rps: 15
+  llm_input_mtokens: 120
+  llm_output_mtokens: 20
+  budget_nzd_month: 6000
+  expect: {no_tier: [gpt-4o-mini_global]}
+
+- id: s10
+  name: Marketing site with global audience
+  needs: [web_app]
+  monthly_users: 400000
+  peak_rps: 80
+  residency: any
+  budget_nzd_month: 1500
+  expect: {}
+
+- id: s11
+  name: Government grants portal (critical)
+  needs: [web_app, relational_db, object_storage]
+  residency: nz
+  availability: critical
+  pii: true
+  peak_rps: 40
+  data_gb: 200
+  blob_gb: 800
+  budget_nzd_month: 9000
+  expect: {all_in: [newzealandnorth], dr_note: true}
+
+- id: s12
+  name: Bank customer chatbot (critical, ANZ)
+  needs: [web_app, llm, relational_db, cache]
+  residency: anz
+  availability: critical
+  pii: true
+  peak_rps: 90
+  llm_input_mtokens: 300
+  llm_output_mtokens: 60
+  budget_nzd_month: 15000
+  expect: {dr_region: true, no_tier: [gpt-4o-mini_global]}
+
+- id: s13
+  name: Internal HR knowledge search
+  needs: [web_app, search, llm]
+  residency: any
+  peak_rps: 3
+  llm_input_mtokens: 10
+  llm_output_mtokens: 2
+  budget_nzd_month: 1200
+  expect: {max_total: 1200}
+
+- id: s14
+  name: Batch invoice processing
+  needs: [background_jobs, object_storage, relational_db]
+  residency: nz
+  data_gb: 30
+  blob_gb: 300
+  budget_nzd_month: 900
+  expect: {all_in: [newzealandnorth]}
+
+- id: s15
+  name: Legacy app lift-and-shift
+  needs: [virtual_machines, relational_db]
+  availability: high
+  residency: nz
+  data_gb: 100
+  budget_nzd_month: 3000
+  expect: {has: [vm], all_in: [newzealandnorth]}
+
+- id: s16
+  name: Microservices platform
+  needs: [containers, relational_db, cache]
+  availability: high
+  residency: anz
+  peak_rps: 150
+  data_gb: 250
+  budget_nzd_month: 7000
+  expect: {has: [redis]}
+
+- id: s17
+  name: School newsletter app (tight budget)
+  needs: [web_app, relational_db, object_storage]
+  residency: nz
+  peak_rps: 1
+  blob_gb: 50
+  budget_nzd_month: 90
+  expect: {max_total: 90}
+
+- id: s18
+  name: Tourism booking engine
+  needs: [web_app, api, relational_db, cache]
+  monthly_users: 80000
+  peak_rps: 70
+  data_gb: 120
+  availability: high
+  pii: true
+  residency: anz
+  budget_nzd_month: 6500
+  expect: {zone_redundant_db: true}
+
+- id: s19
+  name: Research document Q&A (any region)
+  needs: [web_app, llm, search, object_storage]
+  residency: any
+  peak_rps: 5
+  blob_gb: 1000
+  llm_input_mtokens: 60
+  llm_output_mtokens: 10
+  budget_nzd_month: 2500
+  expect: {}
+
+- id: s20
+  name: Farm sensor dashboard
+  needs: [web_app, nosql_db, background_jobs]
+  residency: nz
+  peak_rps: 20
+  data_gb: 60
+  budget_nzd_month: 800
+  expect: {all_in: [newzealandnorth], max_total: 800}

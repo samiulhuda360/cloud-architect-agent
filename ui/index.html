@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cloud Architect Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root { --paper: #f5f3ee; --card: #ffffff; --ink: #13222b; --muted: #5d6b73; --line: #dcd7cc; --ocean: #0e5a6f; --ocean-soft: #e1eef1;
+          --kowhai: #c98b00; --kowhai-soft: #fdf3d8; --red: #b8322a; --red-soft: #fbe6e3; --fern: #2f7d4f; --fern-soft: #e2f1e7;
+          --sans: Archivo, system-ui, sans-serif; --mono: "Fira Code", ui-monospace, monospace; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 15px/1.5 var(--sans); }
+  header { background: var(--ink); color: #f5f3ee; }
+  header .wrap { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 14px 16px; }
+  .brand { font-weight: 800; font-size: 19px; letter-spacing: -.01em; } .brand span { color: #f2c14e; }
+  .tag { font: 500 12px var(--mono); color: #b9c6cc; }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 0 16px; }
+  .layout { display: grid; grid-template-columns: 360px 1fr; gap: 18px; padding: 20px 0 40px; align-items: start; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+  h2 { font-size: 15px; font-weight: 700; margin: 0 0 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--ocean); }
+  label { display: block; font-size: 13px; font-weight: 600; margin: 10px 0 4px; }
+  input[type=text], input[type=number], select, textarea { width: 100%; font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+  textarea { min-height: 56px; resize: vertical; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .needs { display: flex; flex-wrap: wrap; gap: 6px; }
+  .needs label { display: inline-flex; align-items: center; gap: 5px; margin: 0; padding: 4px 8px; border: 1px solid var(--line); border-radius: 999px; font-weight: 500; cursor: pointer; }
+  .needs input { margin: 0; }
+  .seg { display: flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .seg button { flex: 1; border: 0; background: #fff; padding: 8px; font: 600 13px var(--sans); cursor: pointer; color: var(--muted); }
+  .seg button.on { background: var(--ocean); color: #fff; }
+  .go { width: 100%; margin-top: 14px; padding: 12px; border: 0; border-radius: 10px; background: var(--ocean); color: #fff; font: 700 15px var(--sans); cursor: pointer; }
+  .go:disabled { opacity: .6; cursor: wait; }
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+  .kpi { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+  .kpi b { display: block; font-size: 24px; font-weight: 800; } .kpi span { color: var(--muted); font-size: 13px; }
+  .kpi.bad b { color: var(--red); } .kpi.good b { color: var(--fern); }
+  .note { padding: 10px 12px; border-radius: 10px; margin-bottom: 12px; font-size: 14px; }
+  .note.warn { background: var(--kowhai-soft); border: 1px solid #ecd28a; } .note.bad { background: var(--red-soft); border: 1px solid #efc1bb; }
+  .note.info { background: var(--ocean-soft); border: 1px solid #bcd9e0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 12.5px; }
+  td.num { text-align: right; font-family: var(--mono); white-space: nowrap; }
+  .chip { display: inline-block; font: 600 11px var(--sans); padding: 1px 7px; border-radius: 999px; margin: 0 3px 2px 0; background: var(--ocean-soft); color: var(--ocean); }
+  .chip.out { background: var(--red-soft); color: var(--red); }
+  .sev { font: 700 11px var(--sans); text-transform: uppercase; padding: 1px 6px; border-radius: 4px; }
+  .sev.high { background: var(--red-soft); color: var(--red); } .sev.medium { background: var(--kowhai-soft); color: var(--kowhai); }
+  .sev.low, .sev.info { background: var(--ocean-soft); color: var(--ocean); }
+  .sev.accepted { background: transparent; color: var(--kowhai); box-shadow: inset 0 0 0 1px var(--kowhai); white-space: nowrap; }
+  .grid2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; margin-top: 14px; }
+  .diagram { overflow-x: auto; background: #fbfaf7; border: 1px dashed var(--line); border-radius: 10px; padding: 10px; min-height: 120px; }
+  pre { font: 12.5px/1.5 var(--mono); font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; background: var(--ink); color: #e6ece9; padding: 14px; border-radius: 10px; overflow: auto; max-height: 420px; margin: 0; }
+  .tabs { display: flex; gap: 6px; margin-bottom: 10px; } .tabs button { border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 6px 12px; font: 600 13px var(--sans); cursor: pointer; }
+  .tabs button.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .muted { color: var(--muted); } .empty { color: var(--muted); padding: 40px 0; text-align: center; }
+  .small { font-size: 12.5px; }
+  @media (max-width: 980px) { .layout { grid-template-columns: 1fr; } .kpis { grid-template-columns: repeat(2, 1fr); } .grid2 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header><div class="wrap"><div class="brand">Cloud Architect <span>Agent</span></div><div class="tag">Azure for Aotearoa · live NZD pricing · residency · Terraform</div></div></header>
+<div class="wrap layout">
+  <form class="card" id="form">
+    <h2>Workload</h2>
+    <label for="preset">Start from an example</label>
+    <select id="preset"><option value="">Choose a scenario…</option></select>
+    <label for="name">Name</label><input type="text" id="name" required value="Clinic patient portal">
+    <label for="description">What it does</label><textarea id="description">Patients book appointments and read results.</textarea>
+    <label>Needs</label>
+    <div class="needs" id="needs"></div>
+    <div class="row2">
+      <div><label for="monthly_users">Monthly users</label><input type="number" id="monthly_users" value="5000" min="1"></div>
+      <div><label for="peak_rps">Peak requests/s</label><input type="number" id="peak_rps" value="25" min="0" step="1"></div>
+      <div><label for="data_gb">Database GB</label><input type="number" id="data_gb" value="80" min="0"></div>
+      <div><label for="blob_gb">Files GB</label><input type="number" id="blob_gb" value="400" min="0"></div>
+      <div><label for="llm_input_mtokens">LLM input M tokens/mo</label><input type="number" id="llm_input_mtokens" value="0" min="0"></div>
+      <div><label for="llm_output_mtokens">LLM output M tokens/mo</label><input type="number" id="llm_output_mtokens" value="0" min="0"></div>
+    </div>
+    <label>Data residency</label>
+    <div class="seg" data-field="residency"><button type="button" data-v="nz" class="on">NZ only</button><button type="button" data-v="anz">NZ + Australia</button><button type="button" data-v="any">Anywhere</button></div>
+    <label>Availability</label>
+    <div class="seg" data-field="availability"><button type="button" data-v="standard">99.9%</button><button type="button" data-v="high" class="on">99.95%</button><button type="button" data-v="critical">99.99%</button></div>
+    <div class="row2">
+      <div><label for="environment">Environment</label><select id="environment"><option>production</option><option>dev</option></select></div>
+      <div><label for="budget">Budget NZD/month</label><input type="number" id="budget" value="4000" min="0"></div>
+    </div>
+    <label style="display:flex;gap:6px;align-items:center;margin-top:10px"><input type="checkbox" id="pii" checked> Handles personal information</label>
+    <label>Architect</label>
+    <div class="seg" data-field="mode"><button type="button" data-v="agent" class="on">AI agent</button><button type="button" data-v="rules">Rule-based</button></div>
+    <button class="go" id="go" type="submit">Design it</button>
+  </form>
+  <main id="out"><div class="card empty">Describe a workload and press <b>Design it</b>. The agent designs with live Azure prices for New Zealand North
+    and Australia, checks residency and budget, reviews it against the Well-Architected pillars and writes the Terraform.</div></main>
+</div>
+<script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+mermaid.initialize({ startOnLoad: false, theme: "base", themeVariables: { fontFamily: "Archivo", primaryColor: "#e1eef1", primaryBorderColor: "#0e5a6f", lineColor: "#5d6b73", clusterBkg: "#fbfaf7", clusterBorder: "#bcd9e0" } });
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const money = (x) => "NZ$" + Math.round(x).toLocaleString();
+const NEEDS = ["web_app", "api", "relational_db", "nosql_db", "object_storage", "cache", "llm", "search", "background_jobs", "containers", "virtual_machines"];
+const LABEL = { web_app: "web app", api: "API", relational_db: "SQL database", nosql_db: "NoSQL", object_storage: "files", cache: "cache", llm: "LLM",
+  search: "search", background_jobs: "background jobs", containers: "containers", virtual_machines: "VMs" };
+const REGION = { newzealandnorth: "NZ North", australiaeast: "Australia East", australiasoutheast: "Australia SE", southeastasia: "SE Asia", eastus: "East US" };
+$("needs").innerHTML = NEEDS.map((n) => `<label><input type="checkbox" value="${n}" ${["web_app", "relational_db", "object_storage"].includes(n) ? "checked" : ""}>${LABEL[n]}</label>`).join("");
+const seg = {};
+document.querySelectorAll(".seg").forEach((s) => {
+  seg[s.dataset.field] = s.querySelector(".on").dataset.v;
+  s.addEventListener("click", (e) => { if (e.target.dataset.v) { s.querySelectorAll("button").forEach((b) => b.classList.toggle("on", b === e.target)); seg[s.dataset.field] = e.target.dataset.v; } });
+});
+const setSeg = (field, v) => { const s = document.querySelector(`.seg[data-field=${field}]`); s.querySelectorAll("button").forEach((b) => b.classList.toggle("on", b.dataset.v === v)); seg[field] = v; };
+let presets = [];
+fetch("/api/presets").then((r) => r.json()).then((p) => { presets = p; $("preset").innerHTML += p.map((s, i) => `<option value="${i}">${esc(s.name)}</option>`).join(""); });
+$("preset").addEventListener("change", (e) => {
+  const s = presets[e.target.value]; if (!s) return;
+  $("name").value = s.name; $("description").value = s.description || "";
+  document.querySelectorAll("#needs input").forEach((c) => (c.checked = (s.needs || []).includes(c.value)));
+  for (const k of ["monthly_users", "peak_rps", "data_gb", "blob_gb", "llm_input_mtokens", "llm_output_mtokens"]) $(k).value = s[k] ?? $(k).defaultValue;
+  setSeg("residency", s.residency || "any"); setSeg("availability", s.availability || "standard");
+  $("environment").value = s.environment || "production"; $("budget").value = s.budget_nzd_month ?? ""; $("pii").checked = !!s.pii;
+});
+function workload() {
+  const num = (id) => Number($(id).value || 0);
+  return { name: $("name").value, description: $("description").value, needs: [...document.querySelectorAll("#needs input:checked")].map((c) => c.value),
+    monthly_users: num("monthly_users"), peak_rps: num("peak_rps"), data_gb: num("data_gb"), blob_gb: num("blob_gb"),
+    llm_input_mtokens: num("llm_input_mtokens"), llm_output_mtokens: num("llm_output_mtokens"), residency: seg.residency, availability: seg.availability,
+    environment: $("environment").value, pii: $("pii").checked, budget_nzd_month: $("budget").value === "" ? null : num("budget") };
+}
+$("form").addEventListener("submit", async (e) => {
+  e.preventDefault(); $("go").disabled = true;
+  $("out").innerHTML = `<div class="card empty">${seg.mode === "agent" ? "The agent is designing: drafting, pricing live, checking residency and budget, fixing, reviewing…" : "Designing…"}</div>`;
+  try {
+    const r = await fetch("/api/design", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ workload: workload(), mode: seg.mode }) });
+    const d = await r.json(); if (!r.ok) throw new Error(typeof d.detail === "string" ? d.detail : JSON.stringify(d.detail).slice(0, 300));
+    await render(d);
+  } catch (err) { $("out").innerHTML = `<div class="card note bad">${esc(err.message)}</div>`; }
+  finally { $("go").disabled = false; }
+});
+async function render(d) {
+  const over = d.budget_nzd_month != null && d.total_nzd_month > d.budget_nzd_month;
+  const high = d.findings.filter((f) => f.severity === "high" && !f.message.includes("Accepted:")).length;
+  const perComp = {}; d.lines.forEach((l) => { const k = `${l.service}|${l.tier}|${l.region}`; perComp[k] = (perComp[k] || 0) + l.nzd_month; });
+  const exceptions = d.design.accepted_exceptions || [];
+  let html = "";
+  if (d.note) html += `<div class="note info">${esc(d.note)}</div>`;
+  html += `<div class="kpis">
+    <div class="kpi ${over ? "bad" : "good"}"><b>${money(d.total_nzd_month)}</b><span>per month${d.budget_nzd_month != null ? ` · budget ${money(d.budget_nzd_month)}` : ""}</span></div>
+    <div class="kpi ${d.violations.length ? "bad" : "good"}"><b>${d.violations.length}</b><span>hard violations</span></div>
+    <div class="kpi ${high ? "bad" : "good"}"><b>${high}</b><span>high-severity findings</span></div>
+    <div class="kpi"><b>${d.mode === "agent" ? "AI agent" : "Rules"}</b><span>${d.mode === "agent" ? `${esc((d.model || "").split("/").pop())} · ${d.seconds}s · ${d.steps} tool calls` : "no model used"}</span></div></div>`;
+  d.violations.forEach((v) => (html += `<div class="note bad"><b>${esc(v.rule)}</b> ${esc(v.message)} ${v.fix ? `<span class="muted">Fix: ${esc(v.fix)}</span>` : ""}</div>`));
+  exceptions.forEach((x) => (html += `<div class="note warn"><b>Accepted exception</b> ${esc(x)}</div>`));
+  html += `<div class="card"><h2>Architecture</h2><div class="diagram" id="diagram"></div>
+    ${d.design.rationale ? `<p>${esc(d.design.rationale)}</p>` : ""}
+    ${(d.design.tradeoffs || []).length ? `<ul class="small">${d.design.tradeoffs.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>` : ""}</div>`;
+  html += `<div class="card" style="margin-top:14px"><h2>Components and live price</h2><table><tr><th>Service</th><th>Tier</th><th>Region</th><th>Setup</th><th>Purpose</th><th class="num">NZD / month</th></tr>
+    ${d.design.components.map((c) => `<tr><td>${esc(c.service.replace(/_/g, " "))}</td><td>${esc(c.tier)}</td><td>${esc(REGION[c.region] || c.region)}</td>
+      <td>${c.instances > 1 ? `<span class="chip">x${c.instances}</span>` : ""}${c.zone_redundant ? '<span class="chip">zone-redundant</span>' : ""}${c.private_endpoint ? '<span class="chip">private</span>' : ""}</td>
+      <td class="muted">${esc(c.purpose)}</td><td class="num">${money(perComp[`${c.service}|${c.tier}|${c.region}`] || 0)}</td></tr>`).join("")}
+    <tr><td colspan="5"><b>Total</b> <span class="muted small">(USD prices from the Azure Retail Prices API at Azure's rate, US$1 = NZ$${d.fx_usd_to_nzd})</span></td><td class="num"><b>${money(d.total_nzd_month)}</b></td></tr></table></div>`;
+  // An accepted exception is already shown in the banner above: badge it as accepted and drop the repeated reason.
+  const order = { high: 0, accepted: 0.5, medium: 1, low: 2, info: 3 };
+  const findings = [...d.findings].map((f) => (f.message.includes(" Accepted:") ? { ...f, severity: "accepted", message: f.message.split(" Accepted:")[0], fix: "" } : f))
+    .sort((a, b) => order[a.severity] - order[b.severity]);
+  html += `<div class="grid2"><div class="card"><h2>Well-Architected review</h2>${findings.length ? `<table>${findings.map((f) => `<tr><td><span class="sev ${f.severity}">${f.severity}</span></td><td><b>${esc(f.pillar)}</b> · ${esc(f.message)}${f.fix ? `<div class="muted small">${esc(f.fix)}</div>` : ""}</td></tr>`).join("")}</table>` : '<p class="muted">No findings.</p>'}</div>
+    <div class="card"><h2>Infrastructure as code</h2><div class="tabs"><button class="on" type="button" id="copy">Copy Terraform</button><button type="button" id="dl">Download main.tf</button></div><pre id="tf">${esc(d.terraform)}</pre></div></div>`;
+  $("out").innerHTML = html;
+  $("copy").onclick = () => navigator.clipboard.writeText(d.terraform);
+  $("dl").onclick = () => { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([d.terraform], { type: "text/plain" })); a.download = "main.tf"; a.click(); };
+  try { const { svg } = await mermaid.render("arch" + Date.now(), d.diagram); $("diagram").innerHTML = svg; } catch { $("diagram").innerHTML = `<pre>${esc(d.diagram)}</pre>`; }
+}
+</script>
+</body>
+</html>

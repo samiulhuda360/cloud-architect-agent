@@ -1,0 +1,1624 @@
+{
+ "system": "rules",
+ "model": "",
+ "rows": [
+  {
+   "id": "s01",
+   "ok": true,
+   "total_nzd": 69.93,
+   "silent_violations": [],
+   "within_budget": true,
+   "expectations": {
+    "max_total": true
+   },
+   "expectations_met": true,
+   "high_findings": [],
+   "exceptions": [],
+   "design": {
+    "region": "newzealandnorth",
+    "dr_region": null,
+    "components": [
+     {
+      "service": "app_service",
+      "tier": "B1",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "web app and API (dev)",
+      "settings": {}
+     },
+     {
+      "service": "postgres",
+      "tier": "B1ms",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "relational database",
+      "settings": {}
+     },
+     {
+      "service": "key_vault",
+      "tier": "standard",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "secrets, keys and certificates",
+      "settings": {}
+     },
+     {
+      "service": "log_analytics",
+      "tier": "pay_as_you_go",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "logs and metrics for every component",
+      "settings": {}
+     }
+    ],
+    "rationale": "Rule-based design for dev, standard availability, residency 'any'.",
+    "tradeoffs": [],
+    "accepted_exceptions": []
+   },
+   "system": "rules",
+   "seconds": 0.0,
+   "terraform_valid": true
+  },
+  {
+   "id": "s02",
+   "ok": true,
+   "total_nzd": 501.8,
+   "silent_violations": [],
+   "within_budget": true,
+   "expectations": {
+    "max_total": true
+   },
+   "expectations_met": true,
+   "high_findings": [],
+   "exceptions": [],
+   "design": {
+    "region": "newzealandnorth",
+    "dr_region": null,
+    "components": [
+     {
+      "service": "app_service",
+      "tier": "S1",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "web app and API",
+      "settings": {}
+     },
+     {
+      "service": "postgres",
+      "tier": "D2ds_v5",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "relational database",
+      "settings": {}
+     },
+     {
+      "service": "key_vault",
+      "tier": "standard",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "secrets, keys and certificates",
+      "settings": {}
+     },
+     {
+      "service": "log_analytics",
+      "tier": "pay_as_you_go",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "logs and metrics for every component",
+      "settings": {}
+     }
+    ],
+    "rationale": "Rule-based design for production, standard availability, residency 'any'.",
+    "tradeoffs": [],
+    "accepted_exceptions": []
+   },
+   "system": "rules",
+   "seconds": 0.0,
+   "terraform_valid": true
+  },
+  {
+   "id": "s03",
+   "ok": true,
+   "total_nzd": 2293.05,
+   "silent_violations": [],
+   "within_budget": true,
+   "expectations": {
+    "all_in": true,
+    "private_data": true,
+    "zone_redundant_db": true
+   },
+   "expectations_met": true,
+   "high_findings": [],
+   "exceptions": [],
+   "design": {
+    "region": "newzealandnorth",
+    "dr_region": null,
+    "components": [
+     {
+      "service": "app_service",
+      "tier": "P1v3",
+      "region": "newzealandnorth",
+      "instances": 3,
+      "zone_redundant": true,
+      "private_endpoint": false,
+      "purpose": "web app and API, zone redundant",
+      "settings": {}
+     },
+     {
+      "service": "postgres",
+      "tier": "D2ds_v5",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": true,
+      "private_endpoint": true,
+      "purpose": "relational database",
+      "settings": {}
+     },
+     {
+      "service": "blob_storage",
+      "tier": "hot_zrs",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": true,
+      "purpose": "files and documents",
+      "settings": {}
+     },
+     {
+      "service": "app_gateway",
+      "tier": "waf_v2",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": true,
+      "private_endpoint": false,
+      "purpose": "web application firewall in front of the app",
+      "settings": {}
+     },
+     {
+      "service": "key_vault",
+      "tier": "standard",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "secrets, keys and certificates",
+      "settings": {}
+     },
+     {
+      "service": "log_analytics",
+      "tier": "pay_as_you_go",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "logs and metrics for every component",
+      "settings": {}
+     }
+    ],
+    "rationale": "Rule-based design for production, high availability, residency 'nz'.",
+    "tradeoffs": [],
+    "accepted_exceptions": []
+   },
+   "system": "rules",
+   "seconds": 0.0,
+   "terraform_valid": true
+  },
+  {
+   "id": "s04",
+   "ok": true,
+   "total_nzd": 2899.9,
+   "silent_violations": [],
+   "within_budget": true,
+   "expectations": {
+    "llm_exception": true
+   },
+   "expectations_met": true,
+   "high_findings": [],
+   "exceptions": [
+    "llm: no Azure language model is sold in New Zealand North; prompts are processed in an Australian data zone. Keep personal data out of prompts or get approval for this exception."
+   ],
+   "design": {
+    "region": "newzealandnorth",
+    "dr_region": null,
+    "components": [
+     {
+      "service": "app_service",
+      "tier": "P1v3",
+      "region": "newzealandnorth",
+      "instances": 3,
+      "zone_redundant": true,
+      "private_endpoint": false,
+      "purpose": "web app and API, zone redundant",
+      "settings": {}
+     },
+     {
+      "service": "postgres",
+      "tier": "D2ds_v5",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": true,
+      "private_endpoint": false,
+      "purpose": "relational database",
+      "settings": {}
+     },
+     {
+      "service": "ai_search",
+      "tier": "s1",
+      "region": "newzealandnorth",
+      "instances": 3,
+      "zone_redundant": true,
+      "private_endpoint": false,
+      "purpose": "full-text and vector search",
+      "settings": {}
+     },
+     {
+      "service": "azure_openai",
+      "tier": "o4-mini_datazone",
+      "region": "australiaeast",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "language model (Data Zone, Australia East)",
+      "settings": {}
+     },
+     {
+      "service": "key_vault",
+      "tier": "standard",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "secrets, keys and certificates",
+      "settings": {}
+     },
+     {
+      "service": "log_analytics",
+      "tier": "pay_as_you_go",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "logs and metrics for every component",
+      "settings": {}
+     }
+    ],
+    "rationale": "Rule-based design for production, high availability, residency 'nz'.",
+    "tradeoffs": [
+     "The language model runs in Australia East (Data Zone): the only way to keep it near NZ on Azure."
+    ],
+    "accepted_exceptions": [
+     "llm: no Azure language model is sold in New Zealand North; prompts are processed in an Australian data zone. Keep personal data out of prompts or get approval for this exception."
+    ]
+   },
+   "system": "rules",
+   "seconds": 0.0,
+   "terraform_valid": true
+  },
+  {
+   "id": "s05",
+   "ok": true,
+   "total_nzd": 2537.19,
+   "silent_violations": [],
+   "within_budget": true,
+   "expectations": {
+    "zone_redundant_db": true,
+    "has:redis": true
+   },
+   "expectations_met": true,
+   "high_findings": [],
+   "exceptions": [],
+   "design": {
+    "region": "newzealandnorth",
+    "dr_region": null,
+    "components": [
+     {
+      "service": "container_apps",
+      "tier": "1vcpu",
+      "region": "newzealandnorth",
+      "instances": 3,
+      "zone_redundant": true,
+      "private_endpoint": false,
+      "purpose": "web front end and API in containers",
+      "settings": {}
+     },
+     {
+      "service": "postgres",
+      "tier": "D2ds_v5",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": true,
+      "private_endpoint": true,
+      "purpose": "relational database",
+      "settings": {}
+     },
+     {
+      "service": "blob_storage",
+      "tier": "hot_zrs",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": true,
+      "purpose": "files and documents",
+      "settings": {}
+     },
+     {
+      "service": "redis",
+      "tier": "standard_c0",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "cache for hot reads and sessions",
+      "settings": {}
+     },
+     {
+      "service": "app_gateway",
+      "tier": "waf_v2",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": true,
+      "private_endpoint": false,
+      "purpose": "web application firewall in front of the app",
+      "settings": {}
+     },
+     {
+      "service": "key_vault",
+      "tier": "standard",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "secrets, keys and certificates",
+      "settings": {}
+     },
+     {
+      "service": "log_analytics",
+      "tier": "pay_as_you_go",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "logs and metrics for every component",
+      "settings": {}
+     }
+    ],
+    "rationale": "Rule-based design for production, high availability, residency 'anz'.",
+    "tradeoffs": [],
+    "accepted_exceptions": []
+   },
+   "system": "rules",
+   "seconds": 0.0,
+   "terraform_valid": true
+  },
+  {
+   "id": "s06",
+   "ok": true,
+   "total_nzd": 1564.93,
+   "silent_violations": [],
+   "within_budget": true,
+   "expectations": {
+    "all_in": true,
+    "no_tier:hot_grs": true
+   },
+   "expectations_met": true,
+   "high_findings": [],
+   "exceptions": [],
+   "design": {
+    "region": "newzealandnorth",
+    "dr_region": null,
+    "components": [
+     {
+      "service": "app_service",
+      "tier": "S1",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "web app and API",
+      "settings": {}
+     },
+     {
+      "service": "postgres",
+      "tier": "D2ds_v5",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": true,
+      "purpose": "relational database",
+      "settings": {}
+     },
+     {
+      "service": "blob_storage",
+      "tier": "hot_lrs",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": true,
+      "purpose": "files and documents",
+      "settings": {}
+     },
+     {
+      "service": "ai_search",
+      "tier": "basic",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "full-text and vector search",
+      "settings": {}
+     },
+     {
+      "service": "app_gateway",
+      "tier": "waf_v2",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "web application firewall in front of the app",
+      "settings": {}
+     },
+     {
+      "service": "key_vault",
+      "tier": "standard",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "secrets, keys and certificates",
+      "settings": {}
+     },
+     {
+      "service": "log_analytics",
+      "tier": "pay_as_you_go",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "logs and metrics for every component",
+      "settings": {}
+     }
+    ],
+    "rationale": "Rule-based design for production, standard availability, residency 'nz'.",
+    "tradeoffs": [],
+    "accepted_exceptions": []
+   },
+   "system": "rules",
+   "seconds": 0.0,
+   "terraform_valid": true
+  },
+  {
+   "id": "s07",
+   "ok": true,
+   "total_nzd": 1139.69,
+   "silent_violations": [],
+   "within_budget": true,
+   "expectations": {
+    "has:cosmos_db": true,
+    "has:functions": true
+   },
+   "expectations_met": true,
+   "high_findings": [],
+   "exceptions": [],
+   "design": {
+    "region": "newzealandnorth",
+    "dr_region": null,
+    "components": [
+     {
+      "service": "app_service",
+      "tier": "P1v3",
+      "region": "newzealandnorth",
+      "instances": 3,
+      "zone_redundant": true,
+      "private_endpoint": false,
+      "purpose": "web app and API, zone redundant",
+      "settings": {}
+     },
+     {
+      "service": "functions",
+      "tier": "flex",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": true,
+      "private_endpoint": false,
+      "purpose": "scheduled and queued background jobs",
+      "settings": {}
+     },
+     {
+      "service": "cosmos_db",
+      "tier": "provisioned_400",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": true,
+      "private_endpoint": false,
+      "purpose": "document database",
+      "settings": {}
+     },
+     {
+      "service": "key_vault",
+      "tier": "standard",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "secrets, keys and certificates",
+      "settings": {}
+     },
+     {
+      "service": "log_analytics",
+      "tier": "pay_as_you_go",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "logs and metrics for every component",
+      "settings": {}
+     }
+    ],
+    "rationale": "Rule-based design for production, high availability, residency 'anz'.",
+    "tradeoffs": [],
+    "accepted_exceptions": []
+   },
+   "system": "rules",
+   "seconds": 0.0,
+   "terraform_valid": true
+  },
+  {
+   "id": "s08",
+   "ok": true,
+   "total_nzd": 175.39,
+   "silent_violations": [],
+   "within_budget": true,
+   "expectations": {
+    "max_total": true
+   },
+   "expectations_met": true,
+   "high_findings": [],
+   "exceptions": [],
+   "design": {
+    "region": "newzealandnorth",
+    "dr_region": null,
+    "components": [
+     {
+      "service": "app_service",
+      "tier": "B1",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "web app and API",
+      "settings": {}
+     },
+     {
+      "service": "postgres",
+      "tier": "B2s",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "relational database",
+      "settings": {}
+     },
+     {
+      "service": "key_vault",
+      "tier": "standard",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "secrets, keys and certificates",
+      "settings": {}
+     },
+     {
+      "service": "log_analytics",
+      "tier": "pay_as_you_go",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "logs and metrics for every component",
+      "settings": {}
+     }
+    ],
+    "rationale": "Rule-based design for production, standard availability, residency 'any'.",
+    "tradeoffs": [
+     "Downsized postgres from D2ds_v5 to B2s to fit the budget.",
+     "Downsized app_service from S1 to B1 to fit the budget."
+    ],
+    "accepted_exceptions": []
+   },
+   "system": "rules",
+   "seconds": 0.1,
+   "terraform_valid": true
+  },
+  {
+   "id": "s09",
+   "ok": true,
+   "total_nzd": 2663.13,
+   "silent_violations": [],
+   "within_budget": true,
+   "expectations": {
+    "no_tier:gpt-4o-mini_global": true
+   },
+   "expectations_met": true,
+   "high_findings": [],
+   "exceptions": [],
+   "design": {
+    "region": "newzealandnorth",
+    "dr_region": null,
+    "components": [
+     {
+      "service": "app_service",
+      "tier": "P1v3",
+      "region": "newzealandnorth",
+      "instances": 3,
+      "zone_redundant": true,
+      "private_endpoint": false,
+      "purpose": "web app and API, zone redundant",
+      "settings": {}
+     },
+     {
+      "service": "postgres",
+      "tier": "D2ds_v5",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": true,
+      "private_endpoint": true,
+      "purpose": "relational database",
+      "settings": {}
+     },
+     {
+      "service": "blob_storage",
+      "tier": "hot_zrs",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": true,
+      "purpose": "files and documents",
+      "settings": {}
+     },
+     {
+      "service": "azure_openai",
+      "tier": "o4-mini_datazone",
+      "region": "australiaeast",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "language model (Data Zone, Australia East)",
+      "settings": {}
+     },
+     {
+      "service": "app_gateway",
+      "tier": "waf_v2",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": true,
+      "private_endpoint": false,
+      "purpose": "web application firewall in front of the app",
+      "settings": {}
+     },
+     {
+      "service": "key_vault",
+      "tier": "standard",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "secrets, keys and certificates",
+      "settings": {}
+     },
+     {
+      "service": "log_analytics",
+      "tier": "pay_as_you_go",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "logs and metrics for every component",
+      "settings": {}
+     }
+    ],
+    "rationale": "Rule-based design for production, high availability, residency 'anz'.",
+    "tradeoffs": [
+     "The language model runs in Australia East (Data Zone): the only way to keep it near NZ on Azure."
+    ],
+    "accepted_exceptions": []
+   },
+   "system": "rules",
+   "seconds": 0.0,
+   "terraform_valid": true
+  },
+  {
+   "id": "s10",
+   "ok": true,
+   "total_nzd": 346.95,
+   "silent_violations": [],
+   "within_budget": true,
+   "expectations": {},
+   "expectations_met": true,
+   "high_findings": [],
+   "exceptions": [],
+   "design": {
+    "region": "newzealandnorth",
+    "dr_region": null,
+    "components": [
+     {
+      "service": "app_service",
+      "tier": "S1",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "web app and API",
+      "settings": {}
+     },
+     {
+      "service": "key_vault",
+      "tier": "standard",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "secrets, keys and certificates",
+      "settings": {}
+     },
+     {
+      "service": "log_analytics",
+      "tier": "pay_as_you_go",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "logs and metrics for every component",
+      "settings": {}
+     }
+    ],
+    "rationale": "Rule-based design for production, standard availability, residency 'any'.",
+    "tradeoffs": [],
+    "accepted_exceptions": []
+   },
+   "system": "rules",
+   "seconds": 0.0,
+   "terraform_valid": true
+  },
+  {
+   "id": "s11",
+   "ok": true,
+   "total_nzd": 2551.22,
+   "silent_violations": [],
+   "within_budget": true,
+   "expectations": {
+    "all_in": true,
+    "dr_note": true
+   },
+   "expectations_met": true,
+   "high_findings": [
+    "REL-DR"
+   ],
+   "exceptions": [],
+   "design": {
+    "region": "newzealandnorth",
+    "dr_region": null,
+    "components": [
+     {
+      "service": "app_service",
+      "tier": "P1v3",
+      "region": "newzealandnorth",
+      "instances": 3,
+      "zone_redundant": true,
+      "private_endpoint": false,
+      "purpose": "web app and API, zone redundant",
+      "settings": {}
+     },
+     {
+      "service": "postgres",
+      "tier": "D2ds_v5",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": true,
+      "private_endpoint": true,
+      "purpose": "relational database",
+      "settings": {}
+     },
+     {
+      "service": "blob_storage",
+      "tier": "hot_zrs",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": true,
+      "purpose": "files and documents",
+      "settings": {}
+     },
+     {
+      "service": "app_gateway",
+      "tier": "waf_v2",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": true,
+      "private_endpoint": false,
+      "purpose": "web application firewall in front of the app",
+      "settings": {}
+     },
+     {
+      "service": "key_vault",
+      "tier": "standard",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "secrets, keys and certificates",
+      "settings": {}
+     },
+     {
+      "service": "log_analytics",
+      "tier": "pay_as_you_go",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "logs and metrics for every component",
+      "settings": {}
+     }
+    ],
+    "rationale": "Rule-based design for production, critical availability, residency 'nz'.",
+    "tradeoffs": [
+     "New Zealand has one Azure region: a full DR site would have to leave NZ, so this design relies on three availability zones in Auckland and accepts the regional-outage risk."
+    ],
+    "accepted_exceptions": []
+   },
+   "system": "rules",
+   "seconds": 0.0,
+   "terraform_valid": true
+  },
+  {
+   "id": "s12",
+   "ok": true,
+   "total_nzd": 4326.74,
+   "silent_violations": [],
+   "within_budget": true,
+   "expectations": {
+    "no_tier:gpt-4o-mini_global": true,
+    "dr_region": true
+   },
+   "expectations_met": true,
+   "high_findings": [],
+   "exceptions": [],
+   "design": {
+    "region": "newzealandnorth",
+    "dr_region": "australiaeast",
+    "components": [
+     {
+      "service": "app_service",
+      "tier": "P1v3",
+      "region": "newzealandnorth",
+      "instances": 3,
+      "zone_redundant": true,
+      "private_endpoint": false,
+      "purpose": "web app and API, zone redundant",
+      "settings": {}
+     },
+     {
+      "service": "postgres",
+      "tier": "D2ds_v5",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": true,
+      "private_endpoint": true,
+      "purpose": "relational database",
+      "settings": {}
+     },
+     {
+      "service": "redis",
+      "tier": "standard_c0",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "cache for hot reads and sessions",
+      "settings": {}
+     },
+     {
+      "service": "azure_openai",
+      "tier": "o4-mini_datazone",
+      "region": "australiaeast",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "language model (Data Zone, Australia East)",
+      "settings": {}
+     },
+     {
+      "service": "app_service",
+      "tier": "P1v3",
+      "region": "australiaeast",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "warm standby in the DR region, scaled out after failover",
+      "settings": {}
+     },
+     {
+      "service": "postgres",
+      "tier": "D2ds_v5",
+      "region": "australiaeast",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": true,
+      "purpose": "cross-region replica, promoted on failover",
+      "settings": {
+       "replica": 1.0
+      }
+     },
+     {
+      "service": "front_door",
+      "tier": "premium",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "global entry point: health probes move traffic to the DR region",
+      "settings": {}
+     },
+     {
+      "service": "key_vault",
+      "tier": "standard",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "secrets, keys and certificates",
+      "settings": {}
+     },
+     {
+      "service": "log_analytics",
+      "tier": "pay_as_you_go",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "logs and metrics for every component",
+      "settings": {}
+     }
+    ],
+    "rationale": "Rule-based design for production, critical availability, residency 'anz'.",
+    "tradeoffs": [
+     "The language model runs in Australia East (Data Zone): the only way to keep it near NZ on Azure."
+    ],
+    "accepted_exceptions": []
+   },
+   "system": "rules",
+   "seconds": 0.1,
+   "terraform_valid": true
+  },
+  {
+   "id": "s13",
+   "ok": true,
+   "total_nzd": 298.22,
+   "silent_violations": [],
+   "within_budget": true,
+   "expectations": {
+    "max_total": true
+   },
+   "expectations_met": true,
+   "high_findings": [],
+   "exceptions": [],
+   "design": {
+    "region": "newzealandnorth",
+    "dr_region": null,
+    "components": [
+     {
+      "service": "app_service",
+      "tier": "S1",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "web app and API",
+      "settings": {}
+     },
+     {
+      "service": "ai_search",
+      "tier": "basic",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "full-text and vector search",
+      "settings": {}
+     },
+     {
+      "service": "azure_openai",
+      "tier": "gpt-4o-mini_global",
+      "region": "australiaeast",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "language model",
+      "settings": {}
+     },
+     {
+      "service": "key_vault",
+      "tier": "standard",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "secrets, keys and certificates",
+      "settings": {}
+     },
+     {
+      "service": "log_analytics",
+      "tier": "pay_as_you_go",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "logs and metrics for every component",
+      "settings": {}
+     }
+    ],
+    "rationale": "Rule-based design for production, standard availability, residency 'any'.",
+    "tradeoffs": [],
+    "accepted_exceptions": []
+   },
+   "system": "rules",
+   "seconds": 0.0,
+   "terraform_valid": true
+  },
+  {
+   "id": "s14",
+   "ok": true,
+   "total_nzd": 424.27,
+   "silent_violations": [],
+   "within_budget": true,
+   "expectations": {
+    "all_in": true
+   },
+   "expectations_met": true,
+   "high_findings": [],
+   "exceptions": [],
+   "design": {
+    "region": "newzealandnorth",
+    "dr_region": null,
+    "components": [
+     {
+      "service": "functions",
+      "tier": "flex",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "scheduled and queued background jobs",
+      "settings": {}
+     },
+     {
+      "service": "postgres",
+      "tier": "D2ds_v5",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "relational database",
+      "settings": {}
+     },
+     {
+      "service": "blob_storage",
+      "tier": "hot_lrs",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "files and documents",
+      "settings": {}
+     },
+     {
+      "service": "key_vault",
+      "tier": "standard",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "secrets, keys and certificates",
+      "settings": {}
+     },
+     {
+      "service": "log_analytics",
+      "tier": "pay_as_you_go",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "logs and metrics for every component",
+      "settings": {}
+     }
+    ],
+    "rationale": "Rule-based design for production, standard availability, residency 'nz'.",
+    "tradeoffs": [],
+    "accepted_exceptions": []
+   },
+   "system": "rules",
+   "seconds": 0.0,
+   "terraform_valid": true
+  },
+  {
+   "id": "s15",
+   "ok": true,
+   "total_nzd": 1117.71,
+   "silent_violations": [],
+   "within_budget": true,
+   "expectations": {
+    "all_in": true,
+    "has:vm": true
+   },
+   "expectations_met": true,
+   "high_findings": [],
+   "exceptions": [],
+   "design": {
+    "region": "newzealandnorth",
+    "dr_region": null,
+    "components": [
+     {
+      "service": "vm",
+      "tier": "D2s_v5",
+      "region": "newzealandnorth",
+      "instances": 2,
+      "zone_redundant": true,
+      "private_endpoint": false,
+      "purpose": "workload that needs a full VM",
+      "settings": {}
+     },
+     {
+      "service": "postgres",
+      "tier": "D2ds_v5",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": true,
+      "private_endpoint": false,
+      "purpose": "relational database",
+      "settings": {}
+     },
+     {
+      "service": "key_vault",
+      "tier": "standard",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "secrets, keys and certificates",
+      "settings": {}
+     },
+     {
+      "service": "log_analytics",
+      "tier": "pay_as_you_go",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "logs and metrics for every component",
+      "settings": {}
+     }
+    ],
+    "rationale": "Rule-based design for production, high availability, residency 'nz'.",
+    "tradeoffs": [],
+    "accepted_exceptions": []
+   },
+   "system": "rules",
+   "seconds": 0.0,
+   "terraform_valid": true
+  },
+  {
+   "id": "s16",
+   "ok": true,
+   "total_nzd": 1741.35,
+   "silent_violations": [],
+   "within_budget": true,
+   "expectations": {
+    "has:redis": true
+   },
+   "expectations_met": true,
+   "high_findings": [],
+   "exceptions": [],
+   "design": {
+    "region": "newzealandnorth",
+    "dr_region": null,
+    "components": [
+     {
+      "service": "container_apps",
+      "tier": "1vcpu",
+      "region": "newzealandnorth",
+      "instances": 3,
+      "zone_redundant": true,
+      "private_endpoint": false,
+      "purpose": "web front end and API in containers",
+      "settings": {}
+     },
+     {
+      "service": "postgres",
+      "tier": "D2ds_v5",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": true,
+      "private_endpoint": false,
+      "purpose": "relational database",
+      "settings": {}
+     },
+     {
+      "service": "redis",
+      "tier": "standard_c0",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "cache for hot reads and sessions",
+      "settings": {}
+     },
+     {
+      "service": "key_vault",
+      "tier": "standard",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "secrets, keys and certificates",
+      "settings": {}
+     },
+     {
+      "service": "log_analytics",
+      "tier": "pay_as_you_go",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "logs and metrics for every component",
+      "settings": {}
+     }
+    ],
+    "rationale": "Rule-based design for production, high availability, residency 'anz'.",
+    "tradeoffs": [],
+    "accepted_exceptions": []
+   },
+   "system": "rules",
+   "seconds": 0.0,
+   "terraform_valid": true
+  },
+  {
+   "id": "s17",
+   "ok": true,
+   "total_nzd": 74.21,
+   "silent_violations": [],
+   "within_budget": true,
+   "expectations": {
+    "max_total": true
+   },
+   "expectations_met": true,
+   "high_findings": [],
+   "exceptions": [],
+   "design": {
+    "region": "newzealandnorth",
+    "dr_region": null,
+    "components": [
+     {
+      "service": "app_service",
+      "tier": "B1",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "web app and API",
+      "settings": {}
+     },
+     {
+      "service": "postgres",
+      "tier": "B1ms",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "relational database",
+      "settings": {}
+     },
+     {
+      "service": "blob_storage",
+      "tier": "hot_lrs",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "files and documents",
+      "settings": {}
+     },
+     {
+      "service": "key_vault",
+      "tier": "standard",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "secrets, keys and certificates",
+      "settings": {}
+     },
+     {
+      "service": "log_analytics",
+      "tier": "pay_as_you_go",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "logs and metrics for every component",
+      "settings": {}
+     }
+    ],
+    "rationale": "Rule-based design for production, standard availability, residency 'nz'.",
+    "tradeoffs": [
+     "Downsized postgres from D2ds_v5 to B2s to fit the budget.",
+     "Downsized app_service from S1 to B1 to fit the budget.",
+     "Downsized postgres from B2s to B1ms to fit the budget."
+    ],
+    "accepted_exceptions": []
+   },
+   "system": "rules",
+   "seconds": 0.1,
+   "terraform_valid": true
+  },
+  {
+   "id": "s18",
+   "ok": true,
+   "total_nzd": 2513.5,
+   "silent_violations": [],
+   "within_budget": true,
+   "expectations": {
+    "zone_redundant_db": true
+   },
+   "expectations_met": true,
+   "high_findings": [],
+   "exceptions": [],
+   "design": {
+    "region": "newzealandnorth",
+    "dr_region": null,
+    "components": [
+     {
+      "service": "app_service",
+      "tier": "P1v3",
+      "region": "newzealandnorth",
+      "instances": 3,
+      "zone_redundant": true,
+      "private_endpoint": false,
+      "purpose": "web app and API, zone redundant",
+      "settings": {}
+     },
+     {
+      "service": "postgres",
+      "tier": "D2ds_v5",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": true,
+      "private_endpoint": true,
+      "purpose": "relational database",
+      "settings": {}
+     },
+     {
+      "service": "redis",
+      "tier": "standard_c0",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "cache for hot reads and sessions",
+      "settings": {}
+     },
+     {
+      "service": "app_gateway",
+      "tier": "waf_v2",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": true,
+      "private_endpoint": false,
+      "purpose": "web application firewall in front of the app",
+      "settings": {}
+     },
+     {
+      "service": "key_vault",
+      "tier": "standard",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "secrets, keys and certificates",
+      "settings": {}
+     },
+     {
+      "service": "log_analytics",
+      "tier": "pay_as_you_go",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "logs and metrics for every component",
+      "settings": {}
+     }
+    ],
+    "rationale": "Rule-based design for production, high availability, residency 'anz'.",
+    "tradeoffs": [],
+    "accepted_exceptions": []
+   },
+   "system": "rules",
+   "seconds": 0.0,
+   "terraform_valid": true
+  },
+  {
+   "id": "s19",
+   "ok": true,
+   "total_nzd": 359.27,
+   "silent_violations": [],
+   "within_budget": true,
+   "expectations": {},
+   "expectations_met": true,
+   "high_findings": [],
+   "exceptions": [],
+   "design": {
+    "region": "newzealandnorth",
+    "dr_region": null,
+    "components": [
+     {
+      "service": "app_service",
+      "tier": "S1",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "web app and API",
+      "settings": {}
+     },
+     {
+      "service": "blob_storage",
+      "tier": "hot_lrs",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "files and documents",
+      "settings": {}
+     },
+     {
+      "service": "ai_search",
+      "tier": "basic",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "full-text and vector search",
+      "settings": {}
+     },
+     {
+      "service": "azure_openai",
+      "tier": "gpt-4o-mini_global",
+      "region": "australiaeast",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "language model",
+      "settings": {}
+     },
+     {
+      "service": "key_vault",
+      "tier": "standard",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "secrets, keys and certificates",
+      "settings": {}
+     },
+     {
+      "service": "log_analytics",
+      "tier": "pay_as_you_go",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "logs and metrics for every component",
+      "settings": {}
+     }
+    ],
+    "rationale": "Rule-based design for production, standard availability, residency 'any'.",
+    "tradeoffs": [],
+    "accepted_exceptions": []
+   },
+   "system": "rules",
+   "seconds": 0.0,
+   "terraform_valid": true
+  },
+  {
+   "id": "s20",
+   "ok": true,
+   "total_nzd": 317.05,
+   "silent_violations": [],
+   "within_budget": true,
+   "expectations": {
+    "max_total": true,
+    "all_in": true
+   },
+   "expectations_met": true,
+   "high_findings": [],
+   "exceptions": [],
+   "design": {
+    "region": "newzealandnorth",
+    "dr_region": null,
+    "components": [
+     {
+      "service": "app_service",
+      "tier": "S1",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "web app and API",
+      "settings": {}
+     },
+     {
+      "service": "functions",
+      "tier": "flex",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "scheduled and queued background jobs",
+      "settings": {}
+     },
+     {
+      "service": "cosmos_db",
+      "tier": "serverless",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "document database",
+      "settings": {}
+     },
+     {
+      "service": "key_vault",
+      "tier": "standard",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "secrets, keys and certificates",
+      "settings": {}
+     },
+     {
+      "service": "log_analytics",
+      "tier": "pay_as_you_go",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "logs and metrics for every component",
+      "settings": {}
+     }
+    ],
+    "rationale": "Rule-based design for production, standard availability, residency 'nz'.",
+    "tradeoffs": [],
+    "accepted_exceptions": []
+   },
+   "system": "rules",
+   "seconds": 0.0,
+   "terraform_valid": true
+  }
+ ]
+}
