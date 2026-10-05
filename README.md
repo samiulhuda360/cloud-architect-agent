@@ -69,6 +69,7 @@ Prices and regional availability change over time, so nothing is taken from memo
 ## Architecture
 
 ```mermaid
+%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#e6f2ef", "primaryBorderColor": "#2f6f68", "primaryTextColor": "#13302c", "lineColor": "#5f7471", "secondaryColor": "#f3efe6", "tertiaryColor": "#f7f8f6"}}}%%
 flowchart TD
   subgraph IN["Entry points"]
     direction TD
@@ -115,6 +116,7 @@ The full reference, with every rule code and price recipe, is in [docs/architect
 A design request goes through the same steps whichever architect handles it:
 
 ```mermaid
+%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#e6f2ef", "primaryBorderColor": "#2f6f68", "primaryTextColor": "#13302c", "lineColor": "#5f7471", "secondaryColor": "#f3efe6", "tertiaryColor": "#f7f8f6"}}}%%
 flowchart TD
   A["Workload<br/>needs, scale, residency, availability, personal data, budget"]
   B["Constraints<br/>allowed regions for nz, anz or any<br/>what availability and personal data require"]
@@ -166,6 +168,7 @@ flowchart TD
 ### The agent loop
 
 ```mermaid
+%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#e6f2ef", "primaryBorderColor": "#2f6f68", "primaryTextColor": "#13302c", "lineColor": "#5f7471", "secondaryColor": "#f3efe6", "tertiaryColor": "#f7f8f6"}}}%%
 flowchart LR
   W["Workload<br/>needs, residency, budget"] --> L["LLM architect<br/>(tool calling)"]
   L -- list_options --> C[("Service catalogue<br/>16 services, priced tiers")]

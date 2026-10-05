@@ -3,6 +3,7 @@
 This is the reference for anyone reviewing or extending the code. The README covers what the project does and why.
 
 ```mermaid
+%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#e6f2ef", "primaryBorderColor": "#2f6f68", "primaryTextColor": "#13302c", "lineColor": "#5f7471", "secondaryColor": "#f3efe6", "tertiaryColor": "#f7f8f6"}}}%%
 flowchart LR
   W["Workload"] --> A["Architect<br/>LLM agent or rule-based"]
   A -- "design" --> S["Assessor<br/>assess.py"]
