@@ -1,14 +1,60 @@
 # Cloud Architect Agent
 
-An LLM agent that designs Azure architectures for New Zealand organisations. You describe a workload in business terms, and it returns an architecture that is priced live in NZD from the Azure Retail Prices API, kept inside a data-residency boundary (`nz`, `anz` or `any`), reviewed against 16 Well-Architected rules, and delivered as Terraform for `azurerm` v4 with a Mermaid diagram. It is for architects and platform teams who need a sound first design, and a monthly cost they can defend, for an Azure workload in New Zealand.
-
 [![ci](https://github.com/samiulhuda360/cloud-architect-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/samiulhuda360/cloud-architect-agent/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-0e5a6f)
 ![Terraform](https://img.shields.io/badge/terraform-azurerm%20v4-0e5a6f)
 ![MCP](https://img.shields.io/badge/MCP-server-0e5a6f)
 ![License](https://img.shields.io/badge/license-MIT-0e5a6f)
 
+**Describe the system you need in plain business terms, and get a complete cloud design with its monthly cost in
+New Zealand dollars, checked against the rules your data has to follow.**
+
 ![The web UI designing a council policy assistant: NZ$2,900 a month, no violations, the language model's residency exception recorded](docs/screenshots/council-top.png)
+
+## What it does
+
+You fill in a short form about what you want to run online: a website, a booking system, a chatbot, how many
+people will use it, how much you can spend each month, and whether the data has to stay in New Zealand. It
+returns a ready-made plan for Microsoft's Azure cloud, the price of every piece in New Zealand dollars from
+today's price list, a list of any risks, and the setup files an engineer needs to build it.
+
+## A real-life example
+
+Tom looks after IT at Acme Health, a GP clinic that wants a patient portal where people book appointments, read
+test results and message their doctor.
+
+- **Before:** Tom has to work out which cloud services to use, look up each price (mostly listed in US dollars),
+  and find out which services are actually available in New Zealand, because health information has to stay in
+  the country. It is easy to pick a service that is only sold in Australia, or to discover the real monthly bill
+  after the quotes are signed.
+- **With this project:** he opens the web page, picks "NZ only" for where the data lives, enters about 8,000
+  patients a month, ticks that the portal holds personal information and sets a budget of NZ$4,000 a month. He
+  presses **Design it**.
+- **After:** he gets a diagram of the design, the live price of every part in NZD against his budget, and a
+  review that flags anything risky with a suggested fix. Across the 20 New Zealand test cases, every design
+  stayed within its budget, none broke a data-location rule without saying so openly, and all 20 sets of setup
+  files passed the official checker.
+
+## How you would use it
+
+1. Open the web page (someone on your team starts it once; see [Getting started](#getting-started)).
+2. Click one of the 20 examples under **Start from an example**, or fill in your own: what you need, how many
+   users, your monthly budget and where the data must stay.
+3. Choose **AI agent** or **Rule-based**, then press **Design it**.
+4. Read the result: the monthly total against your budget, a diagram, the price of each part, and any warnings
+   with a plain fix.
+5. Hand the setup file (one click to copy or download) to whoever will build it.
+
+## In technical terms
+
+Cloud Architect Agent is an LLM agent (an AI model that can call tools, here a live price list and a rule checker,
+and act on the results) that designs Azure architectures for New Zealand organisations. You describe a workload
+in business terms, and it returns an architecture that is priced live in NZD from the Azure Retail Prices API,
+kept inside a data-residency boundary (the regions your data may live in: `nz`, `anz` or `any`), reviewed against
+16 Well-Architected rules (Microsoft's published checklist for reliable, secure and cost-effective cloud designs),
+and delivered as Terraform (code that builds the cloud resources) for `azurerm` v4 with a Mermaid diagram. It is
+for architects and platform teams who need a sound first design, and a monthly cost they can defend, for an Azure
+workload in New Zealand.
 
 ## Key features
 
