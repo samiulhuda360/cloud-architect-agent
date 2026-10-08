@@ -11,6 +11,10 @@ New Zealand dollars, checked against the rules your data has to follow.**
 
 ![The web UI designing a council policy assistant: NZ$2,900 a month, no violations, the language model's residency exception recorded](docs/screenshots/council-top.png)
 
+*A finished design. Left: the short form describing what the council needs. Top: the monthly cost against the
+budget, and that no rules are broken. Yellow note: the one thing that has to leave New Zealand, said openly.
+Below: a map of the design, with anything outside New Zealand drawn in red.*
+
 ## What it does
 
 You fill in a short form about what you want to run online: a website, a booking system, a chatbot, how many
@@ -20,20 +24,25 @@ today's price list, a list of any risks, and the setup files an engineer needs t
 
 ## A real-life example
 
-Tom looks after IT at Acme Health, a GP clinic that wants a patient portal where people book appointments, read
-test results and message their doctor.
+![Slideshow: Hana describes the council's assistant, gets a design priced at NZ$2,900 a month against a NZ$4,000 budget, sees the price of every part, and takes away the review and setup file](docs/screenshots/story.gif)
 
-- **Before:** Tom has to work out which cloud services to use, look up each price (mostly listed in US dollars),
-  and find out which services are actually available in New Zealand, because health information has to stay in
-  the country. It is easy to pick a service that is only sold in Australia, or to discover the real monthly bill
-  after the quotes are signed.
-- **With this project:** he opens the web page, picks "NZ only" for where the data lives, enters about 8,000
-  patients a month, ticks that the portal holds personal information and sets a budget of NZ$4,000 a month. He
-  presses **Design it**.
-- **After:** he gets a diagram of the design, the live price of every part in NZD against his budget, and a
-  review that flags anything risky with a suggested fix. Across the 20 New Zealand test cases, every design
-  stayed within its budget, none broke a data-location rule without saying so openly, and all 20 sets of setup
-  files passed the official checker.
+*Hana's council project, from a short form to a costed plan, in four steps.*
+
+Hana manages IT at Acme District Council. The council wants a policy assistant: a website where staff and
+residents ask questions about council policies and get answers that point to the right document.
+
+- **Before:** Hana has to work out which cloud services to use, look up each price (mostly listed in US
+  dollars), and find out which services are actually sold in New Zealand, because council data should stay in
+  the country. It is easy to plan around an AI service that turns out not to be available here, or to discover
+  the real monthly bill only after the project is approved.
+- **With this project:** she opens the web page, ticks what the assistant needs (a website, a database, search
+  and an AI model), chooses "NZ only" for where the data lives, sets a budget of NZ$4,000 a month and presses
+  **Design it**.
+- **After:** she gets a diagram of the design priced at NZ$2,900 a month from today's price list, with no rules
+  broken. It also tells her plainly that no Azure AI model is sold in New Zealand, so questions would be
+  processed in Australia, and that personal details should be kept out of them or the exception approved. Across
+  the 20 New Zealand test cases, every design stayed within its budget, none broke a data-location rule without
+  saying so openly, and all 20 setup files passed the official checker.
 
 ## How you would use it
 
