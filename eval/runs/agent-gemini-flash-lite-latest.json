@@ -1,0 +1,1402 @@
+{
+ "system": "agent",
+ "model": "gemini-flash-lite-latest",
+ "rows": [
+  {
+   "id": "s01",
+   "ok": true,
+   "total_nzd": 56.57,
+   "silent_violations": [],
+   "within_budget": true,
+   "expectations": {
+    "max_total": true
+   },
+   "expectations_met": true,
+   "high_findings": [],
+   "exceptions": [],
+   "design": {
+    "region": "newzealandnorth",
+    "dr_region": null,
+    "components": [
+     {
+      "service": "app_service",
+      "tier": "B1",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Hosts the cafe online ordering web application for development",
+      "settings": {}
+     },
+     {
+      "service": "azure_sql",
+      "tier": "S0",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Stores cafe menu, user, and order data for the application",
+      "settings": {}
+     },
+     {
+      "service": "key_vault",
+      "tier": "standard",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Provides secure storage for connection strings and application secrets",
+      "settings": {}
+     },
+     {
+      "service": "log_analytics",
+      "tier": "pay_as_you_go",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Collects logs and telemetry for operational monitoring and debugging",
+      "settings": {}
+     }
+    ],
+    "rationale": "This architecture deploys a cost-effective development environment for the cafe online ordering workload entirely within the New Zealand North region. App Service B1 and Azure SQL S0 provide lightweight, reliable hosting and relational database capabilities well within the NZ$120 monthly budget. Key Vault and Log Analytics are included to satisfy security and operational monitoring requirements without adding significant cost.",
+    "tradeoffs": [],
+    "accepted_exceptions": []
+   },
+   "system": "agent",
+   "seconds": 22.9,
+   "steps": 4,
+   "error": "",
+   "terraform_valid": true
+  },
+  {
+   "id": "s02",
+   "ok": true,
+   "total_nzd": 501.8,
+   "silent_violations": [],
+   "within_budget": true,
+   "expectations": {
+    "max_total": true
+   },
+   "expectations_met": true,
+   "high_findings": [],
+   "exceptions": [],
+   "design": {
+    "region": "newzealandnorth",
+    "dr_region": null,
+    "components": [
+     {
+      "service": "app_service",
+      "tier": "S1",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Web application hosting for the plumbing booking site",
+      "settings": {}
+     },
+     {
+      "service": "postgres",
+      "tier": "D2ds_v5",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Relational database for plumbing bookings and customer data",
+      "settings": {}
+     },
+     {
+      "service": "key_vault",
+      "tier": "standard",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Store configuration secrets and connection strings securely",
+      "settings": {}
+     },
+     {
+      "service": "log_analytics",
+      "tier": "pay_as_you_go",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Centralised monitoring and log collection for application diagnostics",
+      "settings": {}
+     }
+    ],
+    "rationale": "This production-grade architecture is deployed in the New Zealand North (Auckland) region to ensure low latency and data residency compliance. App Service (S1) handles web traffic with autoscale capabilities suitable for 3,000 monthly users and 3 peak RPS. PostgreSQL Flexible Server (D2ds_v5) provides production-grade relational storage for booking data within the budget. Azure Key Vault and Log Analytics are included to address high-severity security and operational findings.",
+    "tradeoffs": [],
+    "accepted_exceptions": []
+   },
+   "system": "agent",
+   "seconds": 18.7,
+   "steps": 4,
+   "error": "",
+   "terraform_valid": true
+  },
+  {
+   "id": "s03",
+   "ok": false,
+   "error": "the model did not submit a design within the step limit"
+  },
+  {
+   "id": "s04",
+   "ok": true,
+   "total_nzd": 1581.32,
+   "silent_violations": [],
+   "within_budget": true,
+   "expectations": {
+    "llm_exception": true
+   },
+   "expectations_met": true,
+   "high_findings": [],
+   "exceptions": [
+    "[RES-REGION] Azure OpenAI model deployment uses global infrastructure outside New Zealand North as LLM services are not hosted locally in NZ."
+   ],
+   "design": {
+    "region": "newzealandnorth",
+    "dr_region": null,
+    "components": [
+     {
+      "service": "app_service",
+      "tier": "P1v3",
+      "region": "newzealandnorth",
+      "instances": 3,
+      "zone_redundant": true,
+      "private_endpoint": false,
+      "purpose": "Hosting the web application for staff and residents",
+      "settings": {}
+     },
+     {
+      "service": "postgres",
+      "tier": "D2ds_v5",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": true,
+      "private_endpoint": false,
+      "purpose": "Storing relational policy metadata and application state",
+      "settings": {}
+     },
+     {
+      "service": "ai_search",
+      "tier": "basic",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Vector and document search over council policies",
+      "settings": {}
+     },
+     {
+      "service": "azure_openai",
+      "tier": "gpt-4o-mini_global",
+      "region": "australiaeast",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "LLM service for answering policy questions and citing sources",
+      "settings": {}
+     },
+     {
+      "service": "key_vault",
+      "tier": "standard",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Secure storage of application secrets and credentials",
+      "settings": {}
+     },
+     {
+      "service": "log_analytics",
+      "tier": "pay_as_you_go",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Centralized logging and diagnostic monitoring",
+      "settings": {}
+     }
+    ],
+    "rationale": "",
+    "tradeoffs": [],
+    "accepted_exceptions": [
+     "[RES-REGION] Azure OpenAI model deployment uses global infrastructure outside New Zealand North as LLM services are not hosted locally in NZ."
+    ]
+   },
+   "system": "agent",
+   "seconds": 50.6,
+   "steps": 8,
+   "error": "",
+   "terraform_valid": true
+  },
+  {
+   "id": "s05",
+   "ok": true,
+   "total_nzd": 2519.45,
+   "silent_violations": [],
+   "within_budget": true,
+   "expectations": {
+    "zone_redundant_db": true,
+    "has:redis": true
+   },
+   "expectations_met": true,
+   "high_findings": [],
+   "exceptions": [],
+   "design": {
+    "region": "newzealandnorth",
+    "dr_region": null,
+    "components": [
+     {
+      "service": "app_service",
+      "tier": "P1v3",
+      "region": "newzealandnorth",
+      "instances": 2,
+      "zone_redundant": true,
+      "private_endpoint": false,
+      "purpose": "Web application hosting",
+      "settings": {}
+     },
+     {
+      "service": "app_service",
+      "tier": "P1v3",
+      "region": "newzealandnorth",
+      "instances": 2,
+      "zone_redundant": true,
+      "private_endpoint": false,
+      "purpose": "API hosting",
+      "settings": {}
+     },
+     {
+      "service": "postgres",
+      "tier": "D2ds_v5",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": true,
+      "private_endpoint": true,
+      "purpose": "Relational database with high availability",
+      "settings": {}
+     },
+     {
+      "service": "redis",
+      "tier": "standard_c1",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Caching for session and product data",
+      "settings": {}
+     },
+     {
+      "service": "blob_storage",
+      "tier": "hot_zrs",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": true,
+      "private_endpoint": true,
+      "purpose": "Object storage for product images and assets",
+      "settings": {}
+     },
+     {
+      "service": "key_vault",
+      "tier": "standard",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Secret management",
+      "settings": {}
+     },
+     {
+      "service": "log_analytics",
+      "tier": "pay_as_you_go",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Central logging and telemetry",
+      "settings": {}
+     }
+    ],
+    "rationale": "This high-availability e-commerce architecture is deployed in New Zealand North to satisfy strict data residency requirements for PII. Compute is handled by zone-redundant App Service Premium v3 instances running the web application and API layers. PostgreSQL Flexible Server with zone-redundant high availability and private endpoints securely stores relational data, backed by Azure Cache for Redis and ZRS Blob Storage. Key Vault and Log Analytics ensure comprehensive security and operational monitoring well within the 9,000 NZD monthly budget.",
+    "tradeoffs": [
+     "Azure Cache for Redis standard C1 is deployed without zone redundancy as it is not supported on this tier, but meets availability needs.",
+     "Application Gateway WAF v2 was omitted to keep costs lean within budget, relying on App Service security features."
+    ],
+    "accepted_exceptions": []
+   },
+   "system": "agent",
+   "seconds": 22.0,
+   "steps": 4,
+   "error": "",
+   "terraform_valid": true
+  },
+  {
+   "id": "s06",
+   "ok": true,
+   "total_nzd": 876.89,
+   "silent_violations": [],
+   "within_budget": true,
+   "expectations": {
+    "all_in": true,
+    "no_tier:hot_grs": true
+   },
+   "expectations_met": true,
+   "high_findings": [],
+   "exceptions": [],
+   "design": {
+    "region": "newzealandnorth",
+    "dr_region": null,
+    "components": [
+     {
+      "service": "app_service",
+      "tier": "S1",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": true,
+      "purpose": "Host the iwi land records web application.",
+      "settings": {}
+     },
+     {
+      "service": "blob_storage",
+      "tier": "hot_zrs",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": true,
+      "purpose": "Store scanned land records and genealogy images securely with zone redundancy.",
+      "settings": {}
+     },
+     {
+      "service": "postgres",
+      "tier": "D2ds_v5",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": true,
+      "purpose": "Store structured land and genealogy records securely.",
+      "settings": {}
+     },
+     {
+      "service": "ai_search",
+      "tier": "basic",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Enable full-text search across records and metadata.",
+      "settings": {}
+     },
+     {
+      "service": "key_vault",
+      "tier": "standard",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Securely store application secrets and connection strings.",
+      "settings": {}
+     },
+     {
+      "service": "log_analytics",
+      "tier": "pay_as_you_go",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Centralised logging and diagnostics for monitoring and security.",
+      "settings": {}
+     }
+    ],
+    "rationale": "The iwi land records archive architecture is deployed entirely within New Zealand North (Auckland) to strictly honour data residency requirements for sensitive personal and cultural heritage data. App Service S1 hosts the web application with private endpoints securing database and storage access. PostgreSQL Flexible Server and Blob Storage with Hot ZRS ensure reliable and secure retention of relational metadata and 5TB of scanned archives.",
+    "tradeoffs": [
+     "Application Gateway WAF v2 was excluded to stay comfortably within the NZD 2,500 monthly budget. WAF protection can be added later as funding allows."
+    ],
+    "accepted_exceptions": []
+   },
+   "system": "agent",
+   "seconds": 35.4,
+   "steps": 6,
+   "error": "",
+   "terraform_valid": true
+  },
+  {
+   "id": "s07",
+   "ok": true,
+   "total_nzd": 1371.88,
+   "silent_violations": [],
+   "within_budget": true,
+   "expectations": {
+    "has:cosmos_db": true,
+    "has:functions": false
+   },
+   "expectations_met": false,
+   "high_findings": [
+    "REL-ZONES"
+   ],
+   "exceptions": [],
+   "design": {
+    "region": "newzealandnorth",
+    "dr_region": null,
+    "components": [
+     {
+      "service": "app_service",
+      "tier": "P1v3",
+      "region": "newzealandnorth",
+      "instances": 3,
+      "zone_redundant": true,
+      "private_endpoint": false,
+      "purpose": "API service hosting",
+      "settings": {}
+     },
+     {
+      "service": "container_apps",
+      "tier": "1vcpu",
+      "region": "newzealandnorth",
+      "instances": 3,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Background jobs workers",
+      "settings": {}
+     },
+     {
+      "service": "cosmos_db",
+      "tier": "provisioned_400",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": true,
+      "private_endpoint": false,
+      "purpose": "NoSQL database for freight data",
+      "settings": {}
+     },
+     {
+      "service": "key_vault",
+      "tier": "standard",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Secrets management",
+      "settings": {}
+     },
+     {
+      "service": "log_analytics",
+      "tier": "pay_as_you_go",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Monitoring and logging workspace",
+      "settings": {}
+     }
+    ],
+    "rationale": "This architecture deploys a production-grade freight tracking API entirely within the New Zealand North region to meet data residency requirements. App Service Premium v3 provides a scalable, zone-redundant platform for the API, while Container Apps handles background processing. Cosmos DB delivers highly available NoSQL storage for tracking records, supported by Azure Key Vault for secure secret management and Log Analytics for comprehensive observability.",
+    "tradeoffs": [
+     "Container Apps emits a zone-redundancy warning under strict platform checks, but running 3 replicas provides high availability across instances."
+    ],
+    "accepted_exceptions": []
+   },
+   "system": "agent",
+   "seconds": 26.5,
+   "steps": 5,
+   "error": "",
+   "terraform_valid": true
+  },
+  {
+   "id": "s08",
+   "ok": true,
+   "total_nzd": 66.47,
+   "silent_violations": [],
+   "within_budget": true,
+   "expectations": {
+    "max_total": true
+   },
+   "expectations_met": true,
+   "high_findings": [],
+   "exceptions": [],
+   "design": {
+    "region": "australiaeast",
+    "dr_region": null,
+    "components": [
+     {
+      "service": "app_service",
+      "tier": "B1",
+      "region": "australiaeast",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Host web application and API",
+      "settings": {}
+     },
+     {
+      "service": "postgres",
+      "tier": "B1ms",
+      "region": "australiaeast",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Relational database for MVP data",
+      "settings": {}
+     },
+     {
+      "service": "key_vault",
+      "tier": "standard",
+      "region": "australiaeast",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Secure storage for secrets and connection strings",
+      "settings": {}
+     },
+     {
+      "service": "log_analytics",
+      "tier": "pay_as_you_go",
+      "region": "australiaeast",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Centralized logging and monitoring for operations and incidents",
+      "settings": {}
+     }
+    ],
+    "rationale": "Deploying a low-cost Startup SaaS MVP in Australia East using App Service Basic B1, PostgreSQL Flexible Server Burstable B1ms, Key Vault for secure secrets management, and Log Analytics for observability. This design stays well within the NZ$250/month budget while addressing all functional needs and high-severity security findings.",
+    "tradeoffs": [],
+    "accepted_exceptions": []
+   },
+   "system": "agent",
+   "seconds": 18.5,
+   "steps": 4,
+   "error": "",
+   "terraform_valid": true
+  },
+  {
+   "id": "s09",
+   "ok": true,
+   "total_nzd": 2560.34,
+   "silent_violations": [],
+   "within_budget": true,
+   "expectations": {
+    "no_tier:gpt-4o-mini_global": true
+   },
+   "expectations_met": true,
+   "high_findings": [],
+   "exceptions": [
+    "[RES-REGION] Azure OpenAI requires o4-mini_datazone which routes prompts within the Australia/Asia data zone rather than strictly New Zealand, because Foundry models are not hosted in New Zealand North."
+   ],
+   "design": {
+    "region": "australiaeast",
+    "dr_region": null,
+    "components": [
+     {
+      "service": "app_service",
+      "tier": "P1v3",
+      "region": "australiaeast",
+      "instances": 3,
+      "zone_redundant": true,
+      "private_endpoint": false,
+      "purpose": "Host the insurance claims triage web application with production-grade reliability and zone redundancy.",
+      "settings": {}
+     },
+     {
+      "service": "azure_openai",
+      "tier": "o4-mini_datazone",
+      "region": "australiaeast",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": true,
+      "purpose": "Provide LLM capabilities for claims classification and summarisation using data zone standard deployment.",
+      "settings": {}
+     },
+     {
+      "service": "postgres",
+      "tier": "D2ds_v5",
+      "region": "australiaeast",
+      "instances": 1,
+      "zone_redundant": true,
+      "private_endpoint": true,
+      "purpose": "Store relational claim records and personal information securely with high availability and zone redundancy.",
+      "settings": {}
+     },
+     {
+      "service": "blob_storage",
+      "tier": "hot_zrs",
+      "region": "australiaeast",
+      "instances": 1,
+      "zone_redundant": true,
+      "private_endpoint": true,
+      "purpose": "Store claim attachments and unstructured documents securely using zone-redundant blob storage.",
+      "settings": {}
+     },
+     {
+      "service": "log_analytics",
+      "tier": "pay_as_you_go",
+      "region": "australiaeast",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Collect logs and telemetry for monitoring and auditability.",
+      "settings": {}
+     },
+     {
+      "service": "key_vault",
+      "tier": "standard",
+      "region": "australiaeast",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Secure secrets, connection strings, and certificates.",
+      "settings": {}
+     },
+     {
+      "service": "app_gateway",
+      "tier": "waf_v2",
+      "region": "australiaeast",
+      "instances": 1,
+      "zone_redundant": true,
+      "private_endpoint": false,
+      "purpose": "Provide regional WAF protection for public web traffic.",
+      "settings": {}
+     }
+    ],
+    "rationale": "The insurance claims triage workload is designed with high availability and zone redundancy anchored in Australia East to support Azure OpenAI and all required components. App Service Premium v3 and PostgreSQL Flexible Server provide scalable, production-grade compute and database layers for handling sensitive personal and health information. Azure OpenAI o4-mini Data Zone Standard processes AI claims classification and summarisation while complying with the regional data boundary. Blob storage with ZRS secures attachments, Key Vault manages secrets, App Gateway WAF v2 protects inbound web traffic, and Log Analytics ensures full auditability.",
+    "tradeoffs": [
+     "Australia East is selected as the primary region to ensure Azure OpenAI model availability and full service compatibility within the ANZ residency boundary."
+    ],
+    "accepted_exceptions": [
+     "[RES-REGION] Azure OpenAI requires o4-mini_datazone which routes prompts within the Australia/Asia data zone rather than strictly New Zealand, because Foundry models are not hosted in New Zealand North."
+    ]
+   },
+   "system": "agent",
+   "seconds": 24.0,
+   "steps": 4,
+   "error": "",
+   "terraform_valid": true
+  },
+  {
+   "id": "s10",
+   "ok": true,
+   "total_nzd": 733.18,
+   "silent_violations": [],
+   "within_budget": true,
+   "expectations": {},
+   "expectations_met": true,
+   "high_findings": [],
+   "exceptions": [],
+   "design": {
+    "region": "newzealandnorth",
+    "dr_region": null,
+    "components": [
+     {
+      "service": "front_door",
+      "tier": "standard",
+      "region": "newzealandnorth",
+      "instances": 2,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Global edge routing, caching, and TLS termination for marketing site",
+      "settings": {}
+     },
+     {
+      "service": "app_service",
+      "tier": "S1",
+      "region": "newzealandnorth",
+      "instances": 2,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Hosting the marketing web application with standard production tier",
+      "settings": {}
+     },
+     {
+      "service": "key_vault",
+      "tier": "standard",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Securely storing connection strings and secrets with managed identities",
+      "settings": {}
+     },
+     {
+      "service": "log_analytics",
+      "tier": "pay_as_you_go",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Centralized workspace for workload logs and telemetry",
+      "settings": {}
+     }
+    ],
+    "rationale": "This production architecture deploys a resilient marketing web application in New Zealand North, fronted by Azure Front Door Standard to deliver low-latency global edge caching and routing for 400,000 monthly users. App Service Standard (S1) runs across two instances to handle the peak load of 80 requests per second while ensuring high availability. Key Vault secures sensitive configuration and certificates using managed identities, and Log Analytics centralizes application telemetry and monitoring.",
+    "tradeoffs": [],
+    "accepted_exceptions": []
+   },
+   "system": "agent",
+   "seconds": 20.0,
+   "steps": 4,
+   "error": "",
+   "terraform_valid": true
+  },
+  {
+   "id": "s11",
+   "ok": false,
+   "error": "the model did not submit a design within the step limit"
+  },
+  {
+   "id": "s12",
+   "ok": true,
+   "total_nzd": 3874.01,
+   "silent_violations": [],
+   "within_budget": true,
+   "expectations": {
+    "no_tier:gpt-4o-mini_global": true,
+    "dr_region": false
+   },
+   "expectations_met": false,
+   "high_findings": [
+    "REL-DR"
+   ],
+   "exceptions": [
+    "[RES-REGION] Azure OpenAI model deployments and Front Door edge routing leave New Zealand jurisdiction to comply with technical availability and global edge routing requirements."
+   ],
+   "design": {
+    "region": "newzealandnorth",
+    "dr_region": "australiaeast",
+    "components": [
+     {
+      "service": "app_service",
+      "tier": "P1v3",
+      "region": "newzealandnorth",
+      "instances": 3,
+      "zone_redundant": true,
+      "private_endpoint": false,
+      "purpose": "Hosting the bank customer chatbot web application securely with zone redundancy",
+      "settings": {}
+     },
+     {
+      "service": "azure_openai",
+      "tier": "o4-mini_datazone",
+      "region": "australiaeast",
+      "instances": 50,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Providing scalable LLM capabilities for the customer chatbot",
+      "settings": {}
+     },
+     {
+      "service": "postgres",
+      "tier": "D2ds_v5",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": true,
+      "private_endpoint": true,
+      "purpose": "Storing customer chatbot relational data securely with high availability",
+      "settings": {}
+     },
+     {
+      "service": "redis",
+      "tier": "standard_c1",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Providing low-latency caching for the chatbot workload",
+      "settings": {}
+     },
+     {
+      "service": "key_vault",
+      "tier": "standard",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Centralized secrets management and secure key storage",
+      "settings": {}
+     },
+     {
+      "service": "log_analytics",
+      "tier": "pay_as_you_go",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Centralized logging and monitoring for audit and diagnostics",
+      "settings": {}
+     },
+     {
+      "service": "front_door",
+      "tier": "premium",
+      "region": "australiaeast",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Global HTTP(S) load balancer with WAF and bot protection for multi-region failover",
+      "settings": {}
+     }
+    ],
+    "rationale": "",
+    "tradeoffs": [
+     "Due to budget constraints and critical availability requirements, multi-region active-active database replication was replaced by Front Door failover and regional HA in New Zealand North.",
+     "Azure OpenAI Data Zone deployment is used in Australia East as local New Zealand AI endpoints are not available."
+    ],
+    "accepted_exceptions": [
+     "[RES-REGION] Azure OpenAI model deployments and Front Door edge routing leave New Zealand jurisdiction to comply with technical availability and global edge routing requirements."
+    ]
+   },
+   "system": "agent",
+   "seconds": 34.2,
+   "steps": 6,
+   "error": "",
+   "terraform_valid": true
+  },
+  {
+   "id": "s13",
+   "ok": true,
+   "total_nzd": 298.22,
+   "silent_violations": [],
+   "within_budget": true,
+   "expectations": {
+    "max_total": true
+   },
+   "expectations_met": true,
+   "high_findings": [],
+   "exceptions": [
+    "[RES-REGION] Azure OpenAI is hosted in Australia East as models are unavailable in New Zealand North."
+   ],
+   "design": {
+    "region": "newzealandnorth",
+    "dr_region": null,
+    "components": [
+     {
+      "service": "app_service",
+      "tier": "S1",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Host internal HR knowledge search web application",
+      "settings": {}
+     },
+     {
+      "service": "ai_search",
+      "tier": "basic",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Vector search over HR knowledge base documents",
+      "settings": {}
+     },
+     {
+      "service": "azure_openai",
+      "tier": "gpt-4o-mini_global",
+      "region": "australiaeast",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "LLM for generating search answers and processing queries",
+      "settings": {}
+     },
+     {
+      "service": "key_vault",
+      "tier": "standard",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Secure storage of application secrets and connection strings",
+      "settings": {}
+     },
+     {
+      "service": "log_analytics",
+      "tier": "pay_as_you_go",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Centralized logging and operational monitoring",
+      "settings": {}
+     }
+    ],
+    "rationale": "This production design deploys the internal HR knowledge search workload using App Service (Standard S1), Azure AI Search (Basic), Key Vault, and Log Analytics in New Zealand North to meet production and operational requirements. Azure OpenAI (Global Standard gpt-4o-mini) is deployed in Australia East because Foundry models are not offered in New Zealand North. All components operate well within the NZD 1,200 monthly budget.",
+    "tradeoffs": [
+     "[RES-REGION] Azure OpenAI is hosted in Australia East as models are unavailable in New Zealand North."
+    ],
+    "accepted_exceptions": [
+     "[RES-REGION] Azure OpenAI is hosted in Australia East as models are unavailable in New Zealand North."
+    ]
+   },
+   "system": "agent",
+   "seconds": 21.4,
+   "steps": 4,
+   "error": "",
+   "terraform_valid": true
+  },
+  {
+   "id": "s14",
+   "ok": true,
+   "total_nzd": 407.45,
+   "silent_violations": [],
+   "within_budget": true,
+   "expectations": {
+    "all_in": true
+   },
+   "expectations_met": true,
+   "high_findings": [],
+   "exceptions": [],
+   "design": {
+    "region": "newzealandnorth",
+    "dr_region": null,
+    "components": [
+     {
+      "service": "container_apps",
+      "tier": "0.5vcpu",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Processes batch invoices in the background",
+      "settings": {}
+     },
+     {
+      "service": "blob_storage",
+      "tier": "hot_lrs",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Stores invoice documents and PDF files securely",
+      "settings": {}
+     },
+     {
+      "service": "postgres",
+      "tier": "D2ds_v5",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Stores structured invoice data and processing metadata",
+      "settings": {}
+     },
+     {
+      "service": "key_vault",
+      "tier": "standard",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Stores application secrets and database connection strings securely",
+      "settings": {}
+     },
+     {
+      "service": "log_analytics",
+      "tier": "pay_as_you_go",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Collects application logs and operational metrics",
+      "settings": {}
+     }
+    ],
+    "rationale": "This architecture provides a secure, cost-effective solution for batch invoice processing within New Zealand North. Azure Container Apps handles background processing tasks efficiently, while Blob Storage securely stores invoice documents. PostgreSQL Flexible Server (D2ds_v5) maintains structured invoice records and operational metadata reliably. Key Vault and Log Analytics ensure production-grade security and observability within the specified budget.",
+    "tradeoffs": [],
+    "accepted_exceptions": []
+   },
+   "system": "agent",
+   "seconds": 19.0,
+   "steps": 4,
+   "error": "",
+   "terraform_valid": true
+  },
+  {
+   "id": "s15",
+   "ok": true,
+   "total_nzd": 1117.71,
+   "silent_violations": [],
+   "within_budget": true,
+   "expectations": {
+    "all_in": true,
+    "has:vm": true
+   },
+   "expectations_met": true,
+   "high_findings": [],
+   "exceptions": [],
+   "design": {
+    "region": "newzealandnorth",
+    "dr_region": null,
+    "components": [
+     {
+      "service": "vm",
+      "tier": "D2s_v5",
+      "region": "newzealandnorth",
+      "instances": 2,
+      "zone_redundant": true,
+      "private_endpoint": false,
+      "purpose": "Legacy application servers hosting workload compute",
+      "settings": {}
+     },
+     {
+      "service": "postgres",
+      "tier": "D2ds_v5",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": true,
+      "private_endpoint": false,
+      "purpose": "Relational database for legacy application data",
+      "settings": {}
+     },
+     {
+      "service": "key_vault",
+      "tier": "standard",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Centralised secrets management for application configuration and credentials",
+      "settings": {}
+     },
+     {
+      "service": "log_analytics",
+      "tier": "pay_as_you_go",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Centralised logging and monitoring workspace for operational visibility",
+      "settings": {}
+     }
+    ],
+    "rationale": "Deploying legacy virtual machines and a high-availability relational database in New Zealand North meets the high availability production requirements. Two D2s v5 VMs provide compute redundancy for the legacy application with zone-redundancy. PostgreSQL Flexible Server General Purpose D2ds v5 with zone-redundancy ensures reliable, resilient data storage within the NZ data residency boundary. Key Vault and Log Analytics are added to address security and observability best practices.",
+    "tradeoffs": [
+     "Using VMs requires manual OS patching and infrastructure management compared to PaaS options."
+    ],
+    "accepted_exceptions": []
+   },
+   "system": "agent",
+   "seconds": 20.1,
+   "steps": 4,
+   "error": "",
+   "terraform_valid": true
+  },
+  {
+   "id": "s16",
+   "ok": true,
+   "total_nzd": 1848.4,
+   "silent_violations": [],
+   "within_budget": true,
+   "expectations": {
+    "has:redis": true
+   },
+   "expectations_met": true,
+   "high_findings": [],
+   "exceptions": [],
+   "design": {
+    "region": "newzealandnorth",
+    "dr_region": null,
+    "components": [
+     {
+      "service": "container_apps",
+      "tier": "1vcpu",
+      "region": "newzealandnorth",
+      "instances": 3,
+      "zone_redundant": true,
+      "private_endpoint": false,
+      "purpose": "Host microservices platform containers with zone redundancy",
+      "settings": {}
+     },
+     {
+      "service": "postgres",
+      "tier": "D2ds_v5",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": true,
+      "private_endpoint": false,
+      "purpose": "Relational database for microservices platform with high availability",
+      "settings": {}
+     },
+     {
+      "service": "redis",
+      "tier": "standard_c1",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Caching layer for microservices platform performance",
+      "settings": {}
+     },
+     {
+      "service": "key_vault",
+      "tier": "standard",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Securely store secrets and connection strings",
+      "settings": {}
+     },
+     {
+      "service": "log_analytics",
+      "tier": "pay_as_you_go",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Centralized logging and monitoring for platform incidents",
+      "settings": {}
+     }
+    ],
+    "rationale": "This production-grade microservices platform design is deployed entirely within New Zealand North to guarantee strict data residency and high availability. Azure Container Apps powers the containerised microservices, PostgreSQL Flexible Server handles relational data with zone redundancy, and Azure Cache for Redis provides high-performance caching. Key Vault secures secrets and Log Analytics ensures comprehensive observability, all well within the monthly budget.",
+    "tradeoffs": [
+     "Standard C1 Redis and Key Vault do not support zone redundancy in this region, relying instead on standard Azure regional resilience."
+    ],
+    "accepted_exceptions": []
+   },
+   "system": "agent",
+   "seconds": 19.7,
+   "steps": 4,
+   "error": "",
+   "terraform_valid": true
+  },
+  {
+   "id": "s17",
+   "ok": true,
+   "total_nzd": 73.63,
+   "silent_violations": [],
+   "within_budget": true,
+   "expectations": {
+    "max_total": true
+   },
+   "expectations_met": true,
+   "high_findings": [
+    "SEC-SECRETS"
+   ],
+   "exceptions": [],
+   "design": {
+    "region": "newzealandnorth",
+    "dr_region": null,
+    "components": [
+     {
+      "service": "app_service",
+      "tier": "B1",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Hosting the school newsletter web application for parents and staff.",
+      "settings": {}
+     },
+     {
+      "service": "postgres",
+      "tier": "B1ms",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Storing newsletter content, user details, and subscription data.",
+      "settings": {}
+     },
+     {
+      "service": "blob_storage",
+      "tier": "hot_lrs",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Storing uploaded newsletter documents and media securely.",
+      "settings": {}
+     }
+    ],
+    "rationale": "This architecture provides a cost-effective web hosting, relational database, and object storage setup tailored for a small school newsletter app within the New Zealand North region. App Service B1 and PostgreSQL B1ms keep operational costs safely within the tight monthly budget while supporting the required low traffic and storage volumes. Basic tiers are used to satisfy the strict cost constraint, with all data residing securely within New Zealand North.",
+    "tradeoffs": [
+     "Using dev/test tiers (App Service B1 and PostgreSQL B1ms) to stay within the tight NZ$90 monthly budget.",
+     "No zone redundancy or high availability configured due to budget limits and low traffic requirements.",
+     "No Key Vault or Log Analytics included as they would exceed the monthly budget limit."
+    ],
+    "accepted_exceptions": []
+   },
+   "system": "agent",
+   "seconds": 19.3,
+   "steps": 4,
+   "error": "",
+   "terraform_valid": true
+  },
+  {
+   "id": "s18",
+   "ok": false,
+   "error": "the model did not submit a design within the step limit"
+  },
+  {
+   "id": "s19",
+   "ok": true,
+   "total_nzd": 371.09,
+   "silent_violations": [],
+   "within_budget": true,
+   "expectations": {},
+   "expectations_met": true,
+   "high_findings": [],
+   "exceptions": [
+    "[RES-REGION] Azure OpenAI gpt-4o-mini is deployed in Australia East as Azure OpenAI services are not available in New Zealand North."
+   ],
+   "design": {
+    "region": "newzealandnorth",
+    "dr_region": null,
+    "components": [
+     {
+      "service": "app_service",
+      "tier": "S1",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Web app hosting the research Q&A interface",
+      "settings": {}
+     },
+     {
+      "service": "azure_openai",
+      "tier": "gpt-4o-mini_global",
+      "region": "australiaeast",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Azure OpenAI gpt-4o-mini for document Q&A",
+      "settings": {}
+     },
+     {
+      "service": "ai_search",
+      "tier": "basic",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Azure AI Search for document indexing and retrieval",
+      "settings": {}
+     },
+     {
+      "service": "blob_storage",
+      "tier": "hot_zrs",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Blob storage for raw research documents",
+      "settings": {}
+     },
+     {
+      "service": "key_vault",
+      "tier": "standard",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Key Vault for secrets management",
+      "settings": {}
+     },
+     {
+      "service": "log_analytics",
+      "tier": "pay_as_you_go",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Log Analytics workspace for operational monitoring",
+      "settings": {}
+     }
+    ],
+    "rationale": "Deploying in New Zealand North for data residency, using App Service S1 for the web app, Blob Storage ZRS for documents, AI Search Basic for indexing, and Key Vault and Log Analytics for management. Azure OpenAI gpt-4o-mini is deployed in Australia East as OpenAI is not available in New Zealand North. All components fit well within the 2,500 NZD monthly budget.",
+    "tradeoffs": [
+     "Azure OpenAI is hosted in Australia East due to regional availability constraints in New Zealand North."
+    ],
+    "accepted_exceptions": [
+     "[RES-REGION] Azure OpenAI gpt-4o-mini is deployed in Australia East as Azure OpenAI services are not available in New Zealand North."
+    ]
+   },
+   "system": "agent",
+   "seconds": 14.3,
+   "steps": 3,
+   "error": "",
+   "terraform_valid": true
+  },
+  {
+   "id": "s20",
+   "ok": true,
+   "total_nzd": 304.39,
+   "silent_violations": [],
+   "within_budget": true,
+   "expectations": {
+    "max_total": true,
+    "all_in": true
+   },
+   "expectations_met": true,
+   "high_findings": [],
+   "exceptions": [],
+   "design": {
+    "region": "newzealandnorth",
+    "dr_region": null,
+    "components": [
+     {
+      "service": "app_service",
+      "tier": "S1",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Hosting the farm sensor dashboard web application",
+      "settings": {}
+     },
+     {
+      "service": "cosmos_db",
+      "tier": "serverless",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Storing farm sensor data and telemetry records",
+      "settings": {}
+     },
+     {
+      "service": "container_apps",
+      "tier": "0.5vcpu",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Executing background processing jobs for sensor alerts and data aggregation",
+      "settings": {}
+     },
+     {
+      "service": "key_vault",
+      "tier": "standard",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Storing application secrets and connection strings securely",
+      "settings": {}
+     },
+     {
+      "service": "log_analytics",
+      "tier": "pay_as_you_go",
+      "region": "newzealandnorth",
+      "instances": 1,
+      "zone_redundant": false,
+      "private_endpoint": false,
+      "purpose": "Centralised diagnostic logging and monitoring workspace",
+      "settings": {}
+     }
+    ],
+    "rationale": "This architecture provides a cost-effective, production-grade solution for the Farm sensor dashboard within the New Zealand North region, fully adhering to data residency requirements. App Service S1 powers the web application with reliable hosting and autoscale capabilities, while Cosmos DB Serverless efficiently handles the 60 GB NoSQL telemetry dataset with pay-per-request scaling. Azure Container Apps manages asynchronous background processing tasks for sensor alerts and data aggregation. Additionally, Key Vault and Log Analytics are integrated to ensure secure credential storage and comprehensive operational observability within the allocated budget.",
+    "tradeoffs": [],
+    "accepted_exceptions": []
+   },
+   "system": "agent",
+   "seconds": 19.2,
+   "steps": 4,
+   "error": "",
+   "terraform_valid": true
+  }
+ ]
+}

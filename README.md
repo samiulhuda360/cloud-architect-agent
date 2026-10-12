@@ -41,8 +41,10 @@ residents ask questions about council policies and get answers that point to the
 - **After:** she gets a diagram of the design priced at NZ$2,900 a month from today's price list, with no rules
   broken. It also tells her plainly that no Azure AI model is sold in New Zealand, so questions would be
   processed in Australia, and that personal details should be kept out of them or the exception approved. Across
-  the 20 New Zealand test cases, every design stayed within its budget, none broke a data-location rule without
-  saying so openly, and all 20 setup files passed the official checker.
+  the 20 New Zealand test cases, the **rule-based** mode kept every design within its budget, never broke a
+  data-location rule without saying so openly, and all 20 setup files passed the official checker. The **AI agent**
+  mode, tested with Google's Gemini Flash-Lite, scored lower: it finished 17 of the 20 designs, and none of those 17
+  broke a data-location rule without saying so.
 
 ## How you would use it
 
@@ -536,17 +538,39 @@ The same deterministic assessor scores every design, whoever made it, on five me
 - **High-severity findings left open.**
 - **`terraform validate` passes** on the generated code.
 
-| System | No silent violations | Within budget | Expectations met | High findings left (avg) | Terraform valid |
-|---|---|---|---|---|---|
-| Rule-based architect (no model) | 20/20 | 20/20 | 20/20 | 0.05 | 20/20 |
+| System | Design produced | No silent violations | Within budget | Expectations met | High findings left (avg) | Terraform valid |
+|---|---|---|---|---|---|---|
+| Rule-based architect (no model) | 20/20 | 20/20 | 20/20 | 20/20 | 0.05 | 20/20 |
+| LLM agent with tools (Gemini Flash-Lite) | 17/20 | 17/20 | 17/20 | 15/20 | 0.18 | 17/17 |
+| LLM alone, no tools (Gemini Flash-Lite) | 20/20 | 16/20 | 20/20 | 18/20 | 0.40 | 20/20 |
+
+A scenario with no design counts as a failure on every measure. The rule-based architect is the most reliable of
+the three; the model runs used `gemini-flash-lite-latest` on Gemini's free tier.
 
 The one open high finding is `REL-DR`, on the government grants portal. That workload must keep its data in New Zealand and targets 99.99% availability. New Zealand has one Azure region, so the design records the regional-outage risk instead of placing a DR site outside the residency boundary.
 
-The per-scenario prices are in [`eval/results.md`](eval/results.md), and the scored designs are in [`eval/runs/rules.json`](eval/runs/rules.json).
+The per-scenario prices are in [`eval/results.md`](eval/results.md), and the scored designs are in
+[`eval/runs/`](eval/runs/): `rules.json`, `agent-gemini-flash-lite-latest.json` and
+`llm_only-gemini-flash-lite-latest.json`.
 
 ### Comparing the agent with an LLM alone
 
-The same harness compares the **LLM agent with tools** against the **same model without tools**. The no-tools baseline gets the same rules, regions and catalogue, but it has to estimate the price itself. The harness records that estimate next to the live price of its design. Configure a model in `.env`, then run:
+The same harness compares the **LLM agent with tools** against the **same model without tools**. The no-tools baseline gets the same rules, regions and catalogue, but it has to estimate the price itself. The harness records that estimate next to the live price of its design.
+
+What the measured run shows, with the same model on both sides:
+
+- **The tools stop silent rule breaks.** Every design the agent submitted passed the residency and region checks,
+  because the assessor sends back a submission with violations. Without tools, 4 of the 20 designs broke a rule
+  without recording an exception (three put a service in a region that does not exist, such as "global"; one
+  used a Data Zone AI deployment that processes prompts outside New Zealand).
+- **The model cannot price Azure by itself.** The no-tools baseline's own cost estimate was within 20% of the live
+  price for only 5 of its 20 designs (25%). The agent never guesses: every price comes from the live price list.
+- **The agent does not always finish.** On 3 of the 20 scenarios (s03, s11 and s18) it used all 12 steps without
+  submitting a design, and two of its designs missed an expectation (s07 left out Azure Functions; s12 has no DR
+  region).
+
+Configure a model in `.env`, or point `LLM_BASE_URL`, `LLM_API_KEY` and `LLM_MODEL` at any OpenAI-compatible
+endpoint, then run:
 
 ```bash
 python -m cloud_architect eval                         # rule-based, agent and LLM-only, on all 20 scenarios
