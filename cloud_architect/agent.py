@@ -164,6 +164,13 @@ def _parse_design(args: str) -> Design:
     return Design.model_validate(data.get("design", data))
 
 
+def _echo_call(c) -> dict:
+    """A tool call as sent back in the history. Provider extras are kept: Gemini needs each call's
+    thought signature (``extra_content``) returned with it, or the next request is rejected."""
+    extra = getattr(c, "model_extra", None) or {}
+    return {**extra, "id": c.id, "type": "function", "function": {"name": c.function.name, "arguments": c.function.arguments}}
+
+
 def design_with_tools(w: Workload, book: PriceBook, cfg: Settings, client=None, max_steps: int = 12) -> Run:
     client = client or _client(cfg)
     started = time.time()
@@ -185,9 +192,7 @@ def design_with_tools(w: Workload, book: PriceBook, cfg: Settings, client=None, 
             {
                 "role": "assistant",
                 "content": msg.content or "",
-                "tool_calls": [
-                    {"id": c.id, "type": "function", "function": {"name": c.function.name, "arguments": c.function.arguments}} for c in calls
-                ],
+                "tool_calls": [_echo_call(c) for c in calls],
             }
         )
         for call in calls:

@@ -239,6 +239,24 @@ def test_provider_rate_limits_are_retried(monkeypatch, fake_llm):
     assert len(calls) == 2
 
 
+def test_tool_calls_keep_provider_extras_in_the_history():
+    from openai.types.chat import ChatCompletionMessageToolCall
+
+    from cloud_architect.agent import _echo_call
+
+    call = ChatCompletionMessageToolCall.model_validate(
+        {
+            "id": "c1",
+            "type": "function",
+            "function": {"name": "list_options", "arguments": "{}"},
+            "extra_content": {"google": {"thought_signature": "sig"}},
+        }
+    )
+    echoed = _echo_call(call)
+    assert echoed["extra_content"] == {"google": {"thought_signature": "sig"}}
+    assert echoed["function"] == {"name": "list_options", "arguments": "{}"}
+
+
 def test_zone_redundant_functions_pay_for_two_always_ready_instances(book):
     w = web(needs=["background_jobs"], availability="high")
     plain = assess(Design(region="newzealandnorth", components=[comp("functions", "flex")]), w, book)
