@@ -1,127 +1,116 @@
 # Cloud Architect Agent
 
 [![ci](https://github.com/samiulhuda360/cloud-architect-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/samiulhuda360/cloud-architect-agent/actions/workflows/ci.yml)
-![Python](https://img.shields.io/badge/python-3.10%2B-0e5a6f)
-![Terraform](https://img.shields.io/badge/terraform-azurerm%20v4-0e5a6f)
-![MCP](https://img.shields.io/badge/MCP-server-0e5a6f)
-![License](https://img.shields.io/badge/license-MIT-0e5a6f)
+![Python](https://img.shields.io/badge/python-3.10%2B-2f6f68)
+![Terraform](https://img.shields.io/badge/terraform-azurerm%20v4-2f6f68)
+![MCP](https://img.shields.io/badge/MCP-server-2f6f68)
+![License](https://img.shields.io/badge/license-MIT-2f6f68)
 
-**Describe the system you need in plain business terms, and get a complete cloud design with its monthly cost in
-New Zealand dollars, checked against the rules your data has to follow.**
+**Describe the system you need in plain business terms, add your company's policies, and get a complete cloud
+design for your part of the world: priced in your own currency, checked against your rules, drawn as a diagram and
+ready to build.**
 
-![The web UI designing a council policy assistant: NZ$2,900 a month, no violations, the language model's residency exception recorded](docs/screenshots/council-top.png)
+![Demo: choosing the UK online-shop example, pressing Design it, and scrolling through the diagram, the prices in pounds, the review and the setup files](docs/screenshots/demo.gif)
 
-*A finished design. Left: the short form describing what the council needs. Top: the monthly cost against the
-budget, and that no rules are broken. Yellow note: the one thing that has to leave New Zealand, said openly.
-Below: a map of the design, with anything outside New Zealand drawn in red.*
+*The whole flow in under a minute: pick an example (or fill in your own), press **Design it**, and read the result:
+the monthly cost against the budget, a map of the design, the price of every part, what was checked, and the files
+an engineer needs.*
 
 ## What it does
 
-You fill in a short form about what you want to run online: a website, a booking system, a chatbot, how many
-people will use it, how much you can spend each month, and whether the data has to stay in New Zealand. It
-returns a ready-made plan for Microsoft's Azure cloud, the price of every piece in New Zealand dollars from
-today's price list, a list of any risks, and the setup files an engineer needs to build it.
+You describe what you want to run online (a shop, a patient portal, a supplier portal), how many people will use
+it, where they are, how much data you keep, how quickly you must recover from an outage and what you can spend. You
+can also upload your company's security or data policy, and the tool picks out the rules in it for you to approve.
+It returns a ready-made plan for Microsoft's Azure cloud in the right country, the monthly price of every piece in
+your currency from today's price list, a diagram, a list of anything that breaks your rules, and the setup files an
+engineer needs to build it.
 
 ## A real-life example
 
-![Slideshow: Hana describes the council's assistant, gets a design priced at NZ$2,900 a month against a NZ$4,000 budget, sees the price of every part, and takes away the review and setup file](docs/screenshots/story.gif)
+![The finished design for the UK online shop: £3,827 a month against a £9,000 budget, no rules broken, and a diagram with London as the main site and Cardiff as the backup site](docs/screenshots/design-top.png)
 
-*Hana's council project, from a short form to a costed plan, in four steps.*
+*Sarah's design. Top: £3,827 a month against her £9,000 budget, and no rules broken. Below: the map of the design,
+with London as the main site, Cardiff as the backup site, and the private network that keeps customer data off the
+internet.*
 
-Hana manages IT at Acme District Council. The council wants a policy assistant: a website where staff and
-residents ask questions about council policies and get answers that point to the right document.
+Sarah Collins is Head of Ecommerce at Hollin & Wren, an online homeware shop in the UK.
 
-- **Before:** Hana has to work out which cloud services to use, look up each price (mostly listed in US
-  dollars), and find out which services are actually sold in New Zealand, because council data should stay in
-  the country. It is easy to plan around an AI service that turns out not to be available here, or to discover
-  the real monthly bill only after the project is approved.
-- **With this project:** she opens the web page, ticks what the assistant needs (a website, a database, search
-  and an AI model), chooses "NZ only" for where the data lives, sets a budget of NZ$4,000 a month and presses
-  **Design it**.
-- **After:** she gets a diagram of the design priced at NZ$2,900 a month from today's price list, with no rules
-  broken. It also tells her plainly that no Azure AI model is sold in New Zealand, so questions would be
-  processed in Australia, and that personal details should be kept out of them or the exception approved. Across
-  the 20 New Zealand test cases, the **rule-based** mode kept every design within its budget, never broke a
-  data-location rule without saying so openly, and all 20 setup files passed the official checker. The **AI agent**
-  mode, tested with Google's Gemini Flash-Lite, scored lower: it finished 17 of the 20 designs, and none of those 17
-  broke a data-location rule without saying so.
+- **Before:** the shop runs on one ageing server in a back office, and it fell over on Black Friday, the busiest day
+  of the year. Before the next one, Sarah needs a cloud plan that copes with 6,000 shoppers at once, keeps card
+  payments safe enough to pass the card industry's security standard (PCI DSS), keeps customer data in the UK as the
+  company's security standard says, and stays under the £9,000 a month the Finance Director will approve. An IT
+  consultancy quoted three weeks to produce a first design.
+- **With this project:** she uploads the company's security standard (a PDF). The tool lists the seven rules it found,
+  each with the sentence it came from, and she ticks the ones to enforce. She fills in the shop's numbers: 180,000
+  visitors a month, 6,000 at the peak, 120 GB of orders growing 25% a year, back online within an hour after a
+  disaster, and dev, test and live copies. Then she presses **Design it**.
+- **After:** in about a minute she has a design priced at £3,827 a month for all three copies, from today's price
+  list, with nothing that breaks the policy: everything stays in London with a standby site in Cardiff, a web
+  firewall in front of the shop, customer data on a private network and encrypted with the company's own keys, and
+  logs kept for a year. She downloads the diagram for her IT supplier to edit, and the setup files to build it, on
+  the same afternoon instead of after three weeks.
+
+The same example, and three more from other countries, are in [`examples/`](examples/): a US telehealth start-up
+under HIPAA (in US dollars), an Australian accounting firm with a Xero sync (in Australian dollars), and a German
+manufacturer's supplier portal inside the EU (in euros).
 
 ## How you would use it
 
 1. Open the web page (someone on your team starts it once; see [Getting started](#getting-started)).
-2. Click one of the 20 examples under **Start from an example**, or fill in your own: what you need, how many
-   users, your monthly budget and where the data must stay.
-3. Choose **AI agent** or **Rule-based**, then press **Design it**.
-4. Read the result: the monthly total against your budget, a diagram, the price of each part, and any warnings
-   with a plain fix.
-5. Hand the setup file (one click to copy or download) to whoever will build it.
+2. Pick one of the examples under **Start from an example**, or upload a requirements brief (PDF, Word or text) and
+   tick the values it found, or fill in the form yourself.
+3. Choose where the data must stay and the currency for prices.
+4. Under **Company policies**, upload your security or data policy and tick each rule you want enforced.
+5. Press **Design it**.
+6. Read the monthly total against your budget, the diagram, the price of each part, and any warnings with a plain fix.
+7. Download the diagram (draw.io or SVG), the report and the setup files, and hand them to whoever will build it.
+
+![Uploading a policy document: each rule found is listed with the sentence it came from, ready to tick](docs/screenshots/policy-review.png)
+
+*Company policies. Each rule the tool found in the uploaded PDF, with the exact sentence and section it came from.
+Only the ticked rules are enforced.*
 
 ## In technical terms
 
-Cloud Architect Agent is an LLM agent (an AI model that can call tools, here a live price list and a rule checker,
-and act on the results) that designs Azure architectures for New Zealand organisations. You describe a workload
-in business terms, and it returns an architecture that is priced live in NZD from the Azure Retail Prices API,
-kept inside a data-residency boundary (the regions your data may live in: `nz`, `anz` or `any`), reviewed against
-16 Well-Architected rules (Microsoft's published checklist for reliable, secure and cost-effective cloud designs),
-and delivered as Terraform (code that builds the cloud resources) for `azurerm` v4 with a Mermaid diagram. It is
-for architects and platform teams who need a sound first design, and a monthly cost they can defend, for an Azure
-workload in New Zealand.
+Cloud Architect Agent is an LLM agent (an AI model that can call tools and act on the results) and a rule-based
+architect that design Azure architectures for any region. A workload described in business terms becomes an
+architecture that is:
+
+- **placed by data residency** (where the data is allowed to live): EU/EEA, UK, US, Canada, Australia, New Zealand or
+  anywhere, in the allowed region nearest the users, with disaster recovery in the paired region;
+- **priced live** from the public Azure Retail Prices API in any of 14 currencies, at Azure's own exchange rate;
+- **checked** against hard constraints (residency, budget, coverage, stack constraints and every accepted company
+  policy rule) and reviewed against more than 30 Well-Architected and compliance rules (Microsoft's checklist for
+  reliable, secure and cost-effective designs, plus PCI DSS, HIPAA, GDPR, ISO 27001 and SOC 2 requirements);
+- **delivered** as a Mermaid diagram, an editable draw.io file, an SVG picture, a markdown report and Terraform (code
+  that builds the cloud resources) for `azurerm` v4.
+
+It is for architects, platform teams and consultants who need a sound, costed first design they can defend.
 
 ## Key features
 
-- **Live NZD pricing.** Every component is priced from the public Azure Retail Prices API with exact meter recipes, and no Azure account is needed. Tiered meters, free grants and platform minimums are applied. USD is converted to NZD at Azure's own rate.
-- **Residency as a hard constraint.**
-  - `nz` allows New Zealand North only.
-  - `anz` adds Australia East and Australia Southeast.
-  - `any` allows all five supported regions.
-
-  Anything that crosses the boundary must be recorded as an exception that names its rule code, such as `[RES-REGION]`.
-- **Hard-constraint checks** for:
-  - residency;
-  - the AI deployment type (Global or Data Zone);
-  - the disaster-recovery (DR) region;
-  - budget;
-  - coverage of every workload need;
-  - whether Azure sells the service in that region.
-- **A 16-rule Well-Architected review** across reliability, security, cost, operations, performance and residency. Each finding has a severity and a fix.
-- **Two architects:**
-  - an LLM agent that uses tool calling on any OpenAI-compatible endpoint;
-  - a deterministic rule-based architect that needs no model, fits the design to the budget and is the evaluation baseline.
-- **Terraform for `azurerm` v4**, with:
-  - zone redundancy;
-  - private endpoints with private DNS;
-  - App Service VNet integration;
-  - Front Door with health-probe failover;
-  - cross-region database replicas;
-  - managed identities and Key Vault.
-
-  The Terraform for all 20 evaluation designs passes `terraform validate` and `terraform fmt`.
-- **A Mermaid diagram** with one box per region. Anything outside the residency boundary is drawn in red.
-- **Three ways to use it:** a web UI, a CLI, and an MCP server that any MCP-capable assistant or IDE can call.
-
-## Why New Zealand needs its own checks
-
-Azure's New Zealand North region (Auckland) has three availability zones. Its services and prices differ from Australia East (Sydney), and the differences change the design:
-
-- **No Azure OpenAI.** In the Azure Retail Prices API (October 2026), Foundry Models (Azure OpenAI) has no price rows in New Zealand North and 833 in Australia East.
-- **62 services are missing in all.** Each is priced in Australia East but not in NZ North, and Foundry Models is one of them. The others include Azure Machine Learning, Databricks, Synapse Analytics, IoT Hub, Bot Service and Sentinel ([snapshot](docs/data/region-services-2026-10.json)).
-- **No paired region.** Geo-redundant storage (GRS) is not sold there, and a DR site has to be outside New Zealand.
-- **No GPU virtual machines.** A model can't be self-hosted in Auckland either.
-- **Different prices.** Most compute costs about 5% more than in Sydney. Some SKUs cost much more, and a few cost less:
-
-| Monthly list price (730 hours) | NZ North | Australia East | Difference |
-|---|---|---|---|
-| App Service P0v3 (Linux), 1 instance | NZ$162 | NZ$119 | **+37%** |
-| App Service P1v3 (Linux), 1 instance | NZ$249 | NZ$237 | +5% |
-| VM D2s v5 (Linux) | NZ$163 | NZ$155 | +5% |
-| PostgreSQL Flexible D2ds v5 (compute) | NZ$330 | NZ$315 | +5% |
-| Azure SQL General Purpose, 2 vCores (compute) | NZ$491 | NZ$467 | +5% |
-| Azure Cache for Redis Standard C1 | NZ$178 | NZ$178 | 0% |
-| Azure AI Search Basic | NZ$130 | NZ$172 | **-24%** |
-
-*USD list prices from the Azure Retail Prices API, converted at Azure's own rate (US$1 = NZ$1.7667).*
-
-Prices and regional availability change over time, so nothing is taken from memory. Every design is priced and checked against live price data. Anything that crosses the residency boundary has to be recorded as an explicit exception.
+- **Any Azure region.** 43 regions with their pairs; jurisdictions map to allowed regions; the primary region follows
+  the users and DR uses the paired region (or the nearest allowed one when the pair is restricted).
+- **Prices in your currency.** USD, EUR, GBP, AUD, NZD, CAD and eight more, converted at Azure's own rate; dev and
+  test environments are priced as smaller copies.
+- **Every input changes the design or the checks:**
+  - RTO and RPO decide between a warm standby, a database replica and geo-redundant backups;
+  - growth sizes storage for 12 months and the database tier for 36;
+  - peak concurrency sets autoscale; the read share decides whether a cache helps;
+  - PCI DSS brings private networking, a web application firewall and a year of logs; HIPAA brings audit logs, six
+    years of records and geo-redundant backups; GDPR flags personal data sent outside adequate countries;
+  - integrations become queued background jobs; stack constraints such as "must use PostgreSQL" or "no Kubernetes"
+    are enforced.
+- **Company policies from documents.** Upload a PDF, Word, Markdown or text policy. A model (or, without one, a
+  rule-based reader) proposes rules of eight kinds, each with its source, section and quote; you accept them, and
+  violations cite the clause.
+- **Requirements briefs.** Upload an RFP and confirm the values it proposes for the form.
+- **Diagrams** for every design: Mermaid in the UI and report, an editable `.drawio` file using draw.io's own Azure
+  shapes, and an SVG.
+- **Terraform for `azurerm` v4** with zone redundancy, private endpoints, DR replicas and Front Door failover, plus the
+  compliance settings: customer-managed keys, backup and log retention, audit diagnostics, record deletion, autoscale
+  and required tags. Every evaluation and example design passes `terraform validate`.
+- **Three ways in:** a web UI, a CLI, and an MCP server that any MCP-capable assistant or IDE can call.
 
 ## Architecture
 
@@ -129,150 +118,165 @@ Prices and regional availability change over time, so nothing is taken from memo
 %%{init: {"theme": "base", "themeVariables": {"primaryColor": "#e6f2ef", "primaryBorderColor": "#2f6f68", "primaryTextColor": "#13302c", "lineColor": "#5f7471", "secondaryColor": "#f3efe6", "tertiaryColor": "#f7f8f6"}}}%%
 flowchart TD
   subgraph IN["Entry points"]
-    direction TD
     UI["Web UI and HTTP API<br/>ui/index.html, api.py"]
     CLI["CLI<br/>__main__.py"]
     MCP["MCP server<br/>mcp_server.py"]
     EV["Evaluation harness<br/>evaluate.py"]
   end
+  subgraph DOCS["Documents"]
+    PX["Policy extractor<br/>policies.py"]
+    BX["Brief reader<br/>brief.py"]
+  end
   subgraph AR["Architects"]
     AG["LLM agent<br/>agent.py"]
     RB["Rule-based architect<br/>rules.py"]
   end
-  LLM["OpenAI-compatible model<br/>OpenRouter, OpenAI, Azure OpenAI, Ollama, vLLM"]
-  subgraph OUT["Outputs"]
-    direction TD
-    TF["Terraform<br/>terraform.py"]
-    DG["Mermaid diagram<br/>diagram.py"]
-  end
+  LLM["OpenAI-compatible model<br/>Gemini, OpenRouter, OpenAI, Ollama<br/>spaced, cached on disk"]
+  REQ["Requirements<br/>compliance.py"]
   AS["Assessor<br/>assess.py"]
-  CAT["Service catalogue<br/>catalogue.py"]
-  PR["Price book<br/>pricing.py"]
-  DB[("SQLite price cache")]
+  RG["Regions and residency<br/>regions.py, availability survey"]
+  PR["Price book<br/>pricing.py, catalogue.py"]
   RP["Azure Retail Prices API"]
+  subgraph OUT["Outputs"]
+    DG["Diagrams<br/>Mermaid, draw.io, SVG"]
+    TF["Terraform"]
+    RE["Markdown report"]
+  end
 
-  IN -- "workload" --> AR
-  IN -- "final design" --> OUT
+  IN -- "uploads" --> DOCS
+  DOCS -- "proposed rules and values" --> IN
+  IN -- "workload with accepted rules" --> AR
   AG -- "chat with tools" --> LLM
+  PX --> LLM
+  AR --> REQ
   AR -- "price and check designs" --> AS
-  AS --> CAT
-  AS --> PR
-  PR --> DB
-  PR --> RP
+  AS --> REQ
+  AS --> RG
+  AS --> PR --> RP
+  AR -- "final design" --> OUT
 ```
 
-- **Who designs.** The web UI, the CLI and the evaluation harness send a workload to one of the two architects. Only the LLM agent calls a model.
-- **Who judges.** Both architects are judged by the same deterministic assessor. It prices each component through the price book and checks it against the catalogue.
-- **The MCP server** exposes the catalogue, region checks, the assessor, the rule-based architect and the Terraform generator as tools, so the MCP client's own model does the designing.
-- **Outputs.** The final design becomes Terraform and a Mermaid diagram. The web UI returns both, and the CLI and the MCP server return the Terraform.
+- **Documents** become proposed policy rules and form values. A person accepts them before they count.
+- **Requirements** turn frameworks, recovery targets, policies and stack constraints into what a design must have.
+  The rule-based architect builds to them; the assessor checks any design against them.
+- **The assessor** prices each component live, checks the hard constraints, and runs the review. It judges the agent,
+  the no-tools baseline and the rule-based architect alike.
+- **Outputs**: the final design becomes diagrams, Terraform and a report.
 
-The full reference, with every rule code and price recipe, is in [docs/architecture.md](docs/architecture.md).
+The full reference, with every rule code and recipe, is in [docs/architecture.md](docs/architecture.md).
 
 ## How it works
-
-A design request goes through the same steps whichever architect handles it:
 
 ```mermaid
 %%{init: {"theme": "base", "themeVariables": {"primaryColor": "#e6f2ef", "primaryBorderColor": "#2f6f68", "primaryTextColor": "#13302c", "lineColor": "#5f7471", "secondaryColor": "#f3efe6", "tertiaryColor": "#f7f8f6"}}}%%
 flowchart TD
-  A["Workload<br/>needs, scale, residency, availability, personal data, budget"]
-  B["Constraints<br/>allowed regions for nz, anz or any<br/>what availability and personal data require"]
-  C["Service selection<br/>LLM agent or rule-based architect<br/>16-service catalogue"]
-  D["Live pricing in NZD<br/>Azure Retail Prices API, cached for a week<br/>tiered meters, free grants, platform minimums"]
-  E["Hard-constraint check<br/>residency, AI deployment, DR region,<br/>needs covered, sold in region, budget"]
-  F["Well-Architected review<br/>16 rules, each with a severity and a fix"]
-  G{"Violations or over budget?"}
-  R["Revise<br/>agent: fix, or record a coded exception<br/>rules: downsize one tier"]
-  H["Output<br/>Terraform for azurerm v4, Mermaid diagram,<br/>price per component, violations, findings"]
-  A --> B --> C --> D --> E --> F --> G
-  G -- "yes" --> R --> D
-  G -- "no, or limit reached" --> H
+  A["Workload<br/>users and locations, traffic, data and growth,<br/>RPO and RTO, frameworks, budget and currency"]
+  P["Policy document uploaded<br/>rules proposed with quotes, person accepts"]
+  B["Requirements<br/>allowed regions, DR level, backups, logs,<br/>WAF, private data, keys, tags, stack"]
+  C["Regions<br/>primary nearest the users, DR in the pair"]
+  D["Service selection<br/>LLM agent or rule-based architect"]
+  E["Live pricing in your currency<br/>all environments"]
+  F["Hard constraints<br/>residency, budget, coverage, stack, policy rules"]
+  G["Review<br/>reliability, security, compliance, performance, cost"]
+  H{"Violations or over budget?"}
+  R["Revise<br/>agent: fix or record a coded exception<br/>rules: downsize one tier"]
+  O["Outputs<br/>diagram (Mermaid, draw.io, SVG), Terraform, report"]
+  A --> B
+  P --> B
+  B --> C --> D --> E --> F --> G --> H
+  H -- "yes" --> R --> E
+  H -- "no, or limit reached" --> O
 ```
 
-1. **Workload.** A `Workload` (`models.py`) describes:
-   - the needs (web app, API, relational or NoSQL database, files, cache, LLM, search, background jobs, containers or VMs);
-   - monthly users and peak requests per second;
-   - database and file sizes, and LLM tokens per month;
-   - residency and the availability target (99.9%, 99.95% or 99.99%);
-   - the environment, whether it holds personal information, and a monthly budget in NZD.
-2. **Constraints.** Residency fixes the allowed regions. The other requirements follow from the workload:
-   - High or critical availability needs zone redundancy.
-   - Critical availability also needs a working DR site inside the boundary.
-   - Personal data needs private endpoints, and a public web app that handles it needs a web application firewall.
-3. **Service selection.** The architect picks services and tiers from the 16-service catalogue (`catalogue.py`). The LLM agent (`agent.py`) does this through tool calls, and the rule-based architect (`rules.py`) through fixed rules.
-4. **Live pricing.** The assessor (`assess.py`) prices each component from its recipes. The price book (`pricing.py`) does the work:
-   - fetches the matching meters from the Azure Retail Prices API and caches them in SQLite for a week;
-   - applies volume tiers, free grants and platform minimums;
-   - converts USD to NZD at Azure's rate.
-
-   A service with no price in a region is not sold there.
-5. **Hard constraints.** The assessor checks:
-   - residency (`RES-REGION`);
-   - the AI deployment type (`RES-AI-GLOBAL`, `RES-AI-ZONE`);
-   - the DR region (`RES-DR`);
-   - coverage (`UNKNOWN`, `REGION`, `NOT-SOLD`, `NEED`);
-   - budget (`BUDGET`).
-
-   A residency or budget violation can only be accepted by an exception that names the rule code or the thing it relaxes. Accepted exceptions are always reported.
-6. **Well-Architected review.** The 16 rules add findings, each with a severity (high, medium, low or info) and a fix. For example, a design that names a DR region but runs no standby compute or database copy there gets `REL-DR`.
-7. **Revise.**
-   - The agent fixes what fails, or records an exception when no compliant option exists, and then resubmits. A submission that still has violations is sent back once.
-   - The rule-based architect downsizes one tier at a time until the design fits the budget, and records each step in `tradeoffs`.
-8. **Output.** The final design is assessed once more.
-   - The web API returns the price per component, the violations, the findings, a Mermaid diagram (`diagram.py`) and Terraform (`terraform.py`).
-   - The CLI prints the design and review as JSON, and writes `main.tf` when you ask for it.
+1. **Workload.** The form, a YAML file, the API or the MCP tool describes the needs; monthly and peak concurrent users
+   and where they are; peak requests a second and the read share; database size and yearly growth, files, how long
+   records and backups are kept; the uptime target, RPO (how much data you can afford to lose) and RTO (how long you
+   can be down); frameworks and data types; sign-in; environments; integrations; stack constraints; and the budget
+   with its currency.
+2. **Policies.** An uploaded policy becomes proposed rules, each with its source, section and quote. Rules whose quote
+   is not in the document are dropped. Only rules the person accepts are enforced.
+3. **Requirements.** `compliance.py` works out what the design must provide, and why: for example an RTO of 60 minutes
+   needs a warm standby in a second region, and PCI DSS needs a web application firewall (requirement 6.4.2).
+4. **Regions.** The primary region is the allowed region nearest the users that sells every service needed (and has
+   availability zones when high availability is asked for); DR goes to the paired region when allowed.
+5. **Service selection.** The LLM agent (`agent.py`) chooses through tool calls; the rule-based architect
+   (`rules.py`) builds to the requirements.
+6. **Live pricing.** The price book fetches the exact meters from the Azure Retail Prices API (cached for a week),
+   applies volume tiers, free grants and platform minimums, converts to your currency, and prices dev and test copies.
+7. **Hard constraints and review.** The assessor checks residency, budget, coverage, stack constraints and every
+   accepted policy rule, then runs the review. A residency, budget or policy violation can only be relaxed by an
+   exception that names its rule code, and accepted exceptions are always shown.
+8. **Revise.** The agent fixes what fails and resubmits (a submission that still has violations is sent back once).
+   The rule-based architect downsizes one tier at a time until the design fits the budget and any spending cap.
+9. **Outputs.** The final design becomes a diagram in three formats, Terraform, and a markdown report.
 
 ### The agent loop
 
 ```mermaid
 %%{init: {"theme": "base", "themeVariables": {"primaryColor": "#e6f2ef", "primaryBorderColor": "#2f6f68", "primaryTextColor": "#13302c", "lineColor": "#5f7471", "secondaryColor": "#f3efe6", "tertiaryColor": "#f7f8f6"}}}%%
 flowchart LR
-  W["Workload<br/>needs, residency, budget"] --> L["LLM architect<br/>(tool calling)"]
-  L -- list_options --> C[("Service catalogue<br/>16 services, priced tiers")]
+  W["Workload<br/>allowed regions, pairs,<br/>regions nearest the users"] --> L["LLM architect<br/>(tool calling)"]
+  L -- list_options --> C[("Catalogue<br/>18 services, 42 tiers")]
   L -- assess_design --> A["Assessor"]
-  A --> P["Azure Retail Prices API<br/>(cached, NZD)"]
-  A --> K["Hard constraints<br/>residency, budget, coverage, sold in region"]
-  A --> R["Well-Architected review<br/>16 rules"]
+  A --> P["Live prices<br/>your currency"]
+  A --> K["Hard constraints<br/>residency, budget, stack, policies"]
+  A --> R["Review<br/>Well-Architected and compliance"]
   A -- "violations, findings, cost per component" --> L
   L -- submit_design --> G{"Hard violations?"}
   G -- "yes: sent back once" --> L
-  G -- no --> T["Terraform + diagram"]
+  G -- no --> T["Diagrams, Terraform, report"]
 ```
 
-The agent is an OpenAI-compatible tool-calling loop of at most 12 steps, with three tools:
-
-- `list_options` returns the catalogue.
-- `assess_design` returns the price, the violations, the findings and the cost per component.
-- `submit_design` submits the final design.
-
-Its system prompt tells it to:
-
-- price every draft with `assess_design`, and never state a price that did not come from it;
-- fix every hard violation and stay within the budget;
-- record a residency exception only when no compliant option exists, starting it with the rule code, for example `[RES-REGION] no Azure model is sold in NZ North`;
-- address high-severity findings, or explain in `tradeoffs` why not.
-
-The model can be any OpenAI-compatible endpoint with tool calling: OpenRouter (the default), OpenAI, Azure OpenAI, Ollama or vLLM. Rate limits, timeouts and server errors are retried with back-off.
-
-The rule-based architect produces the design instead in three cases:
-
-- no model is configured;
-- the agent returns no design;
-- the model call fails (web UI only). The UI shows a note when this happens.
+The agent is an OpenAI-compatible tool-calling loop of at most 12 steps. Calls are spaced (`AI_MIN_INTERVAL`), cached
+on disk by request, and retried with back-off on rate limits; a used-up daily quota stops the run. The rule-based
+architect steps in when no model is configured, when the agent returns no design, or when the model call fails (the UI
+says so).
 
 ## Screenshots
 
-**A critical banking workload** with `anz` residency and a 99.99% target. Front Door Premium with WAF sits in front of a zone-redundant primary in Auckland and a warm standby with a PostgreSQL replica in Sydney.
+**The price of every part.** Each component with its tier, region, setup (instances, autoscale, zones, private
+network, customer-managed key) and monthly price in pounds, plus the dev and test copies and the exchange rate used.
 
-![A critical banking workload: Front Door Premium with WAF, a zone-redundant primary in Auckland, and a warm standby with a PostgreSQL replica in Sydney](docs/screenshots/bank-diagram.png)
+![Each component with its tier, region, setup and monthly price in pounds, with the dev and test environments](docs/screenshots/design-costs.png)
 
-**The live price breakdown.** It shows each component with its tier, region, setup and monthly price in NZD, and the exchange rate used.
+**What was checked, and why.** The review lists each finding with its fix and its source; the sizing card shows the
+database now, in 12 months and in 36 months; and the enforced policy rules are listed with the sentence each came from.
 
-![Each component with its tier, region, setup and live monthly price](docs/screenshots/council-prices.png)
+![The review, the sizing card and the company policy rules enforced, each with its quote](docs/screenshots/design-review.png)
 
-**The review and the Terraform.** Accepted exceptions are badged in the Well-Architected review. You can copy the generated Terraform or download it as `main.tf`.
+**The diagram as a file.** The same design exported as an SVG picture: London as primary with three availability
+zones, Cardiff for disaster recovery, the private network with its private endpoints, the global edge, and the
+warehouse sync. The `.drawio` download opens the same layout in draw.io with Azure icons, ready to edit.
 
-![Accepted exceptions are badged in the review; the generated Terraform can be copied or downloaded](docs/screenshots/council-review-terraform.png)
+![The exported SVG diagram: global edge, the London primary region with a private network, outside systems, and the Cardiff DR region](docs/screenshots/diagram-export.png)
+
+**A requirements brief, read for you.** Uploading the German manufacturer's RFP proposes each form value with the
+sentence it came from; tick the ones to use.
+
+![Values proposed from an uploaded RFP, each with its sentence and a tick box](docs/screenshots/brief-prefill.png)
+
+**The same tool in the EU, in euros.** The supplier portal designed from that brief: Germany West Central with
+France Central for DR (Germany's paired region is restricted), SQL Server for the .NET team, €1,571 a month.
+
+![The German supplier portal: €1,571 a month, Germany West Central with DR in France Central](docs/screenshots/design-eu.png)
+
+**From the command line.** Reading a policy without a model, and writing a design's report, diagrams and Terraform.
+
+![The policies command listing the rules found in a policy document](docs/screenshots/cli-policies.png)
+
+![The design command writing the report, the diagrams and the Terraform](docs/screenshots/cli-design.png)
+
+## The examples
+
+| Example | Who and what | Rules in play | Design (rule-based) |
+|---|---|---|---|
+| [Hollin & Wren online shop](examples/hollin-wren-online-shop/) | Sarah, Head of Ecommerce: a UK homeware shop that fell over on Black Friday | UK only, PCI DSS, GDPR, RPO 15 min, RTO 60 min, 6,000 concurrent shoppers, a [security standard](examples/policies/hollin-wren-security-standard.md) with 7 rules | £3,827 a month (budget £9,000): UK South, DR in UK West |
+| [Lumenvale virtual care](examples/lumenvale-telehealth/) | James, CTO of a US telehealth start-up with four engineers | US only, HIPAA, SOC 2, AI visit notes, 90-day backups, a [HIPAA policy](examples/policies/lumenvale-hipaa-security-policy.md) with an approved-services list | US$1,380 a month (budget US$7,000): East US 2, model in the US Data Zone |
+| [Kestrel & Moore client portal](examples/kestrel-moore-client-portal/) | Emma, Practice Manager: client files off an office NAS, nightly Xero sync | Australia only, Privacy Act, records kept 7 years, a [client data policy](examples/policies/kestrel-moore-client-data-policy.md) with an A$2,500 cap | A$1,092 a month: Australia East |
+| [Falkenhain supplier portal](examples/falkenhain-supplier-portal/) | Tom, IT Lead at a German parts manufacturer, from an [RFP](examples/briefs/falkenhain-supplier-portal-rfp.md) | EU only, GDPR, ISO 27001, RPO 15 min, RTO 4 h, .NET team | €1,571 a month (budget €3,500): Germany West Central, DR in France Central |
+
+Each folder has the workload (`workload.yaml`, with the reviewed policy rules), the report (`report.md`), the
+diagram (`diagram.drawio`, `diagram.svg`, `diagram.mmd`), the Terraform (`main.tf`) and the design (`design.json`).
 
 ## Tech stack
 
@@ -280,12 +284,13 @@ The rule-based architect produces the design instead in three cases:
 |---|---|
 | Language | Python 3.10+ |
 | Models and validation | Pydantic |
-| LLM access | OpenAI Python SDK, against any OpenAI-compatible endpoint (OpenRouter, OpenAI, Azure OpenAI, Ollama, vLLM) |
-| Web | FastAPI and Uvicorn. The UI is a single page of HTML and JavaScript, with Mermaid rendered in the browser. |
-| MCP | FastMCP, over stdio |
+| LLM access | OpenAI Python SDK against any OpenAI-compatible endpoint (Google Gemini, OpenRouter, OpenAI, Azure OpenAI, Ollama, vLLM) |
+| Documents | pypdf, python-docx |
+| Web | FastAPI and Uvicorn; a single-page UI in HTML and JavaScript with Mermaid in the browser |
+| MCP | FastMCP over stdio |
 | Prices | Azure Retail Prices API, cached in SQLite |
-| Infrastructure as code | Terraform, with the `azurerm` (~> 4.0) and `random` providers |
-| Configuration and data | python-dotenv, PyYAML |
+| Infrastructure as code | Terraform with the `azurerm` (~> 4.0) and `random` providers |
+| Diagrams | Mermaid, draw.io (built-in Azure shapes), SVG |
 | Quality | pytest, httpx, Ruff, GitHub Actions |
 
 ## Getting started
@@ -293,8 +298,9 @@ The rule-based architect produces the design instead in three cases:
 ### Prerequisites
 
 - **Python 3.10 or newer.**
-- **Terraform 1.6 or newer.** This is optional. You need it to run the `terraform validate` and `fmt` tests, and to deploy the generated code.
-- **An API key for an OpenAI-compatible endpoint.** This is only needed for the LLM agent. The rule-based architect, the MCP server and the price checks need no key and no Azure account.
+- **Terraform 1.6 or newer**, optional: for the `validate` and `fmt` tests and to deploy the generated code.
+- **A model API key**, optional: for the AI agent and model-based document reading. Everything else (the rule-based
+  architect, the rule-based readers, the MCP server and the price checks) needs no key and no Azure account.
 
 ### Install
 
@@ -308,24 +314,21 @@ pip install -e ".[dev]"            # the dev extra adds pytest, httpx and Ruff
 
 ### Configure
 
-The rule-based mode needs no configuration. For the LLM agent, copy `.env.example` to `.env` and set a key. Settings come from these environment variables, or from `.env`:
+Copy `.env.example` to `.env` to use a model. Settings come from these environment variables or from `.env`:
 
 | Variable | Description |
 |---|---|
-| `OPENROUTER_API_KEY` | API key for OpenRouter, the default endpoint |
-| `LLM_API_KEY` | API key for any other OpenAI-compatible endpoint. Used in place of `OPENROUTER_API_KEY` when both are set. |
-| `LLM_BASE_URL` | Base URL of the OpenAI-compatible endpoint. OpenRouter is used when this is unset. A local server such as Ollama or vLLM needs no key. |
-| `LLM_MODEL` | The model to call |
+| `AI_API_KEY` | A Google Gemini key. On its own it selects Gemini's OpenAI-compatible endpoint and `gemini-flash-lite-latest`. |
+| `AI_MODEL` | Another Gemini model |
+| `AI_MIN_INTERVAL` | Seconds between model calls (default 2.5) |
+| `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL` | Any other OpenAI-compatible endpoint, key and model |
+| `OPENROUTER_API_KEY` | A key for OpenRouter, the default endpoint when nothing else is set |
 | `LLM_MAX_TOKENS` | Maximum tokens per model reply |
-| `PRICE_CACHE` | Path of the SQLite price cache. The default is `cache/prices.sqlite`. |
+| `PRICE_CACHE` | The SQLite price cache (default `cache/prices.sqlite`) |
+| `LLM_CACHE` | The model reply cache (default `cache/llm.sqlite`); `off` disables it |
 
-These variables are for development and evaluation:
-
-| Variable | Description |
-|---|---|
-| `TERRAFORM` | Path to the `terraform` binary. Setting it turns on the `terraform validate` and `fmt` tests. |
-| `LIVE_PRICES` | Set it to `1` to run the live Azure price checks |
-| `EVAL_PAUSE` | Seconds to wait between scenarios when evaluating a model |
+For development and evaluation: `TERRAFORM` (path to `terraform`; turns on the validate and fmt tests),
+`LIVE_PRICES=1` (runs the live price checks), `EVAL_PAUSE` (seconds between scenarios when evaluating a model).
 
 ### Run
 
@@ -333,120 +336,130 @@ These variables are for development and evaluation:
 python -m cloud_architect serve                # web UI and API on http://127.0.0.1:8000
 ```
 
-Prices come from the public Azure Retail Prices API, and each query is cached for a week in `cache/prices.sqlite`.
-
 ## Usage
 
 ### Web UI
 
-1. Open http://127.0.0.1:8000.
-2. Pick one of the 20 example workloads under **Start from an example**, or describe your own. The form asks for:
-   - needs, users and peak requests per second;
-   - database and file sizes, and LLM tokens;
-   - residency: NZ only, NZ + Australia, or Anywhere;
-   - availability: 99.9%, 99.95% or 99.99%;
-   - environment, budget, and whether it handles personal information.
-3. Choose **AI agent** or **Rule-based**, then press **Design it**.
-4. Read the result:
-   - the monthly total against the budget;
-   - counts of hard violations and high-severity findings;
-   - which architect ran;
-   - any accepted exception;
-   - the architecture diagram with its rationale and trade-offs;
-   - each component with its live price;
-   - the Well-Architected review;
-   - the Terraform, ready to copy or download.
+Open http://127.0.0.1:8000, then follow [How you would use it](#how-you-would-use-it). The form groups the inputs
+into the system, users and traffic, data, reliability, security and compliance, team and integrations, and the
+budget with its currency. The result has download buttons for the `.drawio`, SVG and Mermaid diagram, the report and
+`main.tf`.
 
 ### Command line
 
 | Command | What it does |
 |---|---|
-| `python -m cloud_architect design <file> [--rules] [--terraform <dir>]` | Designs a workload from a YAML or JSON file and prints the design, the monthly total, the violations and the findings as JSON. `--rules` uses the rule-based architect, and `--terraform` writes `main.tf` to a folder. |
-| `python -m cloud_architect serve [--port 8000]` | Starts the web UI and the HTTP API on `127.0.0.1` |
+| `python -m cloud_architect design <file> [--rules] [--out <dir>] [--terraform <dir>]` | Designs a workload from YAML or JSON. `--out` writes `report.md`, `diagram.svg`, `diagram.drawio`, `diagram.mmd`, `main.tf` and `design.json`. |
+| `python -m cloud_architect policies <document> [--rules]` | Proposes policy rules from a PDF, Word, Markdown or text document, as YAML to review |
+| `python -m cloud_architect brief <document> [--rules]` | Proposes workload values from a requirements brief or RFP |
+| `python -m cloud_architect serve [--port 8000]` | Starts the web UI and the HTTP API |
 | `python -m cloud_architect mcp` | Starts the MCP server over stdio |
-| `python -m cloud_architect eval [--only rules,agent,llm_only] [--resume] [--rescore] [--no-terraform]` | Runs the evaluation on the 20 scenarios |
+| `python -m cloud_architect eval [--only rules,agent,llm_only,extraction] [--resume] [--rescore] [--no-terraform]` | Runs the evaluation |
 
-`design` uses the LLM agent when a model is configured. It uses the rule-based architect otherwise, or when you pass `--rules`.
+`design`, `policies` and `brief` use the model when one is configured, and the rule-based path otherwise or with
+`--rules`.
 
-A workload file ([examples/gp-clinic.yaml](examples/gp-clinic.yaml)):
+A workload file (shortened from [examples/hollin-wren-online-shop/workload.yaml](examples/hollin-wren-online-shop/workload.yaml)):
 
 ```yaml
-name: GP clinic patient portal
-description: Patients book appointments, read results and message their GP.
-needs: [web_app, relational_db, object_storage]
-monthly_users: 8000
-peak_rps: 30
+name: Hollin & Wren online shop
+needs: [web_app, api, relational_db, object_storage, background_jobs]
+monthly_users: 180000
+peak_concurrent_users: 6000
+user_locations: [United Kingdom]
+peak_rps: 300
+read_ratio: 0.9
 data_gb: 120
-blob_gb: 600
-residency: nz          # health information stays in New Zealand
-availability: high     # 99.95%
-pii: true
-budget_nzd_month: 4000
+data_growth_pct: 25
+blob_gb: 800
+retention_years: 6
+backup_retention_days: 35
+availability: high          # 99.95%
+rpo_minutes: 15
+rto_minutes: 60
+residency: uk
+frameworks: [pci_dss, gdpr]
+identity: entra_external_id
+environments: [dev, test, prod]
+integrations: [warehouse system]
+budget_month: 9000
+currency: GBP
+policies:                   # rules from the uploaded policy, reviewed and accepted
+  - id: P1
+    check: allowed_regions
+    regions: [uksouth, ukwest]
+    source: hollin-wren-security-standard.md
+    section: '3'
+    quote: Customer and payment data must be stored and processed only in the United Kingdom.
+    status: accepted
 ```
 
 Design it, then plan the generated Terraform:
 
 ```bash
-python -m cloud_architect design examples/gp-clinic.yaml --rules --terraform build/gp-clinic
-cd build/gp-clinic
+python -m cloud_architect design examples/hollin-wren-online-shop/workload.yaml --rules --out build/shop
+cd build/shop
 terraform init
-terraform plan -var subscription_id=<subscription-id> -var db_admin_password=<password>
+terraform plan -var subscription_id=<subscription-id> -var db_admin_password=<password> \
+  -var 'required_tags={"owner":"<team>","cost-centre":"<code>","data-classification":"restricted"}'
 ```
 
-Designs that include VMs also take `-var vm_ssh_public_key=<public-key>`.
-
-These are the workload fields:
+The workload fields:
 
 | Field | Meaning | Default |
 |---|---|---|
-| `name` | Workload name, 2 to 80 characters | required |
-| `description` | What it does | empty |
-| `needs` | One or more of `web_app`, `api`, `relational_db`, `nosql_db`, `object_storage`, `cache`, `llm`, `search`, `background_jobs`, `containers`, `virtual_machines` | required |
-| `monthly_users` | Users per month | 1,000 |
-| `peak_rps` | Peak requests per second | 5 |
-| `data_gb` | Primary database size in GB | 10 |
-| `blob_gb` | Files, images and documents in GB | 0 |
-| `llm_input_mtokens`, `llm_output_mtokens` | LLM tokens per month, in millions | 0 |
-| `residency` | `nz`, `anz` or `any` | `any` |
-| `availability` | `standard` (99.9%), `high` (99.95%) or `critical` (99.99%) | `standard` |
-| `environment` | `production` or `dev` | `production` |
-| `pii` | Whether it handles personal information | `false` |
-| `budget_nzd_month` | Monthly budget in NZD | none |
+| `name`, `description`, `needs` | What it is; needs are `web_app`, `api`, `relational_db`, `nosql_db`, `object_storage`, `cache`, `llm`, `search`, `background_jobs`, `containers`, `virtual_machines` | name and needs required |
+| `monthly_users`, `peak_concurrent_users`, `user_locations` | Monthly active users, users online at the peak (default 5% of monthly), countries or regions they are in | 1,000, 5%, none |
+| `peak_rps`, `read_ratio` | Peak requests a second, share that only read | 5, 0.8 |
+| `data_gb`, `data_growth_pct`, `blob_gb` | Database GB today, growth % a year, files GB | 10, 0, 0 |
+| `retention_years`, `backup_retention_days`, `geo_backup` | How long records and backups are kept; copy backups to a second region | 0, 7, false |
+| `availability`, `rpo_minutes`, `rto_minutes` | `standard` (99.9%), `high` (99.95%) or `critical` (99.99%); recovery objectives in minutes | standard, none, none |
+| `residency` | `eu`, `uk`, `us`, `canada`, `australia`, `nz` or `any` | `any` |
+| `frameworks` | `gdpr`, `hipaa`, `pci_dss`, `iso27001`, `soc2` | none |
+| `pii`, `health_data`, `card_data` | The kinds of sensitive data (HIPAA implies health data, PCI DSS card data) | false |
+| `identity` | `entra_id` (staff), `entra_external_id` (customers), `external` or `none` | `none` |
+| `environments` | Any of `dev`, `test`, `prod` | `[prod]` |
+| `integrations`, `constraints` | Outside systems; stack constraints in plain words | none |
+| `budget_month`, `currency` | Monthly budget and its currency (default: the jurisdiction's) | none |
+| `preferred_region`, `policies` | A region to prefer; accepted company policy rules | none |
+| `llm_input_mtokens`, `llm_output_mtokens` | Model tokens a month, in millions | 0 |
+
+Older workload files with `budget_nzd_month` and `environment: dev` still load (as an NZD budget and a dev-only
+environment).
 
 ### HTTP API
 
 | Method and path | Body | Returns |
 |---|---|---|
-| `GET /` | | The web UI |
-| `GET /api/presets` | | The 20 evaluation workloads, with defaults filled in |
-| `GET /api/options` | | The service catalogue |
-| `POST /api/design` | `{"workload": {...}, "mode": "agent"}` or `"mode": "rules"` | The design, cost lines, total, violations, findings, Mermaid diagram and Terraform |
-| `POST /api/assess` | `{"workload": {...}, "design": {...}}` | The price and review for an edited design |
+| `GET /api/presets` | | The four examples and the 20 evaluation workloads |
+| `GET /api/options` | | The catalogue, regions, jurisdictions, currencies and policy check types |
+| `POST /api/design` | `{"workload": {...}, "mode": "agent" or "rules"}` | Design, cost lines by environment, total, violations, findings, sizing, Mermaid, draw.io, SVG, Terraform and report |
+| `POST /api/assess` | `{"workload": {...}, "design": {...}}` | The same for an edited design |
+| `POST /api/policies/extract` | `{"filename": "...", "content_b64": "..."}` | Proposed policy rules, the method used and a note |
+| `POST /api/brief/extract` | `{"filename": "...", "content_b64": "..."}` | Proposed workload values with their sentences |
 
-FastAPI also serves interactive API docs at `/docs`.
+FastAPI serves interactive docs at `/docs`.
 
 ### MCP server
 
-`python -m cloud_architect mcp` starts a stdio MCP server. The client's own model does the designing. These tools give it live NZD prices, region checks and the same deterministic review. No LLM key is needed.
+`python -m cloud_architect mcp` starts a stdio MCP server; the client's own model does the designing.
 
 | Tool | Returns |
 |---|---|
-| `list_services(role)` | The catalogue, optionally filtered by role |
-| `check_region(service, region)` | Whether Azure sells a catalogue service in a region, with residency notes |
-| `assess_design(workload, design)` | The NZD price, the residency, budget and coverage checks, and the Well-Architected review |
-| `rule_based_design(workload)` | A design from fixed rules, already fitted to the budget |
-| `terraform_for(workload, design)` | Terraform for `azurerm` v4 |
-
-Register it in any MCP client:
+| `list_services(role)` | The catalogue |
+| `list_regions(jurisdiction)` | Jurisdictions with their regions and pairs |
+| `check_region(service, region)` | Whether Azure sells a service in a region |
+| `extract_policies(text, path, content_b64)` | Proposed policy rules with quotes |
+| `extract_brief(text, path)` | Proposed workload values |
+| `assess_design(workload, design)` | Price, hard constraints and review |
+| `rule_based_design(workload)` | A rule-based design fitted to the budget |
+| `diagram_for(workload, design, format)` | Mermaid or draw.io |
+| `terraform_for(workload, design)` | Terraform |
 
 ```json
 {
   "mcpServers": {
-    "cloud-architect": {
-      "command": "python",
-      "args": ["-m", "cloud_architect", "mcp"],
-      "cwd": "/path/to/cloud-architect-agent"
-    }
+    "cloud-architect": { "command": "python", "args": ["-m", "cloud_architect", "mcp"], "cwd": "/path/to/cloud-architect-agent" }
   }
 }
 ```
@@ -455,142 +468,141 @@ Register it in any MCP client:
 
 ```
 cloud_architect/
-  __main__.py       CLI: design, eval, serve, mcp
-  models.py         workload and design models, regions and residency boundaries
-  catalogue.py      16 Azure services, their tiers and exact price recipes
-  pricing.py        Azure Retail Prices API client: paging, retries, SQLite cache, tiered meters, USD to NZD
-  assess.py         pricing, hard constraints and the Well-Architected review (deterministic)
+  __main__.py       CLI: design, policies, brief, eval, serve, mcp
+  models.py         workload, policy rule, design and assessment models
+  regions.py        43 regions, pairs, jurisdictions, currencies, region choice
+  data/             availability.json: which tiers each region sells (from the live API)
+  compliance.py     requirements from frameworks, recovery targets, policies and stack constraints
+  catalogue.py      18 Azure services, 42 tiers and their exact price recipes
+  pricing.py        Retail Prices API client, SQLite cache, tiered meters, currency conversion
+  assess.py         pricing, hard constraints, the review and sizing (deterministic)
   rules.py          rule-based architect with budget-driven downsizing
   agent.py          tool-calling LLM agent and the LLM-only baseline
-  terraform.py      Terraform for azurerm v4, aligned the way terraform fmt aligns it
-  diagram.py        Mermaid diagram, one box per region
-  evaluate.py       evaluation harness and report
+  llm.py            shared model client: spacing, retries, disk cache, daily-quota stop
+  documents.py      PDF, Word, Markdown and text into sections and sentences
+  policies.py       policy rules from documents (model with quote checks, or rules)
+  brief.py          workload values from requirements briefs
+  diagram.py        one graph model rendered as Mermaid, draw.io and SVG
+  report.py         markdown report
+  terraform.py      Terraform for azurerm v4, aligned like terraform fmt
+  evaluate.py       evaluation harness for the architects and the extractors
   api.py            FastAPI app: web UI and JSON API
   mcp_server.py     MCP server (FastMCP, stdio)
   config.py         settings from environment variables and .env
 ui/index.html       single-page web UI
-eval/               20 scenarios, saved runs and results.md
-examples/           example workload file
-docs/               architecture reference, screenshots, region service snapshot
-scripts/            export_price_fixture.py: rebuilds the offline price fixture
-tests/              93 tests, the offline price fixture and the live price checks
-.github/workflows/  CI: lint, tests with Terraform, weekly live price check
+examples/           four real-life examples, their policies and a requirements brief
+eval/               20 scenarios, labelled policy documents, saved runs and results.md
+docs/               architecture reference and screenshots
+scripts/            refresh_availability.py, export_price_fixture.py
+tests/              163 tests, an offline price fixture and live price checks
 ```
 
 ## Testing
 
 ```bash
 pytest -q                                            # offline
-TERRAFORM=terraform pytest -q                        # adds the terraform validate and fmt checks
-LIVE_PRICES=1 pytest -q tests/test_live_prices.py    # checks every price recipe against the live API
+TERRAFORM=terraform pytest -q                        # adds terraform validate and fmt
+LIVE_PRICES=1 pytest -q tests/test_live_prices.py    # every price recipe against the live API
 ```
 
-The suite has 93 tests. It runs offline against 147 real price rows captured from the API (`tests/fixtures/prices.json`). A scripted fake model stands in for the LLM, so no API key is needed. The tests cover:
+There are 163 tests: 161 run offline (with Terraform installed) against 719 real price rows captured from the API
+(`tests/fixtures/prices.json`), and 2 check the live API. A scripted fake model stands in for the LLM, so CI never
+calls a model. They cover:
 
-- **Pricing:**
-  - volume tiers and the USD to NZD rate;
-  - every catalogue tier priced in NZ North or Australia East;
-  - exactly one price per volume band for every recipe;
-  - free grants applied once (Australia East lists the Functions grant as a $0 band and NZ North doesn't);
-  - platform minimums: 2 instances for zone-redundant App Service, and 2 always-ready instances for zone-redundant Functions.
-- **Constraints and review:**
-  - residency, and Global AI deployments with personal data;
-  - budget and coverage, and services that aren't sold in a region;
-  - accepted exceptions and name normalisation;
-  - review rules for single-zone compute and databases, public personal data, and a missing Key Vault or logging.
-- **Architects:**
-  - The rule-based architect produces no residency violations and leaves no need uncovered on any of the 20 scenarios. It downsizes to fit the budget and builds a working DR site.
-  - The agent runs its price, fix and submit loop, and a submission that still has violations is sent back once.
-  - The no-tools baseline gets the same knowledge as the agent, minus the tools, and one repair turn.
-  - Rate-limit errors are retried.
-- **Disaster recovery:** a DR region with nothing running in it is flagged.
-- **Terraform:**
-  - every resource reference is declared, checked on all 20 scenarios;
-  - there are no literal secrets or storage keys, and Functions reach their storage with a managed identity;
-  - private endpoints, zone redundancy, Front Door priorities and the WAF are present.
+- **Regions and currency:** the primary and DR region for nine jurisdiction and location cases (including a
+  restricted pair), every jurisdiction enforced, the same design priced in six currencies at Azure's rate, older
+  workload files.
+- **Every input:** RTO to warm standby, RPO to a replica or geo backups, long backups to a backup vault or SQL LTR,
+  growth to storage and tier, concurrency to autoscale, read share to a cache, user locations to an edge network,
+  PCI, HIPAA, ISO and SOC 2 requirements, environments priced, customer sign-in priced past its free tier,
+  integrations, stack constraints and record retention.
+- **Policies:** PDF and Word reading, extraction of every labelled rule in the example policies, quote grounding for
+  model rules, the fallback when the model fails, all eight check types enforced and cited, and the rule-based
+  architect meeting all of them at once.
+- **Outputs:** every example designs cleanly in its own currency, the diagram's regions, zones, private network and
+  flows, the draw.io file's shapes and links, the report, and the compliance settings in the Terraform.
+- **Core behaviour:** pricing recipes, residency and AI deployments, budget fitting, DR, the agent loop and its
+  baseline, retries, the HTTP API, and Terraform that references only what it declares.
 
-  With `TERRAFORM` set, the tests also run `terraform validate` on a critical multi-region design and a `terraform fmt` round-trip on all 20 scenario designs.
-- **HTTP API:**
-  - the design response;
-  - fallback to the rule-based architect when the model fails;
-  - input validation, the presets and the UI.
-
-`python scripts/export_price_fixture.py` rebuilds the fixture from the price cache.
-
-[CI](.github/workflows/ci.yml) runs on every push and pull request. It uses Python 3.12 and runs `ruff check`, `ruff format --check`, and `pytest -q` with Terraform installed, so the validate and fmt checks run as well. A weekly scheduled job, which can also be started by hand, runs `tests/test_live_prices.py` against the live API. A renamed Azure meter then fails the build instead of pricing a component at zero.
+[CI](.github/workflows/ci.yml) runs `ruff check`, `ruff format --check` and `pytest -q` with Terraform installed on
+every push, and the live price checks weekly.
 
 ## Evaluation
 
-[`eval/scenarios.yaml`](eval/scenarios.yaml) holds 20 New Zealand workloads. Each one tests a constraint an architect has to get right. For example:
+### Designs
 
-- a GP clinic portal whose health data must stay in NZ North;
-- a council policy assistant that needs a language model under `nz` residency;
-- an iwi land-records archive;
-- a bank chatbot with a 99.99% target and `anz` residency;
-- a school newsletter app on a NZ$90 budget;
-- a farm sensor dashboard.
+[`eval/scenarios.yaml`](eval/scenarios.yaml) holds 20 workloads in six jurisdictions plus "anywhere", priced in six
+currencies: for example a UK physiotherapy portal with health data, a Dutch HR assistant that needs a language model
+inside the EU, a German bank chatbot at 99.99%, an Irish payments ledger with a 5-minute RPO, a US store under PCI
+DSS with company policy rules, and a New Zealand portal that cannot leave the country. The same deterministic
+assessor scores every design on: no silent violations (no hard constraint broken without an accepted exception),
+within budget, the scenario's own expectations (for example the primary region near the users, DR in the paired
+region, a WAF, a year of logs), high-severity findings left open, and `terraform validate`.
 
-The same deterministic assessor scores every design, whoever made it, on five measures:
+| System | Designs | No silent violations | Within budget | Expectations met | High findings left (avg) | Terraform valid | Own cost estimate within 20% |
+|---|---|---|---|---|---|---|---|
+| Rule-based architect (no model) | 20/20 | 20/20 | 20/20 | 20/20 | 0.05 | 20/20 | n/a |
+| LLM agent with tools (Gemini Flash-Lite) | 20/20 | 20/20 | 20/20 | 13/20 | 0.30 | 20/20 | n/a |
+| LLM alone, no tools (Gemini Flash-Lite) | 20/20 | 17/20 | 20/20 | 12/20 | 0.70 | 20/20 | 3/20 |
 
-- **No silent violations:** no hard constraint is broken without an accepted exception.
-- **Within budget.**
-- **Scenario expectations met.** For example, data stays in NZ North, every data store sits behind a private endpoint, or the critical bank workload has a working DR site.
-- **High-severity findings left open.**
-- **`terraform validate` passes** on the generated code.
+The model runs used `gemini-flash-lite-latest` on Gemini's free tier, on 14 October 2026.
 
-| System | Design produced | No silent violations | Within budget | Expectations met | High findings left (avg) | Terraform valid |
+- **The rule-based architect is the most reliable.** Its one open high finding is `REL-DR` on the New Zealand portal:
+  New Zealand has one Azure region, so it records the regional-outage risk instead of leaving the country.
+- **The tools stop silent rule breaks.** Every agent design passed residency, budget and coverage, because the
+  assessor sends a failing submission back. Without tools, 3 of 20 designs used a service or tier that is not sold in
+  the region they chose, and the model's own cost estimate was within 20% of the live price for only 3 of 20 (median
+  error 63%).
+- **The agent's misses are judgement calls**, each visible in the review: it put the Dutch assistant in Sweden
+  Central for a Regional model, used a Global model deployment for the UK claims triage (with a recorded exception)
+  where a Data Zone was expected, skipped the DR site for the German bank, chose PostgreSQL instead of SQL Server for
+  the .NET team, sized the Australian store's database for today rather than its growth, and left out autoscale and
+  background jobs on two more scenarios.
+
+Scored designs are in [`eval/runs/`](eval/runs/) and per-scenario results in [`eval/results.md`](eval/results.md).
+
+### Policy extraction
+
+44 hand-labelled rules in 8 policy documents ([`eval/policy_labels.yaml`](eval/policy_labels.yaml)). A proposed rule
+counts as correct only when its check type and its parameters (regions, days, amount and currency, services or tags)
+match a label. The five development documents (the three example policies and two more in other styles) were used
+while building the rule-based reader; the three held-out documents were written and labelled after it was finished
+and never used to change it.
+
+| Extractor | Documents | Labelled | Proposed | Correct | Precision | Recall |
 |---|---|---|---|---|---|---|
-| Rule-based architect (no model) | 20/20 | 20/20 | 20/20 | 20/20 | 0.05 | 20/20 |
-| LLM agent with tools (Gemini Flash-Lite) | 17/20 | 17/20 | 17/20 | 15/20 | 0.18 | 17/17 |
-| LLM alone, no tools (Gemini Flash-Lite) | 20/20 | 16/20 | 20/20 | 18/20 | 0.40 | 20/20 |
+| Model (Gemini Flash-Lite) | development | 27 | 27 | 27 | 100% | 100% |
+| Model (Gemini Flash-Lite) | held-out | 17 | 17 | 17 | 100% | 100% |
+| Rule-based reader (no model) | development | 27 | 27 | 27 | 100% | 100% |
+| Rule-based reader (no model) | held-out | 17 | 7 | 6 | 86% | 35% |
 
-A scenario with no design counts as a failure on every measure. The rule-based architect is the most reliable of
-the three; the model runs used `gemini-flash-lite-latest` on Gemini's free tier.
-
-The one open high finding is `REL-DR`, on the government grants portal. That workload must keep its data in New Zealand and targets 99.99% availability. New Zealand has one Azure region, so the design records the regional-outage risk instead of placing a DR site outside the residency boundary.
-
-The per-scenario prices are in [`eval/results.md`](eval/results.md), and the scored designs are in
-[`eval/runs/`](eval/runs/): `rules.json`, `agent-gemini-flash-lite-latest.json` and
-`llm_only-gemini-flash-lite-latest.json`.
-
-### Comparing the agent with an LLM alone
-
-The same harness compares the **LLM agent with tools** against the **same model without tools**. The no-tools baseline gets the same rules, regions and catalogue, but it has to estimate the price itself. The harness records that estimate next to the live price of its design.
-
-What the measured run shows, with the same model on both sides:
-
-- **The tools stop silent rule breaks.** Every design the agent submitted passed the residency and region checks,
-  because the assessor sends back a submission with violations. Without tools, 4 of the 20 designs broke a rule
-  without recording an exception (three put a service in a region that does not exist, such as "global"; one
-  used a Data Zone AI deployment that processes prompts outside New Zealand).
-- **The model cannot price Azure by itself.** The no-tools baseline's own cost estimate was within 20% of the live
-  price for only 5 of its 20 designs (25%). The agent never guesses: every price comes from the live price list.
-- **The agent does not always finish.** On 3 of the 20 scenarios (s03, s11 and s18) it used all 12 steps without
-  submitting a design, and two of its designs missed an expectation (s07 left out Azure Functions; s12 has no DR
-  region).
-
-Configure a model in `.env`, or point `LLM_BASE_URL`, `LLM_API_KEY` and `LLM_MODEL` at any OpenAI-compatible
-endpoint, then run:
+All of the model's quotes were found in their documents, so none was dropped. The rule-based reader is precise but
+only recognises phrasings it was built for, which is why the UI says when no model was used and asks the person to
+check the list. With 44 rules, these numbers are a sanity check, not a benchmark.
 
 ```bash
-python -m cloud_architect eval                         # rule-based, agent and LLM-only, on all 20 scenarios
-python -m cloud_architect eval --only agent --resume   # re-run only the scenarios that hit a provider error
-python -m cloud_architect eval --rescore               # re-score the saved runs without calling a model
+python -m cloud_architect eval --only rules,extraction     # no model needed for the rule-based rows
+AI_API_KEY=... python -m cloud_architect eval              # all systems, model rows included
+python -m cloud_architect eval --rescore                   # re-score saved runs without calling a model
 ```
 
-Each run adds its system's row to `eval/results.md`. Rate limits and timeouts are retried with back-off. `--resume` re-runs only the scenarios that failed with a provider error, never one where the model answered.
+Model replies are cached on disk and the runs are saved, so re-scoring never calls a model. `--resume` re-runs only
+the scenarios that failed with a provider error.
 
 ## Scope
 
-- **List prices.** Reservations, savings plans and enterprise or CSP discounts are not applied, though the review flags steady compute where a reservation would pay off. Requests, egress and log volume are estimated from peak requests per second.
-- **A curated catalogue.** It covers 16 services and their common tiers, not every Azure SKU.
-- **Five regions:** New Zealand North, Australia East, Australia Southeast, Southeast Asia and East US.
-- **Terraform is a reviewed starting point.** CI validates it but does not deploy it. It doesn't include:
-  - a remote state backend;
-  - application code or deployment pipelines;
-  - TLS certificates. The Application Gateway listener stays on HTTP until you add one.
-- **Residency means where resources run.** It does not cover Microsoft support access, telemetry, or global control-plane services such as Entra ID. Use it to support a privacy review, not to replace one.
+- **List prices.** Reservations, savings plans and enterprise discounts are not applied (the review flags where a
+  reservation would pay off). Requests, egress, log volume and long-term backup storage are estimated from the
+  workload.
+- **A curated catalogue** of 18 services and their common tiers, not every Azure SKU. Concurrency per instance is a
+  rule of thumb.
+- **Compliance support, not certification.** The framework checks cover what an architecture can show (network
+  isolation, firewalls, encryption keys, retention, audit logs, separation of environments, data location). They do
+  not replace an assessor, a privacy review or Microsoft's own compliance documentation.
+- **Terraform is a reviewed starting point**, validated but not deployed: no remote state, application code or
+  pipelines, and Entra External ID tenants are created in the Entra admin center.
 
 ## Licence
 
-MIT, see [LICENSE](LICENSE). Prices come from Microsoft's public Azure Retail Prices API. This project is not affiliated with Microsoft.
+MIT, see [LICENSE](LICENSE). Prices come from Microsoft's public Azure Retail Prices API. This project is not
+affiliated with Microsoft.
