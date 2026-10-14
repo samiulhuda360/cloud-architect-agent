@@ -8,169 +8,346 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root { --paper: #f5f3ee; --card: #ffffff; --ink: #13222b; --muted: #5d6b73; --line: #dcd7cc; --ocean: #0e5a6f; --ocean-soft: #e1eef1;
-          --kowhai: #c98b00; --kowhai-soft: #fdf3d8; --red: #b8322a; --red-soft: #fbe6e3; --fern: #2f7d4f; --fern-soft: #e2f1e7;
-          --sans: Archivo, system-ui, sans-serif; --mono: "Fira Code", ui-monospace, monospace; }
+  :root { --paper: #f4f6f5; --card: #ffffff; --ink: #13302c; --muted: #5f7471; --line: #d9e1df; --teal: #2f6f68; --teal-dark: #1f4f4a;
+          --teal-soft: #e6f2ef; --sand: #f3efe6; --amber: #a86b00; --amber-soft: #fbf1dc; --red: #b8322a; --red-soft: #fbe6e3;
+          --green: #2f7d4f; --green-soft: #e2f1e7; --sans: Archivo, system-ui, sans-serif; --mono: "Fira Code", ui-monospace, monospace; }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--paper); color: var(--ink); font: 15px/1.5 var(--sans); }
-  header { background: var(--ink); color: #f5f3ee; }
-  header .wrap { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 14px 16px; }
-  .brand { font-weight: 800; font-size: 19px; letter-spacing: -.01em; } .brand span { color: #f2c14e; }
-  .tag { font: 500 12px var(--mono); color: #b9c6cc; }
-  .wrap { max-width: 1240px; margin: 0 auto; padding: 0 16px; }
-  .layout { display: grid; grid-template-columns: 360px 1fr; gap: 18px; padding: 20px 0 40px; align-items: start; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
-  h2 { font-size: 15px; font-weight: 700; margin: 0 0 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--ocean); }
-  label { display: block; font-size: 13px; font-weight: 600; margin: 10px 0 4px; }
-  input[type=text], input[type=number], select, textarea { width: 100%; font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
-  textarea { min-height: 56px; resize: vertical; }
-  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .needs { display: flex; flex-wrap: wrap; gap: 6px; }
-  .needs label { display: inline-flex; align-items: center; gap: 5px; margin: 0; padding: 4px 8px; border: 1px solid var(--line); border-radius: 999px; font-weight: 500; cursor: pointer; }
-  .needs input { margin: 0; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 14.5px/1.5 var(--sans); }
+  header { background: var(--teal-dark); color: #eef6f4; }
+  header .wrap { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 14px 16px; flex-wrap: wrap; }
+  .brand { font-weight: 800; font-size: 19px; letter-spacing: -.01em; } .brand span { color: #9fd8cc; }
+  .tag { font: 500 12px var(--mono); color: #c4dcd7; }
+  .wrap { max-width: 1320px; margin: 0 auto; padding: 0 16px; }
+  .layout { display: grid; grid-template-columns: 400px minmax(0, 1fr); gap: 18px; padding: 18px 0 40px; align-items: start; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  h2 { font-size: 13px; font-weight: 700; margin: 0 0 10px; text-transform: uppercase; letter-spacing: .07em; color: var(--teal); }
+  details { border-top: 1px solid var(--line); padding: 8px 0; } details:first-of-type { border-top: 0; }
+  summary { cursor: pointer; font-weight: 700; font-size: 14px; list-style: none; display: flex; justify-content: space-between; align-items: center; padding: 4px 0; }
+  summary::after { content: "+"; color: var(--muted); font-weight: 500; } details[open] summary::after { content: "–"; }
+  summary small { font-weight: 500; color: var(--muted); margin-left: 6px; }
+  label { display: block; font-size: 12.5px; font-weight: 600; margin: 8px 0 3px; color: #2b4642; }
+  input[type=text], input[type=number], select, textarea { width: 100%; font: inherit; font-size: 14px; padding: 7px 9px; border: 1px solid var(--line); border-radius: 8px; background: #fff; color: var(--ink); }
+  textarea { min-height: 52px; resize: vertical; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; } .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chips label { display: inline-flex; align-items: center; gap: 5px; margin: 0; padding: 3px 9px; border: 1px solid var(--line); border-radius: 999px; font-weight: 500; cursor: pointer; background: #fff; }
+  .chips label:has(input:checked) { background: var(--teal-soft); border-color: #a9cdc6; }
+  .chips input { margin: 0; accent-color: var(--teal); }
   .seg { display: flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
-  .seg button { flex: 1; border: 0; background: #fff; padding: 8px; font: 600 13px var(--sans); cursor: pointer; color: var(--muted); }
-  .seg button.on { background: var(--ocean); color: #fff; }
-  .go { width: 100%; margin-top: 14px; padding: 12px; border: 0; border-radius: 10px; background: var(--ocean); color: #fff; font: 700 15px var(--sans); cursor: pointer; }
+  .seg button { flex: 1; border: 0; background: #fff; padding: 7px; font: 600 13px var(--sans); cursor: pointer; color: var(--muted); }
+  .seg button.on { background: var(--teal); color: #fff; }
+  .go { width: 100%; margin-top: 12px; padding: 12px; border: 0; border-radius: 10px; background: var(--teal); color: #fff; font: 700 15px var(--sans); cursor: pointer; }
   .go:disabled { opacity: .6; cursor: wait; }
-  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
-  .kpi { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
-  .kpi b { display: block; font-size: 24px; font-weight: 800; } .kpi span { color: var(--muted); font-size: 13px; }
-  .kpi.bad b { color: var(--red); } .kpi.good b { color: var(--fern); }
-  .note { padding: 10px 12px; border-radius: 10px; margin-bottom: 12px; font-size: 14px; }
-  .note.warn { background: var(--kowhai-soft); border: 1px solid #ecd28a; } .note.bad { background: var(--red-soft); border: 1px solid #efc1bb; }
-  .note.info { background: var(--ocean-soft); border: 1px solid #bcd9e0; }
-  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
-  th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
-  th { color: var(--muted); font-weight: 600; font-size: 12.5px; }
-  td.num { text-align: right; font-family: var(--mono); white-space: nowrap; }
-  .chip { display: inline-block; font: 600 11px var(--sans); padding: 1px 7px; border-radius: 999px; margin: 0 3px 2px 0; background: var(--ocean-soft); color: var(--ocean); }
-  .chip.out { background: var(--red-soft); color: var(--red); }
-  .sev { font: 700 11px var(--sans); text-transform: uppercase; padding: 1px 6px; border-radius: 4px; }
-  .sev.high { background: var(--red-soft); color: var(--red); } .sev.medium { background: var(--kowhai-soft); color: var(--kowhai); }
-  .sev.low, .sev.info { background: var(--ocean-soft); color: var(--ocean); }
-  .sev.accepted { background: transparent; color: var(--kowhai); box-shadow: inset 0 0 0 1px var(--kowhai); white-space: nowrap; }
-  .grid2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; margin-top: 14px; }
-  .diagram { overflow-x: auto; background: #fbfaf7; border: 1px dashed var(--line); border-radius: 10px; padding: 10px; min-height: 120px; }
-  pre { font: 12.5px/1.5 var(--mono); font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; background: var(--ink); color: #e6ece9; padding: 14px; border-radius: 10px; overflow: auto; max-height: 420px; margin: 0; }
-  .tabs { display: flex; gap: 6px; margin-bottom: 10px; } .tabs button { border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 6px 12px; font: 600 13px var(--sans); cursor: pointer; }
-  .tabs button.on { background: var(--ink); color: #fff; border-color: var(--ink); }
-  .muted { color: var(--muted); } .empty { color: var(--muted); padding: 40px 0; text-align: center; }
-  .small { font-size: 12.5px; }
-  @media (max-width: 980px) { .layout { grid-template-columns: 1fr; } .kpis { grid-template-columns: repeat(2, 1fr); } .grid2 { grid-template-columns: 1fr; } }
+  .btn { border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 6px 11px; font: 600 12.5px var(--sans); cursor: pointer; color: var(--ink); }
+  .btn.primary { background: var(--teal); border-color: var(--teal); color: #fff; } .btn:hover { border-color: var(--teal); }
+  .drop { border: 1.5px dashed #a9cdc6; border-radius: 10px; padding: 10px; text-align: center; background: #f7fbfa; font-size: 13px; color: var(--muted); }
+  .drop input { display: none; } .drop b { color: var(--teal); cursor: pointer; }
+  .proposals { margin-top: 8px; display: grid; gap: 6px; }
+  .prop { border: 1px solid var(--line); border-radius: 9px; padding: 7px 9px; background: #fff; font-size: 13px; }
+  .prop.on { border-color: #8fc2b8; background: #f3faf8; }
+  .prop .top { display: flex; gap: 7px; align-items: center; } .prop .top input[type=checkbox] { accent-color: var(--teal); }
+  .prop .kind { font-weight: 700; } .prop .val { width: auto; flex: 1; padding: 3px 6px; font-size: 13px; }
+  .prop q { display: block; color: var(--muted); font-size: 12px; margin-top: 3px; quotes: "“" "”"; }
+  .prop .src { font: 500 11px var(--mono); color: #7a8c89; }
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 12px; }
+  .kpi { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 11px 13px; }
+  .kpi b { display: block; font-size: 23px; font-weight: 800; } .kpi span { color: var(--muted); font-size: 12.5px; }
+  .kpi.bad b { color: var(--red); } .kpi.good b { color: var(--green); }
+  .note { padding: 9px 12px; border-radius: 10px; margin-bottom: 10px; font-size: 13.5px; }
+  .note.warn { background: var(--amber-soft); border: 1px solid #ecd28a; } .note.bad { background: var(--red-soft); border: 1px solid #efc1bb; }
+  .note.info { background: var(--teal-soft); border: 1px solid #bfdcd6; }
+  .note small { display: block; color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 6px 7px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; } td.num { text-align: right; font-family: var(--mono); white-space: nowrap; }
+  .chip { display: inline-block; font: 600 11px var(--sans); padding: 1px 7px; border-radius: 999px; margin: 0 3px 2px 0; background: var(--teal-soft); color: var(--teal-dark); }
+  .sev { font: 700 10.5px var(--sans); text-transform: uppercase; padding: 1px 6px; border-radius: 4px; white-space: nowrap; }
+  .sev.high { background: var(--red-soft); color: var(--red); } .sev.medium { background: var(--amber-soft); color: var(--amber); }
+  .sev.low, .sev.info { background: var(--teal-soft); color: var(--teal); } .sev.accepted { color: var(--amber); box-shadow: inset 0 0 0 1px var(--amber); }
+  .source { font-size: 11.5px; color: #6c7f7c; font-style: italic; }
+  .diagram { overflow: auto; background: #fbfcfb; border: 1px solid var(--line); border-radius: 10px; padding: 10px; min-height: 140px; }
+  .diagram svg { max-width: none; }
+  .bar { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 8px; }
+  .bar .grow { flex: 1; }
+  pre { font: 12px/1.5 var(--mono); font-variant-ligatures: none; background: #102522; color: #e3eeeb; padding: 12px; border-radius: 10px; overflow: auto; max-height: 440px; margin: 0; white-space: pre; }
+  .tabs { display: flex; gap: 6px; margin-bottom: 8px; } .tabs button { border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 5px 11px; font: 600 12.5px var(--sans); cursor: pointer; }
+  .tabs button.on { background: var(--teal-dark); color: #fff; border-color: var(--teal-dark); }
+  .grid2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; margin-top: 12px; }
+  .muted { color: var(--muted); } .empty { color: var(--muted); padding: 36px 10px; text-align: center; } .small { font-size: 12.5px; }
+  .stack > * + * { margin-top: 12px; }
+  @media (max-width: 1040px) { .layout { grid-template-columns: 1fr; } .grid2 { grid-template-columns: 1fr; } }
+  @media (max-width: 640px) { .kpis { grid-template-columns: repeat(2, 1fr); } .row3 { grid-template-columns: 1fr 1fr; } }
 </style>
 </head>
 <body>
-<header><div class="wrap"><div class="brand">Cloud Architect <span>Agent</span></div><div class="tag">Azure for Aotearoa · live NZD pricing · residency · Terraform</div></div></header>
+<header><div class="wrap"><div class="brand">Cloud Architect <span>Agent</span></div><div class="tag">Azure for any region · live prices in your currency · your policies · diagrams · Terraform</div></div></header>
 <div class="wrap layout">
-  <form class="card" id="form">
-    <h2>Workload</h2>
+  <form class="card" id="form" autocomplete="off">
+    <h2>What you need</h2>
     <label for="preset">Start from an example</label>
-    <select id="preset"><option value="">Choose a scenario…</option></select>
-    <label for="name">Name</label><input type="text" id="name" required value="Clinic patient portal">
-    <label for="description">What it does</label><textarea id="description">Patients book appointments and read results.</textarea>
-    <label>Needs</label>
-    <div class="needs" id="needs"></div>
+    <select id="preset"><option value="">Choose an example…</option></select>
+    <label>Or upload a requirements brief or RFP</label>
+    <div class="drop" id="briefDrop"><input type="file" id="briefFile" accept=".pdf,.docx,.md,.txt"><b id="briefPick">Choose a file</b> · PDF, Word, Markdown or text</div>
+    <div id="briefOut"></div>
+
+    <details open><summary>The system</summary>
+      <label for="name">Name</label><input type="text" id="name" required value="Online shop">
+      <label for="description">What it does</label><textarea id="description">Product pages, basket and checkout, customer accounts.</textarea>
+      <label>It needs</label><div class="chips" id="needs"></div>
+    </details>
+    <details open><summary>Users and traffic</summary>
+      <div class="row2">
+        <div><label for="monthly_users">Monthly active users</label><input type="number" id="monthly_users" value="20000" min="1"></div>
+        <div><label for="peak_concurrent_users">Online at the busiest moment</label><input type="number" id="peak_concurrent_users" min="1" placeholder="5% of monthly"></div>
+      </div>
+      <label for="user_locations">Where the users are</label><input type="text" id="user_locations" value="United Kingdom" placeholder="e.g. Germany, Austria">
+      <div class="row2">
+        <div><label for="peak_rps">Peak requests a second</label><input type="number" id="peak_rps" value="20" min="0"></div>
+        <div><label for="read_ratio">Share that only read (%)</label><input type="number" id="read_ratio" value="80" min="0" max="100"></div>
+      </div>
+    </details>
+    <details><summary>Data <small>size, growth, retention, backups</small></summary>
+      <div class="row3">
+        <div><label for="data_gb">Database GB</label><input type="number" id="data_gb" value="50" min="0"></div>
+        <div><label for="data_growth_pct">Growth %/year</label><input type="number" id="data_growth_pct" value="20" min="0"></div>
+        <div><label for="blob_gb">Files GB</label><input type="number" id="blob_gb" value="200" min="0"></div>
+        <div><label for="retention_years">Keep records (years)</label><input type="number" id="retention_years" value="0" min="0"></div>
+        <div><label for="backup_retention_days">Keep backups (days)</label><input type="number" id="backup_retention_days" value="7" min="1"></div>
+        <div><label for="llm_input_mtokens">AI tokens in (M/mo)</label><input type="number" id="llm_input_mtokens" value="0" min="0"></div>
+      </div>
+      <input type="hidden" id="llm_output_mtokens" value="0">
+      <div class="chips" style="margin-top:8px"><label><input type="checkbox" id="geo_backup"> Copy backups to a second region</label></div>
+    </details>
+    <details open><summary>Reliability</summary>
+      <label>Uptime target</label>
+      <div class="seg" data-field="availability"><button type="button" data-v="standard">99.9%</button><button type="button" data-v="high" class="on">99.95%</button><button type="button" data-v="critical">99.99%</button></div>
+      <div class="row2">
+        <div><label for="rpo_minutes">Data you can lose (RPO, min)</label><input type="number" id="rpo_minutes" min="0" placeholder="not set"></div>
+        <div><label for="rto_minutes">Time to recover (RTO, min)</label><input type="number" id="rto_minutes" min="0" placeholder="not set"></div>
+      </div>
+    </details>
+    <details open><summary>Security and compliance</summary>
+      <div class="row2">
+        <div><label for="residency">Data must stay in</label><select id="residency"></select></div>
+        <div><label for="identity">Sign-in</label><select id="identity">
+          <option value="none">Not decided</option><option value="entra_id">Staff (Entra ID)</option><option value="entra_external_id">Customers (External ID)</option><option value="external">Another provider</option></select></div>
+      </div>
+      <label>Frameworks</label><div class="chips" id="frameworks"></div>
+      <label>The data includes</label><div class="chips" id="flags"></div>
+      <label>Environments</label><div class="chips" id="environments"></div>
+    </details>
+    <details><summary>Team, integrations and budget</summary>
+      <label for="integrations">Connects to</label><input type="text" id="integrations" placeholder="e.g. Xero, ERP, payment provider">
+      <label for="constraints">Team or stack constraints (one per line)</label><textarea id="constraints" placeholder="e.g. .NET team&#10;must use PostgreSQL"></textarea>
+    </details>
     <div class="row2">
-      <div><label for="monthly_users">Monthly users</label><input type="number" id="monthly_users" value="5000" min="1"></div>
-      <div><label for="peak_rps">Peak requests/s</label><input type="number" id="peak_rps" value="25" min="0" step="1"></div>
-      <div><label for="data_gb">Database GB</label><input type="number" id="data_gb" value="80" min="0"></div>
-      <div><label for="blob_gb">Files GB</label><input type="number" id="blob_gb" value="400" min="0"></div>
-      <div><label for="llm_input_mtokens">LLM input M tokens/mo</label><input type="number" id="llm_input_mtokens" value="0" min="0"></div>
-      <div><label for="llm_output_mtokens">LLM output M tokens/mo</label><input type="number" id="llm_output_mtokens" value="0" min="0"></div>
+      <div><label for="budget">Monthly budget</label><input type="number" id="budget" value="3000" min="0"></div>
+      <div><label for="currency">Currency</label><select id="currency"></select></div>
     </div>
-    <label>Data residency</label>
-    <div class="seg" data-field="residency"><button type="button" data-v="nz" class="on">NZ only</button><button type="button" data-v="anz">NZ + Australia</button><button type="button" data-v="any">Anywhere</button></div>
-    <label>Availability</label>
-    <div class="seg" data-field="availability"><button type="button" data-v="standard">99.9%</button><button type="button" data-v="high" class="on">99.95%</button><button type="button" data-v="critical">99.99%</button></div>
-    <div class="row2">
-      <div><label for="environment">Environment</label><select id="environment"><option>production</option><option>dev</option></select></div>
-      <div><label for="budget">Budget NZD/month</label><input type="number" id="budget" value="4000" min="0"></div>
-    </div>
-    <label style="display:flex;gap:6px;align-items:center;margin-top:10px"><input type="checkbox" id="pii" checked> Handles personal information</label>
+
+    <details open><summary>Company policies <small id="polCount"></small></summary>
+      <div class="drop" id="polDrop"><input type="file" id="polFile" accept=".pdf,.docx,.md,.txt" multiple><b id="polPick">Upload policy documents</b> · security standard, data or cloud policy</div>
+      <div id="polNote" class="small muted" style="margin-top:6px"></div>
+      <div class="proposals" id="polList"></div>
+    </details>
+
     <label>Architect</label>
     <div class="seg" data-field="mode"><button type="button" data-v="agent" class="on">AI agent</button><button type="button" data-v="rules">Rule-based</button></div>
     <button class="go" id="go" type="submit">Design it</button>
   </form>
-  <main id="out"><div class="card empty">Describe a workload and press <b>Design it</b>. The agent designs with live Azure prices for New Zealand North
-    and Australia, checks residency and budget, reviews it against the Well-Architected pillars and writes the Terraform.</div></main>
+  <main id="out"><div class="card empty">Describe what you need, or start from an example, then press <b>Design it</b>.<br>
+    You get an Azure design for your region, priced live in your currency, checked against data residency, your company policies and the
+    Well-Architected review, with a diagram to download and the Terraform to build it.</div></main>
 </div>
 <script type="module">
-import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
-mermaid.initialize({ startOnLoad: false, theme: "base", themeVariables: { fontFamily: "Archivo", primaryColor: "#e1eef1", primaryBorderColor: "#0e5a6f", lineColor: "#5d6b73", clusterBkg: "#fbfaf7", clusterBorder: "#bcd9e0" } });
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.esm.min.mjs";
+mermaid.initialize({ startOnLoad: false, theme: "base", flowchart: { htmlLabels: true, curve: "basis" },
+  themeVariables: { fontFamily: "Archivo", primaryColor: "#e6f2ef", primaryBorderColor: "#2f6f68", primaryTextColor: "#13302c", lineColor: "#5f7471", clusterBkg: "#f7f8f6", clusterBorder: "#2f6f68" } });
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const money = (x) => "NZ$" + Math.round(x).toLocaleString();
-const NEEDS = ["web_app", "api", "relational_db", "nosql_db", "object_storage", "cache", "llm", "search", "background_jobs", "containers", "virtual_machines"];
-const LABEL = { web_app: "web app", api: "API", relational_db: "SQL database", nosql_db: "NoSQL", object_storage: "files", cache: "cache", llm: "LLM",
+const NEEDS = { web_app: "website", api: "API", relational_db: "SQL database", nosql_db: "NoSQL", object_storage: "files", cache: "cache", llm: "AI model",
   search: "search", background_jobs: "background jobs", containers: "containers", virtual_machines: "VMs" };
-const REGION = { newzealandnorth: "NZ North", australiaeast: "Australia East", australiasoutheast: "Australia SE", southeastasia: "SE Asia", eastus: "East US" };
-$("needs").innerHTML = NEEDS.map((n) => `<label><input type="checkbox" value="${n}" ${["web_app", "relational_db", "object_storage"].includes(n) ? "checked" : ""}>${LABEL[n]}</label>`).join("");
+const FRAMEWORKS = { gdpr: "GDPR", hipaa: "HIPAA", pci_dss: "PCI DSS", iso27001: "ISO 27001", soc2: "SOC 2" };
+const FLAGS = { pii: "personal data", health_data: "health data", card_data: "card data" };
+const ENVS = { dev: "dev", test: "test", prod: "prod" };
+const CHECK = { allowed_regions: "Allowed regions", customer_managed_keys: "Customer-managed keys", no_public_endpoints: "No public endpoints",
+  min_backup_retention_days: "Backups kept at least", approved_services: "Approved services only", max_monthly_spend: "Monthly spend cap",
+  required_tags: "Required tags", min_log_retention_days: "Logs kept at least" };
+let options = { regions: {}, jurisdictions: {}, currencies: [] };
+let policies = [];
+let presets = [];
+let result = null;
+const chips = (id, map, checked = []) => ($(id).innerHTML = Object.entries(map).map(([k, v]) => `<label><input type="checkbox" value="${k}" ${checked.includes(k) ? "checked" : ""}>${v}</label>`).join(""));
+chips("needs", NEEDS, ["web_app", "relational_db", "object_storage"]); chips("frameworks", FRAMEWORKS, ["gdpr"]); chips("flags", FLAGS, ["pii"]); chips("environments", ENVS, ["prod"]);
 const seg = {};
 document.querySelectorAll(".seg").forEach((s) => {
   seg[s.dataset.field] = s.querySelector(".on").dataset.v;
   s.addEventListener("click", (e) => { if (e.target.dataset.v) { s.querySelectorAll("button").forEach((b) => b.classList.toggle("on", b === e.target)); seg[s.dataset.field] = e.target.dataset.v; } });
 });
 const setSeg = (field, v) => { const s = document.querySelector(`.seg[data-field=${field}]`); s.querySelectorAll("button").forEach((b) => b.classList.toggle("on", b.dataset.v === v)); seg[field] = v; };
-let presets = [];
-fetch("/api/presets").then((r) => r.json()).then((p) => { presets = p; $("preset").innerHTML += p.map((s, i) => `<option value="${i}">${esc(s.name)}</option>`).join(""); });
+const checked = (id) => [...document.querySelectorAll(`#${id} input:checked`)].map((c) => c.value);
+const setChecked = (id, values) => document.querySelectorAll(`#${id} input`).forEach((c) => (c.checked = (values || []).includes(c.value)));
+const money = (x, cur) => { try { return new Intl.NumberFormat("en", { style: "currency", currency: cur, maximumFractionDigits: 0 }).format(x); } catch { return `${cur} ${Math.round(x)}`; } };
+const regionName = (r) => options.regions[r]?.label || r;
+
+Promise.all([fetch("/api/options").then((r) => r.json()), fetch("/api/presets").then((r) => r.json())]).then(([o, p]) => {
+  options = o; presets = p;
+  $("residency").innerHTML = Object.entries(o.jurisdictions).filter(([k]) => k !== "anz").map(([k, v]) => `<option value="${k}" ${k === "uk" ? "selected" : ""}>${esc(v.label)}</option>`).join("");
+  $("currency").innerHTML = o.currencies.map((c) => `<option ${c === "GBP" ? "selected" : ""}>${c}</option>`).join("");
+  const groups = {}; p.forEach((s, i) => (groups[s.group] ||= []).push(`<option value="${i}">${esc(s.name)}</option>`));
+  $("preset").innerHTML = `<option value="">Choose an example…</option>` + Object.entries(groups).map(([g, opts]) => `<optgroup label="${esc(g)}">${opts.join("")}</optgroup>`).join("");
+});
+$("residency").addEventListener("change", (e) => { const cur = options.jurisdictions[e.target.value]?.currency; if (cur) $("currency").value = cur; });
+
+function fill(s) {
+  for (const k of ["name", "description", "monthly_users", "peak_rps", "data_gb", "data_growth_pct", "blob_gb", "retention_years", "backup_retention_days", "llm_input_mtokens", "llm_output_mtokens"])
+    if (s[k] !== undefined) $(k).value = s[k] ?? "";
+  for (const k of ["peak_concurrent_users", "rpo_minutes", "rto_minutes"]) if (k in s) $(k).value = s[k] ?? "";
+  if ("read_ratio" in s) $("read_ratio").value = Math.round((s.read_ratio ?? 0.8) * 100);
+  if ("user_locations" in s) $("user_locations").value = (s.user_locations || []).join(", ");
+  if ("integrations" in s) $("integrations").value = (s.integrations || []).join(", ");
+  if ("constraints" in s) $("constraints").value = (s.constraints || []).join("\n");
+  if ("needs" in s) setChecked("needs", s.needs); if ("frameworks" in s) setChecked("frameworks", s.frameworks); if ("environments" in s) setChecked("environments", s.environments);
+  if ("pii" in s || "health_data" in s || "card_data" in s) setChecked("flags", Object.keys(FLAGS).filter((k) => s[k]));
+  if (s.availability) setSeg("availability", s.availability);
+  if (s.residency) $("residency").value = s.residency === "anz" ? "nz" : s.residency;
+  if (s.identity) $("identity").value = s.identity;
+  if ("geo_backup" in s) $("geo_backup").checked = !!s.geo_backup;
+  if ("budget_month" in s) $("budget").value = s.budget_month ?? "";
+  if (s.currency) $("currency").value = s.currency;
+}
 $("preset").addEventListener("change", (e) => {
   const s = presets[e.target.value]; if (!s) return;
-  $("name").value = s.name; $("description").value = s.description || "";
-  document.querySelectorAll("#needs input").forEach((c) => (c.checked = (s.needs || []).includes(c.value)));
-  for (const k of ["monthly_users", "peak_rps", "data_gb", "blob_gb", "llm_input_mtokens", "llm_output_mtokens"]) $(k).value = s[k] ?? $(k).defaultValue;
-  setSeg("residency", s.residency || "any"); setSeg("availability", s.availability || "standard");
-  $("environment").value = s.environment || "production"; $("budget").value = s.budget_nzd_month ?? ""; $("pii").checked = !!s.pii;
+  fill(s);
+  policies = (s.policies || []).map((p) => ({ ...p })); renderPolicies(s.policies?.length ? `${s.policies.length} rules from this example's policy, already reviewed.` : "");
 });
+
+// ------------------------------------------------------------ uploads
+const b64 = (file) => new Promise((ok, fail) => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(",")[1]); r.onerror = fail; r.readAsDataURL(file); });
+async function upload(url, file) {
+  const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ filename: file.name, content_b64: await b64(file) }) });
+  const d = await r.json(); if (!r.ok) throw new Error(typeof d.detail === "string" ? d.detail : "Upload failed"); return d;
+}
+$("polPick").onclick = () => $("polFile").click(); $("briefPick").onclick = () => $("briefFile").click();
+$("polFile").addEventListener("change", async (e) => {
+  $("polNote").textContent = "Reading…";
+  try {
+    const notes = [];
+    for (const f of e.target.files) { const d = await upload("/api/policies/extract", f); policies.push(...d.rules); notes.push(`${f.name}: ${d.rules.length} rules. ${d.note}`); }
+    policies.forEach((p, i) => (p.id = `P${i + 1}`));
+    renderPolicies(notes.join(" ") + " Tick the rules to enforce.");
+  } catch (err) { $("polNote").textContent = err.message; }
+  e.target.value = "";
+});
+const paramText = (p) => ({ allowed_regions: (p.regions || []).map(regionName).join(", "), min_backup_retention_days: `${p.days} days`, min_log_retention_days: `${p.days} days`,
+  approved_services: (p.services || []).join(", "), max_monthly_spend: `${p.amount} ${p.currency || ""}`, required_tags: (p.tags || []).join(", ") }[p.check] ?? "");
+function renderPolicies(note) {
+  if (note !== undefined) $("polNote").textContent = note;
+  const accepted = policies.filter((p) => p.status === "accepted").length;
+  $("polCount").textContent = policies.length ? `${accepted} of ${policies.length} enforced` : "";
+  $("polList").innerHTML = policies.map((p, i) => `<div class="prop ${p.status === "accepted" ? "on" : ""}">
+    <div class="top"><input type="checkbox" data-i="${i}" ${p.status === "accepted" ? "checked" : ""} aria-label="Enforce this rule"><span class="kind">${esc(CHECK[p.check] || p.check)}</span>
+    ${paramText(p) ? `<input class="val" data-i="${i}" value="${esc(paramText(p))}" ${["allowed_regions", "approved_services"].includes(p.check) ? "readonly" : ""}>` : ""}</div>
+    <q>${esc(p.quote)}</q><span class="src">${esc(p.source)}${p.section ? ` · section ${esc(p.section)}` : ""} · ${p.extracted_by === "model" ? "read by the AI model" : p.extracted_by === "rules" ? "found by rules" : "entered"}</span></div>`).join("");
+  $("polList").querySelectorAll("input[type=checkbox]").forEach((c) => (c.onchange = () => { policies[c.dataset.i].status = c.checked ? "accepted" : "rejected"; renderPolicies(); }));
+  $("polList").querySelectorAll("input.val").forEach((v) => (v.onchange = () => {
+    const p = policies[v.dataset.i], t = v.value.trim();
+    if (p.check.endsWith("_days")) p.days = parseInt(t, 10) || p.days;
+    if (p.check === "max_monthly_spend") { const m = t.match(/([\d.,]+)\s*([A-Za-z]{3})?/); if (m) { p.amount = Number(m[1].replace(/,/g, "")); p.currency = (m[2] || p.currency || "").toUpperCase(); } }
+    if (p.check === "required_tags") p.tags = t.split(/[,\s]+/).filter(Boolean);
+  }));
+}
+$("briefFile").addEventListener("change", async (e) => {
+  const f = e.target.files[0]; if (!f) return;
+  $("briefOut").innerHTML = `<p class="small muted">Reading ${esc(f.name)}…</p>`;
+  try {
+    const d = await upload("/api/brief/extract", f);
+    $("briefOut").innerHTML = `<p class="small muted">${esc(d.note)} Confirm the values to use.</p><div class="proposals">${d.fields.map((x, i) => `<div class="prop"><div class="top">
+      <input type="checkbox" data-i="${i}"><span class="kind">${esc(x.field.replace(/_/g, " "))}</span><span>${esc(Array.isArray(x.value) ? x.value.join(", ") : x.value)}</span></div><q>${esc(x.quote)}</q></div>`).join("")}</div>
+      <div class="bar" style="margin-top:6px"><button type="button" class="btn" id="briefAll">Tick all</button><button type="button" class="btn primary" id="briefApply">Use the ticked values</button></div>`;
+    $("briefAll").onclick = () => $("briefOut").querySelectorAll("input[type=checkbox]").forEach((c) => (c.checked = true));
+    $("briefApply").onclick = () => {
+      const s = {}; $("briefOut").querySelectorAll("input:checked").forEach((c) => { const x = d.fields[c.dataset.i]; s[x.field] = x.value; });
+      fill(s); $("briefOut").innerHTML = `<p class="small" style="color:var(--green)">${Object.keys(s).length} values filled in from ${esc(f.name)}.</p>`;
+    };
+  } catch (err) { $("briefOut").innerHTML = `<p class="note bad">${esc(err.message)}</p>`; }
+  e.target.value = "";
+});
+
+// ------------------------------------------------------------ design
 function workload() {
-  const num = (id) => Number($(id).value || 0);
-  return { name: $("name").value, description: $("description").value, needs: [...document.querySelectorAll("#needs input:checked")].map((c) => c.value),
-    monthly_users: num("monthly_users"), peak_rps: num("peak_rps"), data_gb: num("data_gb"), blob_gb: num("blob_gb"),
-    llm_input_mtokens: num("llm_input_mtokens"), llm_output_mtokens: num("llm_output_mtokens"), residency: seg.residency, availability: seg.availability,
-    environment: $("environment").value, pii: $("pii").checked, budget_nzd_month: $("budget").value === "" ? null : num("budget") };
+  const num = (id) => Number($(id).value || 0), opt = (id) => ($(id).value === "" ? null : Number($(id).value));
+  const list = (id, sep = ",") => $(id).value.split(sep).map((x) => x.trim()).filter(Boolean);
+  const flags = checked("flags");
+  return { name: $("name").value, description: $("description").value, needs: checked("needs"), monthly_users: num("monthly_users"), peak_concurrent_users: opt("peak_concurrent_users"),
+    user_locations: list("user_locations"), peak_rps: num("peak_rps"), read_ratio: num("read_ratio") / 100, data_gb: num("data_gb"), data_growth_pct: num("data_growth_pct"),
+    blob_gb: num("blob_gb"), retention_years: num("retention_years"), backup_retention_days: num("backup_retention_days") || 7, geo_backup: $("geo_backup").checked,
+    llm_input_mtokens: num("llm_input_mtokens"), llm_output_mtokens: num("llm_output_mtokens") || Math.round(num("llm_input_mtokens") / 5),
+    availability: seg.availability, rpo_minutes: opt("rpo_minutes"), rto_minutes: opt("rto_minutes"), residency: $("residency").value, frameworks: checked("frameworks"),
+    pii: flags.includes("pii"), health_data: flags.includes("health_data"), card_data: flags.includes("card_data"), identity: $("identity").value,
+    environments: checked("environments").length ? checked("environments") : ["prod"], integrations: list("integrations"), constraints: list("constraints", "\n"),
+    budget_month: $("budget").value === "" ? null : num("budget"), currency: $("currency").value, policies };
 }
 $("form").addEventListener("submit", async (e) => {
   e.preventDefault(); $("go").disabled = true;
-  $("out").innerHTML = `<div class="card empty">${seg.mode === "agent" ? "The agent is designing: drafting, pricing live, checking residency and budget, fixing, reviewing…" : "Designing…"}</div>`;
+  $("out").innerHTML = `<div class="card empty">${seg.mode === "agent" ? "The agent is designing: drafting, pricing live, checking residency, policies and budget, fixing, reviewing…" : "Designing…"}</div>`;
   try {
     const r = await fetch("/api/design", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ workload: workload(), mode: seg.mode }) });
     const d = await r.json(); if (!r.ok) throw new Error(typeof d.detail === "string" ? d.detail : JSON.stringify(d.detail).slice(0, 300));
-    await render(d);
+    result = d; await render(d); window.scrollTo(0, 0);
   } catch (err) { $("out").innerHTML = `<div class="card note bad">${esc(err.message)}</div>`; }
   finally { $("go").disabled = false; }
 });
+const download = (name, text, type = "text/plain") => { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; a.click(); };
+const slug = () => ($("name").value || "design").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
 async function render(d) {
-  const over = d.budget_nzd_month != null && d.total_nzd_month > d.budget_nzd_month;
+  const cur = d.currency, m = (x) => money(x, cur);
+  const over = d.budget_month != null && d.total_month > d.budget_month;
   const high = d.findings.filter((f) => f.severity === "high" && !f.message.includes("Accepted:")).length;
-  const perComp = {}; d.lines.forEach((l) => { const k = `${l.service}|${l.tier}|${l.region}`; perComp[k] = (perComp[k] || 0) + l.nzd_month; });
-  const exceptions = d.design.accepted_exceptions || [];
+  const perComp = {}; d.lines.filter((l) => l.environment === "prod" || Object.keys(d.by_environment).length === 1).forEach((l) => { const k = `${l.service}|${l.tier}|${l.region}`; perComp[k] = (perComp[k] || 0) + l.amount; });
+  const envs = Object.entries(d.by_environment);
   let html = "";
   if (d.note) html += `<div class="note info">${esc(d.note)}</div>`;
   html += `<div class="kpis">
-    <div class="kpi ${over ? "bad" : "good"}"><b>${money(d.total_nzd_month)}</b><span>per month${d.budget_nzd_month != null ? ` · budget ${money(d.budget_nzd_month)}` : ""}</span></div>
-    <div class="kpi ${d.violations.length ? "bad" : "good"}"><b>${d.violations.length}</b><span>hard violations</span></div>
+    <div class="kpi ${over ? "bad" : "good"}"><b>${m(d.total_month)}</b><span>a month${d.budget_month != null ? ` · budget ${m(d.budget_month)}` : ""}</span></div>
+    <div class="kpi ${d.violations.length ? "bad" : "good"}"><b>${d.violations.length}</b><span>rules broken</span></div>
     <div class="kpi ${high ? "bad" : "good"}"><b>${high}</b><span>high-severity findings</span></div>
     <div class="kpi"><b>${d.mode === "agent" ? "AI agent" : "Rules"}</b><span>${d.mode === "agent" ? `${esc((d.model || "").split("/").pop())} · ${d.seconds}s · ${d.steps} tool calls` : "no model used"}</span></div></div>`;
-  d.violations.forEach((v) => (html += `<div class="note bad"><b>${esc(v.rule)}</b> ${esc(v.message)} ${v.fix ? `<span class="muted">Fix: ${esc(v.fix)}</span>` : ""}</div>`));
-  exceptions.forEach((x) => (html += `<div class="note warn"><b>Accepted exception</b> ${esc(x)}</div>`));
-  html += `<div class="card"><h2>Architecture</h2><div class="diagram" id="diagram"></div>
-    ${d.design.rationale ? `<p>${esc(d.design.rationale)}</p>` : ""}
+  d.violations.forEach((v) => (html += `<div class="note bad"><b>${esc(v.rule)}</b> ${esc(v.message)} ${v.fix ? `<span class="muted">Fix: ${esc(v.fix)}</span>` : ""}${v.source ? `<small>${esc(v.source)}</small>` : ""}</div>`));
+  (d.design.accepted_exceptions || []).forEach((x) => (html += `<div class="note warn"><b>Accepted exception</b> ${esc(x)}</div>`));
+  html += `<div class="stack"><div class="card"><div class="bar"><h2 class="grow" style="margin:0">Architecture</h2>
+      <button type="button" class="btn" id="dlDrawio">Download .drawio</button><button type="button" class="btn" id="dlSvg">Download SVG</button><button type="button" class="btn" id="dlMmd">Mermaid</button></div>
+    <div class="diagram" id="diagram"></div>
+    <p class="small">${esc(d.design.rationale)}</p>
     ${(d.design.tradeoffs || []).length ? `<ul class="small">${d.design.tradeoffs.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>` : ""}</div>`;
-  html += `<div class="card" style="margin-top:14px"><h2>Components and live price</h2><table><tr><th>Service</th><th>Tier</th><th>Region</th><th>Setup</th><th>Purpose</th><th class="num">NZD / month</th></tr>
-    ${d.design.components.map((c) => `<tr><td>${esc(c.service.replace(/_/g, " "))}</td><td>${esc(c.tier)}</td><td>${esc(REGION[c.region] || c.region)}</td>
-      <td>${c.instances > 1 ? `<span class="chip">x${c.instances}</span>` : ""}${c.zone_redundant ? '<span class="chip">zone-redundant</span>' : ""}${c.private_endpoint ? '<span class="chip">private</span>' : ""}</td>
-      <td class="muted">${esc(c.purpose)}</td><td class="num">${money(perComp[`${c.service}|${c.tier}|${c.region}`] || 0)}</td></tr>`).join("")}
-    <tr><td colspan="5"><b>Total</b> <span class="muted small">(USD prices from the Azure Retail Prices API at Azure's rate, US$1 = NZ$${d.fx_usd_to_nzd})</span></td><td class="num"><b>${money(d.total_nzd_month)}</b></td></tr></table></div>`;
-  // An accepted exception is already shown in the banner above: badge it as accepted and drop the repeated reason.
+  html += `<div class="card"><h2>Components and live price</h2><table><tr><th>Service</th><th>Tier</th><th>Region</th><th>Setup</th><th>Purpose</th><th class="num">${cur} / month</th></tr>
+    ${d.design.components.map((c) => `<tr><td>${esc(c.service.replace(/_/g, " "))}</td><td>${esc(c.tier)}</td><td>${esc(["front_door", "entra_external_id"].includes(c.service) ? "global" : regionName(c.region))}</td>
+      <td>${c.instances > 1 ? `<span class="chip">x${c.instances}</span>` : ""}${c.settings?.max_instances ? `<span class="chip">autoscale ${c.settings.max_instances}</span>` : ""}${c.zone_redundant ? '<span class="chip">3 zones</span>' : ""}${c.private_endpoint ? '<span class="chip">private</span>' : ""}${c.customer_managed_key ? '<span class="chip">customer key</span>' : ""}${c.settings?.replica ? '<span class="chip">replica</span>' : ""}</td>
+      <td class="muted">${esc(c.purpose)}</td><td class="num">${m(perComp[`${c.service}|${c.tier}|${c.region}`] || 0)}</td></tr>`).join("")}
+    ${envs.length > 1 ? envs.filter(([e]) => e !== "prod").map(([e, v]) => `<tr><td colspan="5"><b>${esc(e)}</b> environment <span class="muted small">(a smaller copy: cheapest tiers, one instance)</span></td><td class="num">${m(v)}</td></tr>`).join("") : ""}
+    <tr><td colspan="5"><b>Total</b> <span class="muted small">(Azure Retail Prices API, US$1 = ${d.fx_rate} ${cur} at Azure's rate)</span></td><td class="num"><b>${m(d.total_month)}</b></td></tr></table></div>`;
   const order = { high: 0, accepted: 0.5, medium: 1, low: 2, info: 3 };
-  const findings = [...d.findings].map((f) => (f.message.includes(" Accepted:") ? { ...f, severity: "accepted", message: f.message.split(" Accepted:")[0], fix: "" } : f))
-    .sort((a, b) => order[a.severity] - order[b.severity]);
-  html += `<div class="grid2"><div class="card"><h2>Well-Architected review</h2>${findings.length ? `<table>${findings.map((f) => `<tr><td><span class="sev ${f.severity}">${f.severity}</span></td><td><b>${esc(f.pillar)}</b> · ${esc(f.message)}${f.fix ? `<div class="muted small">${esc(f.fix)}</div>` : ""}</td></tr>`).join("")}</table>` : '<p class="muted">No findings.</p>'}</div>
-    <div class="card"><h2>Infrastructure as code</h2><div class="tabs"><button class="on" type="button" id="copy">Copy Terraform</button><button type="button" id="dl">Download main.tf</button></div><pre id="tf">${esc(d.terraform)}</pre></div></div>`;
+  const findings = [...d.findings].map((f) => (f.message.includes(" Accepted:") ? { ...f, severity: "accepted", message: f.message.split(" Accepted:")[0], fix: "" } : f)).sort((a, b) => order[a.severity] - order[b.severity]);
+  const s = d.sizing || {};
+  html += `<div class="grid2"><div class="card"><h2>Review</h2>${findings.length ? `<table>${findings.map((f) => `<tr><td><span class="sev ${f.severity}">${f.severity}</span></td><td><b>${esc(f.pillar)}</b> · ${esc(f.message)}${f.fix ? `<div class="muted small">${esc(f.fix)}</div>` : ""}${f.source ? `<div class="source">${esc(f.source)}</div>` : ""}</td></tr>`).join("")}</table>` : '<p class="muted">No findings.</p>'}</div>
+    <div class="stack"><div class="card"><h2>Sizing</h2><table>
+      <tr><td>Database</td><td class="num">${s.data_gb_now ?? 0} GB now · ${s.data_gb_12m ?? 0} in 12 mo · ${s.data_gb_36m ?? 0} in 36 mo</td></tr>
+      ${s.db_storage_gb ? `<tr><td>Provisioned storage</td><td class="num">${s.db_storage_gb} GB</td></tr>` : ""}
+      <tr><td>Peak concurrency</td><td class="num">${(s.concurrent_users ?? 0).toLocaleString()} users · capacity ${(s.web_capacity_users ?? 0).toLocaleString()}</td></tr>
+      <tr><td>Backups / logs kept</td><td class="num">${s.backup_retention_days ?? 0} / ${s.log_retention_days ?? 0} days</td></tr></table></div>
+      ${d.policies.length ? `<div class="card"><h2>Company policy rules enforced</h2><ul class="small">${d.policies.map((p) => `<li><b>${esc(CHECK[p.check])}</b>${paramText(p) ? `: ${esc(paramText(p))}` : ""}<div class="source">${esc(p.source)}${p.section ? `, section ${esc(p.section)}` : ""}: “${esc(p.quote)}”</div></li>`).join("")}</ul></div>` : ""}</div></div>`;
+  html += `<div class="card"><div class="bar"><div class="tabs grow"><button type="button" class="on" data-t="tf">Terraform</button><button type="button" data-t="md">Report</button></div>
+      <button type="button" class="btn" id="copy">Copy</button><button type="button" class="btn primary" id="dl">Download</button></div><pre id="code">${esc(d.terraform)}</pre></div></div>`;
   $("out").innerHTML = html;
-  $("copy").onclick = () => navigator.clipboard.writeText(d.terraform);
-  $("dl").onclick = () => { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([d.terraform], { type: "text/plain" })); a.download = "main.tf"; a.click(); };
-  try { const { svg } = await mermaid.render("arch" + Date.now(), d.diagram); $("diagram").innerHTML = svg; } catch { $("diagram").innerHTML = `<pre>${esc(d.diagram)}</pre>`; }
+  let tab = "tf";
+  document.querySelectorAll(".tabs button").forEach((b) => (b.onclick = () => { tab = b.dataset.t; document.querySelectorAll(".tabs button").forEach((x) => x.classList.toggle("on", x === b)); $("code").textContent = tab === "tf" ? d.terraform : d.report; }));
+  $("copy").onclick = () => navigator.clipboard.writeText(tab === "tf" ? d.terraform : d.report);
+  $("dl").onclick = () => (tab === "tf" ? download("main.tf", d.terraform) : download(`${slug()}-design.md`, d.report, "text/markdown"));
+  $("dlDrawio").onclick = () => download(`${slug()}.drawio`, d.drawio, "application/xml");
+  $("dlSvg").onclick = () => download(`${slug()}.svg`, d.svg, "image/svg+xml");
+  $("dlMmd").onclick = () => download(`${slug()}.mmd`, d.diagram);
+  try { const { svg } = await mermaid.render("arch" + Date.now(), d.diagram); $("diagram").innerHTML = svg; } catch { $("diagram").innerHTML = d.svg; }
 }
 </script>
 </body>
