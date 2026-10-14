@@ -17,28 +17,39 @@ from dataclasses import dataclass, field
 
 from pydantic import ValidationError
 
+from . import llm as llm_mod
 from .assess import assess
 from .catalogue import options
+from .compliance import requirements
 from .config import Settings
-from .models import REGIONS, RESIDENCY_REGIONS, Design, Workload
+from .models import Design, Workload
 from .pricing import PriceBook
+from .regions import ALL, JURISDICTIONS, label, location_region
 
-REGION_LIST = ", ".join(f"{k} ({v})" for k, v in REGIONS.items())
+RULES = """Rules:
+1. Respect data residency and company policy: place components only in the allowed regions listed with the
+   workload, in the one closest to the users. For disaster recovery use the primary region's pair when it
+   is allowed. If a need cannot be met inside the boundary, use the closest compliant option and add an
+   entry to accepted_exceptions that starts with the rule code in brackets (e.g. "[RES-REGION] ...") and
+   explains what leaves the boundary and why. Never use an exception to avoid a fix that is available.
+2. Accepted company policy rules (rule codes POL-*) and stack constraints are hard constraints, like residency.
+3. Recovery targets: a 99.99% target or an RTO of 4 hours or less needs a warm standby in a second region;
+   an RPO under 60 minutes needs a database replica there; any RPO up to a day needs geo-redundant backups.
+4. Use component settings for sizing and compliance: backup_days, geo_backup (1) and ltr_days on databases,
+   retention_days (log retention) and audit (1) on log_analytics, max_instances (autoscale) on App Service,
+   delete_after_days on storage. Set customer_managed_key and private_endpoint where required, and put any
+   required tags in the design's tags.
+5. Give every component a one-line purpose. Keep the rationale to 3-5 sentences."""
 
 SYSTEM = (
-    """You are a senior Azure solutions architect for New Zealand organisations. Design an architecture for
-the workload using ONLY services and tiers from the catalogue (call list_options). Rules:
-1. Price and check every draft with assess_design; never state a price you did not get from it.
-2. Fix every hard violation it reports. Keep the total within the budget when there is one.
-3. Respect data residency: 'nz' means New Zealand North only, 'anz' adds Australia East and Southeast.
-   If a need cannot be met inside the boundary, use the closest compliant option and add an entry to
-   accepted_exceptions that starts with the rule code in brackets (e.g. "[RES-REGION] ...") and explains
-   what leaves the boundary and why. Never use an exception to avoid a fix that is available.
-4. Address high-severity review findings unless doing so breaks the budget; say so in tradeoffs if not.
-5. Give every component a one-line purpose. Keep the rationale to 3-5 sentences.
-6. When the design is final, call submit_design with it. Do not answer in plain text.
-Regions: """
-    + REGION_LIST
+    """You are a senior Azure solutions architect. Design an architecture for the workload using ONLY services and
+tiers from the catalogue (call list_options). Price and check every draft with assess_design: it prices the design
+live in the workload's currency and checks residency, budget, company policies and the Well-Architected review.
+Never state a price you did not get from it. Fix every hard violation it reports, keep the total within the
+budget when there is one, and address high-severity findings unless that breaks the budget (say so in tradeoffs).
+When the design is final, call submit_design with it. Do not answer in plain text.
+"""
+    + RULES
 )
 
 COMPONENT_SCHEMA = {
@@ -50,6 +61,7 @@ COMPONENT_SCHEMA = {
         "instances": {"type": "integer", "minimum": 1},
         "zone_redundant": {"type": "boolean"},
         "private_endpoint": {"type": "boolean"},
+        "customer_managed_key": {"type": "boolean"},
         "purpose": {"type": "string"},
         "settings": {"type": "object", "additionalProperties": {"type": "number"}},
     },
@@ -64,6 +76,7 @@ DESIGN_SCHEMA = {
         "rationale": {"type": "string"},
         "tradeoffs": {"type": "array", "items": {"type": "string"}},
         "accepted_exceptions": {"type": "array", "items": {"type": "string"}},
+        "tags": {"type": "object", "additionalProperties": {"type": "string"}},
     },
     "required": ["region", "components"],
 }
@@ -102,50 +115,47 @@ class Run:
     seconds: float = 0.0
     model: str = ""
     error: str = ""
-    claimed_total_nzd: float | None = None  # baseline only: what the model said it would cost
+    claimed_total: float | None = None  # baseline only: what the model said it would cost, in the workload's currency
 
 
-def _client(cfg: Settings):
-    import openai
-
-    return openai.OpenAI(api_key=cfg.llm_api_key or "not-needed", base_url=cfg.llm_base_url, timeout=180)
-
-
-def _extra(cfg: Settings) -> dict | None:
-    return {"reasoning": {"effort": "low"}} if "openrouter.ai" in cfg.llm_base_url else None
+_client = llm_mod.client
+_extra = llm_mod.extra_body
+RETRY_WAITS = llm_mod.RETRY_WAITS
 
 
-RETRY_WAITS = (15, 30, 60, 120)  # seconds; free and shared endpoints rate-limit in bursts
+def _complete(client, cache=None, min_interval: float = 0.0, **kw):
+    """One chat completion, cached, spaced and retried with back-off on rate limits, timeouts and 5xx errors."""
+    return llm_mod.complete(client, cache=cache, min_interval=min_interval, retry_waits=RETRY_WAITS, **kw)
 
 
-def _complete(client, **kw):
-    """One chat completion, retried with back-off on rate limits, timeouts and 5xx errors."""
-    import openai
-
-    for wait in (*RETRY_WAITS, None):
-        try:
-            resp = client.chat.completions.create(**kw)
-            if resp.choices:
-                return resp
-            err: Exception = RuntimeError("provider returned no choices")
-        except (openai.RateLimitError, openai.APIConnectionError, openai.InternalServerError) as exc:
-            if "per-day" in str(exc) or "per day" in str(exc):  # a daily quota will not clear in minutes
-                raise
-            err = exc
-        if wait is None:
-            raise err
-        time.sleep(wait)
+def _io(cfg: Settings, injected) -> dict:
+    """Cache and spacing apply to a real provider, not to a test double."""
+    if injected is not None:
+        return {}
+    return {"cache": llm_mod.Cache(cfg.llm_cache) if cfg.llm_cache else None, "min_interval": cfg.min_interval}
 
 
 def _context(w: Workload) -> str:
-    return "Workload:\n" + w.model_dump_json(indent=1) + f"\nAllowed regions for this residency: {sorted(RESIDENCY_REGIONS[w.residency])}"
+    allowed = sorted(requirements(w).allowed)
+    near = [r for r in (location_region(x) for x in w.user_locations) if r]
+    lines = [
+        "Workload:",
+        w.model_dump_json(indent=1, exclude_defaults=True),
+        f"Currency: {w.currency}. Residency: {JURISDICTIONS[w.residency]['label']}.",
+        f"Allowed regions for this residency: {allowed}",
+        "Region pairs: " + ", ".join(f"{r}->{ALL[r].pair}" for r in allowed if r in ALL and ALL[r].pair),
+    ]
+    if near:
+        lines.append("Users are nearest to: " + ", ".join(f"{r} ({label(r)})" for r in near))
+    return "\n".join(lines)
 
 
 def _summary(a) -> dict:
     return {
-        "total_nzd_month": a.total_nzd_month,
+        "total_month": a.total_month,
+        "currency": a.currency,
         "violations": [f"[{v.rule}] {v.message} Fix: {v.fix}" for v in a.violations],
-        "high_findings": [f"[{f.rule}] {f.message} Fix: {f.fix}" for f in a.findings if f.severity == "high"],
+        "high_findings": [f"[{f.rule}] {f.message} Fix: {f.fix}" for f in a.findings if f.severity == "high" and "Accepted:" not in f.message],
         "other_findings": [f"[{f.rule}] {f.message}" for f in a.findings if f.severity in ("medium", "low")][:8],
         "cost_by_component": _by_component(a),
     }
@@ -155,7 +165,7 @@ def _by_component(a) -> dict:
     out: dict[str, float] = {}
     for line in a.lines:
         key = f"{line.service}/{line.tier}@{line.region}"
-        out[key] = round(out.get(key, 0) + line.nzd_month, 2)
+        out[key] = round(out.get(key, 0) + line.amount, 2)
     return out
 
 
@@ -172,6 +182,7 @@ def _echo_call(c) -> dict:
 
 
 def design_with_tools(w: Workload, book: PriceBook, cfg: Settings, client=None, max_steps: int = 12) -> Run:
+    io = _io(cfg, client)
     client = client or _client(cfg)
     started = time.time()
     messages = [{"role": "system", "content": SYSTEM}, {"role": "user", "content": _context(w)}]
@@ -179,7 +190,7 @@ def design_with_tools(w: Workload, book: PriceBook, cfg: Settings, client=None, 
     rejected_once = False
     for _ in range(max_steps):
         resp = _complete(
-            client, model=cfg.llm_model, messages=messages, tools=TOOLS, temperature=0, max_tokens=cfg.max_tokens, extra_body=_extra(cfg)
+            client, **io, model=cfg.llm_model, messages=messages, tools=TOOLS, temperature=0, max_tokens=cfg.max_tokens, extra_body=_extra(cfg)
         )
         msg = resp.choices[0].message
         calls = msg.tool_calls or []
@@ -230,21 +241,16 @@ def design_with_tools(w: Workload, book: PriceBook, cfg: Settings, client=None, 
 
 
 BASELINE = (
-    """You are a senior Azure solutions architect for New Zealand organisations. Design an architecture for the
-workload using ONLY services and tiers from the catalogue below. You have no tools: estimate the monthly cost in NZD
-from your own knowledge. Rules:
-1. Keep the total within the budget when there is one.
-2. Respect data residency: 'nz' means New Zealand North only, 'anz' adds Australia East and Southeast.
-   If a need cannot be met inside the boundary, use the closest compliant option and add an entry to
-   accepted_exceptions that starts with the rule code in brackets (e.g. "[RES-REGION] ...") and explains
-   what leaves the boundary and why. Never use an exception to avoid a fix that is available.
-3. Follow Azure Well-Architected practice for reliability, security, cost and operations.
-4. Give every component a one-line purpose. Keep the rationale to 3-5 sentences.
-Reply with JSON only: {"design": {"region", "dr_region", "components": [{"service", "tier", "region", "instances",
-"zone_redundant", "private_endpoint", "purpose"}], "rationale", "tradeoffs", "accepted_exceptions"}, "estimated_total_nzd_month": number}
-Regions: """
-    + REGION_LIST
+    """You are a senior Azure solutions architect. Design an architecture for the workload using ONLY services and
+tiers from the catalogue below. You have no tools: estimate the monthly cost in the workload's currency from your own
+knowledge. Keep the total within the budget when there is one, and follow Azure Well-Architected practice for
+reliability, security, cost and operations.
+"""
+    + RULES
     + """
+Reply with JSON only: {"design": {"region", "dr_region", "components": [{"service", "tier", "region", "instances",
+"zone_redundant", "private_endpoint", "customer_managed_key", "purpose", "settings"}], "rationale", "tradeoffs",
+"accepted_exceptions", "tags"}, "estimated_total_month": number}
 Catalogue:
 """
 )
@@ -252,21 +258,23 @@ Catalogue:
 
 def _parse_reply(raw: str) -> tuple[Design, float | None]:
     data = json.loads(raw[raw.find("{") : raw.rfind("}") + 1])
-    return Design.model_validate(data["design"]), float(data.get("estimated_total_nzd_month") or 0) or None
+    claimed = data.get("estimated_total_month", data.get("estimated_total_nzd_month"))
+    return Design.model_validate(data["design"]), float(claimed or 0) or None
 
 
 def design_without_tools(w: Workload, cfg: Settings, client=None) -> Run:
     """The baseline. A reply that does not parse gets one repair turn, as the agent gets one rejected submission."""
+    io = _io(cfg, client)
     client = client or _client(cfg)
     started = time.time()
     messages = [{"role": "system", "content": BASELINE + json.dumps(options())}, {"role": "user", "content": _context(w)}]
     run = Run(design=None, model=cfg.llm_model)
     for attempt in range(2):
-        resp = _complete(client, model=cfg.llm_model, temperature=0, max_tokens=cfg.max_tokens, extra_body=_extra(cfg), messages=messages)
+        resp = _complete(client, **io, model=cfg.llm_model, temperature=0, max_tokens=cfg.max_tokens, extra_body=_extra(cfg), messages=messages)
         choice = resp.choices[0]
         raw = choice.message.content or ""
         try:
-            run.design, run.claimed_total_nzd = _parse_reply(raw)
+            run.design, run.claimed_total = _parse_reply(raw)
             run.error = ""
             break
         except (ValueError, KeyError, TypeError, ValidationError) as exc:
