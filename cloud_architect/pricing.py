@@ -1,9 +1,10 @@
 """Live Azure prices from the public Retail Prices API (no account or key needed).
 
-Prices are fetched in USD and converted to NZD at Azure's own exchange rate. The API can return
-NZD directly, but it rounds to four decimals, which turns per-second meters (Container Apps,
-Functions) into zero. Azure prices every currency from USD at a fixed rate it publishes through
-the same API, so the rate is derived from a reference meter priced in both currencies.
+Prices are fetched in USD and converted to the workload's currency (EUR, GBP, AUD, NZD, CAD and
+others) at Azure's own exchange rate. The API can return other currencies directly, but it rounds
+to four decimals, which turns per-second meters (Container Apps, Functions) into zero. Azure prices
+every currency from USD at a fixed rate it publishes through the same API, so the rate is derived
+from a reference meter priced in both currencies: a large VM, so the rounding is negligible.
 
 Every query result is cached on disk for a week (prices change monthly at most), so a design is
 priced in well under a second after the first run, and tests run offline from a fixture cache.
@@ -22,10 +23,11 @@ from pathlib import Path
 
 API = "https://prices.azure.com/api/retail/prices"
 WEEK = 7 * 24 * 3600
-# Reference meter for the USD -> NZD rate: a Linux D2s v5 hour in Australia East.
+# Reference meter for exchange rates: a Linux D64s v5 hour in East US 2 (about US$3, so four decimals is exact enough).
+FX_SKU = "Standard_D64s_v5"
 FX_FILTER = (
-    "serviceName eq 'Virtual Machines' and armRegionName eq 'australiaeast' and priceType eq 'Consumption' "
-    "and armSkuName eq 'Standard_D2s_v5' and productName eq 'Virtual Machines Dsv5 Series'"
+    "serviceName eq 'Virtual Machines' and armRegionName eq 'eastus2' and priceType eq 'Consumption' "
+    f"and armSkuName eq '{FX_SKU}' and productName eq 'Virtual Machines Dsv5 Series'"
 )
 
 
@@ -61,7 +63,7 @@ class PriceBook:
         self._db = sqlite3.connect(str(cache_path), check_same_thread=False)
         self._db.execute("CREATE TABLE IF NOT EXISTS q (filter TEXT PRIMARY KEY, fetched REAL, items TEXT)")
         self._lock = threading.Lock()
-        self._fx: float | None = None
+        self._fx: dict[str, float] = {}
 
     # ---------------------------------------------------------------- raw API
     def items(self, filt: str, currency: str = "USD") -> list[dict]:
@@ -75,15 +77,15 @@ class PriceBook:
         params = {"$filter": filt, **({"currencyCode": currency} if currency != "USD" else {})}
         url, out = API + "?" + urllib.parse.urlencode(params), []
         while url:
-            for attempt in range(4):
+            for attempt in range(6):
                 try:
                     with urllib.request.urlopen(url, timeout=60) as r:
                         data = json.load(r)
                     break
                 except Exception:  # noqa: BLE001  transient network or 429: back off and retry
-                    if attempt == 3:
+                    if attempt == 5:
                         raise
-                    time.sleep(2 * (attempt + 1))
+                    time.sleep(2 ** (attempt + 1))
             out += data.get("Items", [])
             url = data.get("NextPageLink")
         with self._lock:
@@ -100,14 +102,21 @@ class PriceBook:
         return bool(self.meters(service, region, extra))
 
     # ---------------------------------------------------------------- currency
+    def fx(self, currency: str = "USD") -> float:
+        """How many units of `currency` Azure charges for one US dollar."""
+        currency = currency.upper()
+        if currency == "USD":
+            return 1.0
+        if currency not in self._fx:
+            usd = [i["retailPrice"] for i in self.items(FX_FILTER) if i["skuName"] == FX_SKU]
+            other = [i["retailPrice"] for i in self.items(FX_FILTER, currency) if i["skuName"] == FX_SKU]
+            if not usd or not other:
+                raise LookupError(f"could not derive Azure's USD to {currency} rate")
+            self._fx[currency] = round(other[0] / usd[0], 4)
+        return self._fx[currency]
+
     def usd_to_nzd(self) -> float:
-        if self._fx is None:
-            usd = [i["retailPrice"] for i in self.items(FX_FILTER) if i["skuName"] == "Standard_D2s_v5"]
-            nzd = [i["retailPrice"] for i in self.items(FX_FILTER, "NZD") if i["skuName"] == "Standard_D2s_v5"]
-            if not usd or not nzd:
-                raise LookupError("could not derive Azure's USD to NZD rate")
-            self._fx = round(nzd[0] / usd[0], 4)
-        return self._fx
+        return self.fx("NZD")
 
 
 def tiered_cost(rows: list[Meter], quantity: float) -> float:

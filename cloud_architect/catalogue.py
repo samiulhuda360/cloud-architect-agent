@@ -8,11 +8,13 @@ recipe still matches a real meter, so a renamed meter fails CI instead of silent
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from typing import Callable
 
 from .models import Component, Workload, _squash
 from .pricing import Meter
+from .regions import front_door_zone
 
 HOURS = 730  # Azure's monthly hours
 SECONDS = HOURS * 3600
@@ -28,7 +30,12 @@ class Usage:
     service: str | None = None  # price from another API service (e.g. AKS nodes are Virtual Machines)
     extra: str = ""  # extra API filter for that service, e.g. one VM size
     free: float = 0  # monthly free grant subtracted before pricing
-    region: str | None = None  # fixed pricing region (global services such as Front Door)
+    region: str | Callable[[Component], str] | None = None  # fixed pricing region, or one derived from the component
+
+    def pricing_region(self, c: Component) -> str:
+        if callable(self.region):
+            return self.region(c)
+        return self.region or c.region
 
 
 @dataclass(frozen=True)
@@ -95,12 +102,22 @@ def _flex_gb_seconds(c: Component) -> float:
     return _s(c, "executions_month", 500_000) * _s(c, "avg_seconds", 1) * FLEX_GB
 
 
+def _log_gb(c: Component, w: Workload) -> float:
+    return _s(c, "ingest_gb", 2 + w.peak_rps * 0.4)
+
+
 def _flex_executions(c: Component) -> float:
     return _s(c, "executions_month", 500_000) / 10
 
 
 def _db_storage_gb(c: Component, w: Workload) -> float:
-    return max(32.0, _s(c, "storage_gb", w.data_gb * 1.5))
+    """Provision for the size in a year's time (growth compounded) with 50% headroom."""
+    return max(32.0, _s(c, "storage_gb", w.data_gb_at(12) * 1.5))
+
+
+def backup_copies(days: float) -> int:
+    """Long-term retention keeps one full backup a week for the retention period."""
+    return max(1, math.ceil(days / 7))
 
 
 PG_STORAGE_SIZES_GB = (32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768)
@@ -126,25 +143,30 @@ PG_STORAGE = Usage(
 )
 
 
+def _edge_zone(c: Component) -> str:
+    return front_door_zone(c.region)
+
+
 def _front_door(sku: str, label: str) -> Tier:
-    # Base fees are global; requests and egress are priced for Zone 4 (Australia and New Zealand edge sites).
+    # Base fees are global; requests and egress are priced for the edge zone the users are served from
+    # (the component's region: Zone 1 Europe and North America, Zone 2 Asia, Zone 4 Australia and New Zealand, ...).
     return Tier(
         label,
         (
-            Usage("base fee", _is("Azure Front Door", sku, f"{sku} Base Fees", "Zone 6"), lambda c, w: 1, "month", region="Zone 6"),
+            Usage("base fee", _is("Azure Front Door", sku, f"{sku} Base Fees", "Zone 1"), lambda c, w: 1, "month", region="Zone 1"),
             Usage(
                 "requests",
-                _is("Azure Front Door", sku, f"{sku} Requests", "Zone 4"),
+                lambda m: m.product == "Azure Front Door" and m.sku == sku and m.meter == f"{sku} Requests",
                 lambda c, w: w.peak_rps * 0.15 * SECONDS / 10_000,
                 "10K requests",
-                region="Zone 4",
+                region=_edge_zone,
             ),
             Usage(
-                "data transfer out (Oceania)",
-                _is("Azure Front Door", sku, f"{sku} Data Transfer Out", "Zone 4"),
+                "data transfer out",
+                lambda m: m.product == "Azure Front Door" and m.sku == sku and m.meter == f"{sku} Data Transfer Out",
                 lambda c, w: _s(c, "egress_gb", 20 + w.peak_rps * 6),
                 "GB",
-                region="Zone 4",
+                region=_edge_zone,
             ),
         ),
     )
@@ -156,6 +178,12 @@ PG_GP = "Azure Database for PostgreSQL Flexible Server General Purpose Ddsv5 Ser
 SQL_STD = "SQL Database Single Standard"
 SQL_GP = "SQL Database Single/Elastic Pool General Purpose - Compute Gen5"
 SQL_GP_STORAGE = "SQL Database Single/Elastic Pool General Purpose - Storage"
+SQL_LTR = Usage(
+    "long-term backup retention (weekly full copies)",
+    _is("SQL Database - LTR Backup Storage", "Backup LRS", "Backup LRS Data Stored"),
+    lambda c, w: _s(c, "ltr_gb", 0),
+    "GB-month",
+)
 
 OPENAI = "Azure OpenAI"
 
@@ -333,7 +361,7 @@ SERVICES: dict[str, Service] = {
                 ),
             },
             terraform="functions",
-            note="Zone redundancy keeps 2 always-ready instances running (about NZ$90 a month), so the app never scales to zero.",
+            note="Zone redundancy keeps 2 always-ready instances running (about US$50 a month), so the app never scales to zero.",
             zr_min_instances=2,
         ),
         Service(
@@ -363,11 +391,12 @@ SERVICES: dict[str, Service] = {
             {
                 "S0": Tier(
                     "Standard S0: 10 DTUs, 250 GB included",
-                    (Usage("database days", _is(SQL_STD, "S0", "S0 DTUs"), lambda c, w: DAYS, "days"),),
+                    (Usage("database days", _is(SQL_STD, "S0", "S0 DTUs"), lambda c, w: DAYS, "days"), SQL_LTR),
                     production_grade=False,
                 ),
                 "S2": Tier(
-                    "Standard S2: 50 DTUs, 250 GB included", (Usage("database days", _is(SQL_STD, "S2", "S2 DTUs"), lambda c, w: DAYS, "days"),)
+                    "Standard S2: 50 DTUs, 250 GB included",
+                    (Usage("database days", _is(SQL_STD, "S2", "S2 DTUs"), lambda c, w: DAYS, "days"), SQL_LTR),
                 ),
                 "GP_2vcore": Tier(
                     "General Purpose, 2 vCores",
@@ -380,6 +409,7 @@ SERVICES: dict[str, Service] = {
                             "hours",
                         ),
                         Usage("storage", _is(SQL_GP_STORAGE, "General Purpose", "General Purpose Data Stored"), _db_storage_gb, "GB-month"),
+                        SQL_LTR,
                     ),
                     zone_redundant_ok=True,
                 ),
@@ -446,7 +476,8 @@ SERVICES: dict[str, Service] = {
             api_extra="productName eq 'General Block Blob v2'",
             terraform="blob_storage",
             data_store=True,
-            residency_note="New Zealand North has no paired region, so geo-redundant (GRS) storage is not sold there; use ZRS.",
+            residency_note="GRS copies data to the region's pair. Regions without a pair (New Zealand North, Italy North, Spain Central, "
+            "Poland Central and others) do not sell GRS; use ZRS there.",
         ),
         Service(
             "redis",
@@ -477,7 +508,15 @@ SERVICES: dict[str, Service] = {
             {
                 "standard": Tier(
                     "Standard",
-                    (Usage("operations", _is("Key Vault", "Standard", "Operations"), lambda c, w: _s(c, "ops_10k", 10 + w.peak_rps), "10K ops"),),
+                    (
+                        Usage("operations", _is("Key Vault", "Standard", "Operations"), lambda c, w: _s(c, "ops_10k", 10 + w.peak_rps), "10K ops"),
+                        Usage(
+                            "customer-managed key rotation (yearly)",
+                            _is("Key Vault", "Standard", "Automated Key Rotation"),
+                            lambda c, w: _s(c, "cmk_keys", 0) / 12,
+                            "rotations",
+                        ),
+                    ),
                 ),
             },
             terraform="key_vault",
@@ -494,8 +533,21 @@ SERVICES: dict[str, Service] = {
                         Usage(
                             "log ingestion",
                             _is("Log Analytics", "Analytics Logs", "Analytics Logs Data Ingestion"),
-                            lambda c, w: _s(c, "ingest_gb", 2 + w.peak_rps * 0.4),
+                            lambda c, w: _log_gb(c, w),
                             "GB",
+                        ),
+                        Usage(
+                            "interactive retention beyond 31 days",
+                            _is("Log Analytics", "Analytics Logs", "Analytics Logs Data Retention"),
+                            lambda c, w: _log_gb(c, w) * max(0.0, min(_s(c, "retention_days", 30), 90) - 31) / DAYS,
+                            "GB-month",
+                        ),
+                        Usage(
+                            "long-term retention beyond 90 days",
+                            _is("Azure Monitor", "Data Archive", "Data Archive"),
+                            lambda c, w: _log_gb(c, w) * max(0.0, _s(c, "retention_days", 30) - 90) / DAYS,
+                            "GB-month",
+                            service="Azure Monitor",
                         ),
                     ),
                 ),
@@ -532,12 +584,17 @@ SERVICES: dict[str, Service] = {
                 "o4-mini_datazone": _llm(
                     "o4-mini, Data Zone Standard", "o4-mini 0416 Inp Data Zone Tokens", "o4-mini 0416 Outp Data Zone Tokens", "datazone"
                 ),
+                "gpt-4o-mini_regional": _llm(
+                    "gpt-4o-mini, Regional Standard", "gpt-4o-mini-0718-Inp-regnl Tokens", "gpt-4o-mini-0718-Outp-regnl Tokens", "regional"
+                ),
+                "o4-mini_regional": _llm("o4-mini, Regional Standard", "o4-mini 0416 Inp regnl Tokens", "o4-mini 0416 Outp regnl Tokens", "regional"),
             },
             terraform="azure_openai",
             residency_note=(
-                "No Foundry model is sold in New Zealand North, and NZ North has no GPU VMs for self-hosting. Global "
-                "deployments may process prompts in any Azure region; Data Zone deployments stay within a multi-country "
-                "zone. Neither keeps processing in New Zealand."
+                "Global deployments may process prompts in any Azure region. Data Zone deployments stay inside the EU or "
+                "the US zone. Regional deployments keep processing in the region, but only a few regions sell them (for "
+                "example Sweden Central, East US and East US 2). Some regions sell no model at all (New Zealand North, UK West, "
+                "Canada Central)."
             ),
         ),
         Service(
@@ -553,8 +610,8 @@ SERVICES: dict[str, Service] = {
             private_endpoint_ok=False,
             terraform="front_door",
             note="Use it to fail over between regions; Premium includes the WAF, so it replaces Application Gateway in multi-region designs.",
-            residency_note="Global edge network: NZ users usually connect at the Auckland edge, but routing and caching are global, "
-            "so requests can be handled at edge sites outside New Zealand.",
+            residency_note="Global edge network: users usually connect at their nearest edge site, but routing and caching are global, "
+            "so requests can be handled at edge sites in other countries.",
         ),
         Service(
             "app_gateway",
@@ -578,6 +635,61 @@ SERVICES: dict[str, Service] = {
             },
             private_endpoint_ok=False,
             terraform="app_gateway",
+        ),
+        Service(
+            "entra_external_id",
+            "Microsoft Entra External ID",
+            "Microsoft Entra",
+            ("identity",),
+            {
+                "core": Tier(
+                    "Core: customer sign-up and sign-in, first 50,000 monthly active users free",
+                    (
+                        Usage(
+                            "monthly active users",
+                            _is("Microsoft Entra External ID", "Core", "Core Monthly Active Users"),
+                            lambda c, w: _s(c, "mau", w.monthly_users),
+                            "MAU",
+                            region="Global",
+                        ),
+                    ),
+                ),
+            },
+            global_service=True,
+            private_endpoint_ok=False,
+            terraform="entra_external_id",
+            note="Customer identity (sign-up, sign-in, MFA) in an external tenant. Workforce sign-in with Entra ID has no extra cost.",
+            residency_note="Tenant data is stored in the geography chosen when the external tenant is created.",
+        ),
+        Service(
+            "backup_vault",
+            "Backup vault (long-term database backups)",
+            "Backup",
+            ("backup",),
+            {
+                tier: Tier(
+                    f"Azure Backup, {tier.upper()} vault storage: weekly full backups kept for the retention period",
+                    (
+                        Usage(
+                            "protected PostgreSQL servers",
+                            _is("Backup", "PostgreSQL", "PostgreSQL Protected Instance"),
+                            lambda c, w: c.instances,
+                            "servers",
+                        ),
+                        Usage(
+                            "vault storage",
+                            _is("Backup", "Standard", f"Standard {tier.upper()} Data Stored"),
+                            lambda c, w: _s(c, "storage_gb", w.data_gb_at(12) * backup_copies(_s(c, "retention_days", w.backup_retention_days))),
+                            "GB-month",
+                        ),
+                    ),
+                    note={"lrs": "3 copies in one region", "grs": "copied to the paired region"}[tier],
+                )
+                for tier in ("lrs", "grs")
+            },
+            private_endpoint_ok=False,
+            terraform="backup_vault",
+            note="PostgreSQL keeps point-in-time backups for at most 35 days; longer retention needs a backup vault.",
         ),
         Service(
             "aks",
@@ -637,14 +749,15 @@ NEED_ROLES = {  # which catalogue roles satisfy each workload need
 }
 
 
-def ambiguous_recipes(book, regions: tuple[str, ...] = ("newzealandnorth", "australiaeast")) -> list[str]:
+def ambiguous_recipes(book, regions: tuple[str, ...] = ("newzealandnorth", "australiaeast", "uksouth", "eastus2", "westeurope")) -> list[str]:
     """Recipes whose filter matches two different prices for the same band, e.g. every Postgres size shares the meter 'vCore'."""
     out = []
     for sid, svc in SERVICES.items():
         for tid, tier in svc.tiers.items():
             for u in tier.usages:
                 for region in regions:
-                    rows = [m for m in book.meters(u.service or svc.api_service, u.region or region, u.extra or svc.api_extra) if u.match(m)]
+                    where = u.pricing_region(Component.model_construct(service=sid, tier=tid, region=region))
+                    rows = [m for m in book.meters(u.service or svc.api_service, where, u.extra or svc.api_extra) if u.match(m)]
                     prices: dict[float, set[float]] = {}
                     for m in rows:
                         prices.setdefault(m.tier_min, set()).add(m.usd)
