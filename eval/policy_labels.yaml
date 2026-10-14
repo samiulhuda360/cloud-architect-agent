@@ -1,0 +1,68 @@
+# Hand-labelled rules for the policy-extraction evaluation. Each document lists every machine-checkable rule a
+# careful reader would take from it, and nothing else (training, passwords, laptops and similar are not checks).
+# `jurisdiction` expands to that jurisdiction's Azure regions. A prediction matches a label when the check type
+# and its parameters agree: the same region set, days, amount and currency, service set or tag set.
+examples/policies/hollin-wren-security-standard.md:
+  - {check: allowed_regions, jurisdiction: uk}
+  - {check: no_public_endpoints}
+  - {check: customer_managed_keys}
+  - {check: min_backup_retention_days, days: 35}
+  - {check: min_log_retention_days, days: 365}
+  - {check: max_monthly_spend, amount: 9000, currency: GBP}
+  - {check: required_tags, tags: [owner, cost-centre, data-classification]}
+
+examples/policies/lumenvale-hipaa-security-policy.md:
+  - {check: allowed_regions, jurisdiction: us}
+  - check: approved_services
+    services: [app_service, postgres, blob_storage, key_vault, log_analytics, functions, front_door, azure_openai, backup_vault, entra_external_id]
+  - {check: no_public_endpoints}
+  - {check: min_log_retention_days, days: 2190}
+  - {check: min_backup_retention_days, days: 90}
+  - {check: required_tags, tags: [owner, phi]}
+
+examples/policies/kestrel-moore-client-data-policy.md:
+  - {check: allowed_regions, jurisdiction: australia}
+  - {check: no_public_endpoints}
+  - {check: min_backup_retention_days, days: 30}
+  - {check: max_monthly_spend, amount: 2500, currency: AUD}
+
+# Development documents in other styles. These, with the three example policies above, were used while building
+# the rule-based extractor.
+eval/policies-dev/nordhaven-cloud-policy.md:
+  - {check: allowed_regions, jurisdiction: eu}
+  - {check: customer_managed_keys}
+  - {check: no_public_endpoints}
+  - {check: min_backup_retention_days, days: 14}
+  - {check: min_log_retention_days, days: 180}
+  - {check: required_tags, tags: [application, environment, owner]}
+
+eval/policies-dev/cedar-lark-data-standard.md:
+  - {check: allowed_regions, jurisdiction: canada}
+  - {check: max_monthly_spend, amount: 4000, currency: CAD}
+  - {check: min_backup_retention_days, days: 60}
+  - check: approved_services
+    services: [app_service, azure_sql, blob_storage, key_vault, log_analytics, app_gateway]
+
+# Held-out documents: written and labelled after the extractor was frozen, and never used to change it.
+eval/policies-holdout/penhallow-it-security-baseline.md:
+  - {check: allowed_regions, jurisdiction: uk}
+  - {check: no_public_endpoints}
+  - {check: min_backup_retention_days, days: 28}
+  - {check: customer_managed_keys}
+  - {check: min_log_retention_days, days: 730}
+  - {check: max_monthly_spend, amount: 1800, currency: GBP}
+
+eval/policies-holdout/ridgeback-cloud-governance.md:
+  - {check: allowed_regions, jurisdiction: us}
+  - {check: approved_services, services: [aks, postgres, redis, key_vault, log_analytics]}
+  - {check: no_public_endpoints}
+  - {check: min_log_retention_days, days: 365}
+  - {check: max_monthly_spend, amount: 25000, currency: USD}
+  - {check: required_tags, tags: [costcenter, owner, dataclass]}
+
+eval/policies-holdout/halvorsen-cloud-rules.md:
+  - {check: allowed_regions, jurisdiction: eu}
+  - {check: customer_managed_keys}
+  - {check: min_backup_retention_days, days: 90}
+  - {check: min_log_retention_days, days: 400}
+  - {check: required_tags, tags: [owner, project]}

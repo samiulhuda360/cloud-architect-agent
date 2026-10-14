@@ -1,113 +1,145 @@
-# Evaluation workloads. Each one exercises a constraint an architect has to get right.
+# Evaluation workloads in six jurisdictions plus "anywhere", priced in six currencies. Each one exercises something an architect has to
+# get right: residency, recovery targets, frameworks, growth, concurrency, stack constraints or a company policy.
 # `expect` lists properties of a good answer that the scorer checks in addition to the generic metrics.
 - id: s01
-  name: Cafe online ordering (dev)
+  name: Bakery click-and-collect (dev)
   needs: [web_app, relational_db]
-  environment: dev
-  budget_nzd_month: 120
-  expect: {max_total: 120}
+  environments: [dev]
+  residency: uk
+  budget_month: 30
+  currency: GBP
+  expect: {max_total: 30, region: uksouth}
 
 - id: s02
   name: Plumbing business booking site
   needs: [web_app, relational_db]
   monthly_users: 3000
   peak_rps: 3
-  budget_nzd_month: 600
-  expect: {max_total: 600}
+  user_locations: [Texas]
+  residency: us
+  budget_month: 300
+  currency: USD
+  expect: {max_total: 300, region: southcentralus}
 
 - id: s03
-  name: GP clinic patient portal
-  description: Patients book appointments and read results. Health information.
+  name: Physiotherapy chain patient portal
+  description: Patients book appointments and read treatment notes. Health information.
   needs: [web_app, relational_db, object_storage]
-  residency: nz
+  user_locations: [United Kingdom]
+  residency: uk
   availability: high
   pii: true
+  health_data: true
+  frameworks: [gdpr]
+  retention_years: 8
   peak_rps: 25
   data_gb: 80
   blob_gb: 400
-  budget_nzd_month: 4000
-  expect: {all_in: [newzealandnorth], private_data: true, zone_redundant_db: true}
+  budget_month: 1200
+  currency: GBP
+  expect: {all_in: uk, private_data: true, zone_redundant_db: true, waf: true}
 
 - id: s04
-  name: Council policy assistant
-  description: Staff and residents ask questions about council policies; answers cite the documents.
+  name: HR policy assistant for a Dutch employer
+  description: Staff ask questions about HR policies; answers cite the documents.
   needs: [web_app, llm, search, relational_db]
-  residency: nz
+  user_locations: [Netherlands]
+  residency: eu
   availability: high
+  pii: true
+  frameworks: [gdpr]
+  retention_years: 2
   peak_rps: 10
   data_gb: 20
   llm_input_mtokens: 40
   llm_output_mtokens: 8
-  budget_nzd_month: 4000
-  expect: {llm_exception: true}
+  budget_month: 2500
+  currency: EUR
+  expect: {all_in: eu, no_tier: [gpt-4o-mini_global], region: westeurope}
 
 - id: s05
-  name: Retail chain e-commerce
+  name: Australian retail chain e-commerce
   needs: [web_app, api, relational_db, cache, object_storage]
   monthly_users: 120000
+  peak_concurrent_users: 3000
+  user_locations: [Australia]
   peak_rps: 120
+  read_ratio: 0.9
   data_gb: 300
+  data_growth_pct: 40
   blob_gb: 2000
   availability: high
   pii: true
-  residency: anz
-  budget_nzd_month: 9000
-  expect: {has: [redis], zone_redundant_db: true}
+  residency: australia
+  budget_month: 4000
+  currency: AUD
+  expect: {has: [redis], zone_redundant_db: true, no_tier: [D2ds_v5], region: australiaeast}
 
 - id: s06
-  name: Iwi land records archive
-  description: Scanned land records and genealogy; must stay in Aotearoa.
+  name: Land records archive for a New Zealand trust
+  description: Scanned land records and genealogy; must stay in New Zealand.
   needs: [web_app, object_storage, relational_db, search]
   residency: nz
   availability: standard
   pii: true
+  geo_backup: true
   blob_gb: 5000
   data_gb: 40
-  budget_nzd_month: 2500
-  expect: {all_in: [newzealandnorth], no_tier: [hot_grs]}
+  budget_month: 2000
+  currency: NZD
+  expect: {all_in: nz, no_tier: [hot_grs]}
 
 - id: s07
-  name: Freight tracking API
+  name: Canadian freight tracking API
   needs: [api, nosql_db, background_jobs]
+  user_locations: [Canada]
   peak_rps: 60
   data_gb: 150
   availability: high
-  residency: anz
-  budget_nzd_month: 5000
-  expect: {has: [cosmos_db, functions]}
+  residency: canada
+  budget_month: 1500
+  currency: CAD
+  expect: {has: [cosmos_db, functions], all_in: canada}
 
 - id: s08
   name: Startup SaaS MVP
   needs: [web_app, api, relational_db]
   monthly_users: 500
   peak_rps: 2
-  budget_nzd_month: 250
-  expect: {max_total: 250}
+  residency: any
+  budget_month: 150
+  currency: USD
+  expect: {max_total: 150}
 
 - id: s09
-  name: Insurance claims triage with AI
+  name: UK insurance claims triage with AI
   description: Claim descriptions are classified and summarised. Contains personal and health information.
   needs: [web_app, llm, relational_db, object_storage]
-  residency: anz
+  user_locations: [United Kingdom]
+  residency: uk
   availability: high
   pii: true
   peak_rps: 15
   llm_input_mtokens: 120
   llm_output_mtokens: 20
-  budget_nzd_month: 6000
-  expect: {no_tier: [gpt-4o-mini_global]}
+  budget_month: 1500
+  currency: GBP
+  expect: {llm_exception: true, no_tier: [gpt-4o-mini_global], all_in: uk}
 
 - id: s10
-  name: Marketing site with global audience
+  name: Marketing site for a global audience
   needs: [web_app]
   monthly_users: 400000
+  peak_concurrent_users: 4000
+  user_locations: [United States, United Kingdom, Australia]
   peak_rps: 80
   residency: any
-  budget_nzd_month: 1500
-  expect: {}
+  budget_month: 600
+  currency: USD
+  expect: {has: [front_door], autoscale: true, region: eastus2}
 
 - id: s11
-  name: Government grants portal (critical)
+  name: Government grants portal (critical, New Zealand only)
   needs: [web_app, relational_db, object_storage]
   residency: nz
   availability: critical
@@ -115,20 +147,25 @@
   peak_rps: 40
   data_gb: 200
   blob_gb: 800
-  budget_nzd_month: 9000
-  expect: {all_in: [newzealandnorth], dr_note: true}
+  budget_month: 4000
+  currency: NZD
+  expect: {all_in: nz, dr_note: true}
 
 - id: s12
-  name: Bank customer chatbot (critical, ANZ)
+  name: German bank customer chatbot (critical)
   needs: [web_app, llm, relational_db, cache]
-  residency: anz
+  user_locations: [Germany]
+  residency: eu
   availability: critical
   pii: true
+  frameworks: [gdpr]
+  retention_years: 10
   peak_rps: 90
   llm_input_mtokens: 300
   llm_output_mtokens: 60
-  budget_nzd_month: 15000
-  expect: {dr_region: true, no_tier: [gpt-4o-mini_global]}
+  budget_month: 3500
+  currency: EUR
+  expect: {dr_region: true, no_tier: [gpt-4o-mini_global], region: germanywestcentral, all_in: eu}
 
 - id: s13
   name: Internal HR knowledge search
@@ -137,36 +174,44 @@
   peak_rps: 3
   llm_input_mtokens: 10
   llm_output_mtokens: 2
-  budget_nzd_month: 1200
-  expect: {max_total: 1200}
+  budget_month: 300
+  currency: USD
+  expect: {max_total: 300}
 
 - id: s14
-  name: Batch invoice processing
+  name: Batch invoice processing for an Australian wholesaler
   needs: [background_jobs, object_storage, relational_db]
-  residency: nz
+  residency: australia
   data_gb: 30
   blob_gb: 300
-  budget_nzd_month: 900
-  expect: {all_in: [newzealandnorth]}
+  backup_retention_days: 90
+  budget_month: 600
+  currency: AUD
+  expect: {all_in: australia, has: [backup_vault]}
 
 - id: s15
-  name: Legacy app lift-and-shift
+  name: Legacy app lift-and-shift for a Quebec insurer
   needs: [virtual_machines, relational_db]
+  user_locations: [Quebec]
   availability: high
-  residency: nz
+  residency: canada
   data_gb: 100
-  budget_nzd_month: 3000
-  expect: {has: [vm], all_in: [newzealandnorth]}
+  budget_month: 1200
+  currency: CAD
+  expect: {has: [vm], all_in: canada}
 
 - id: s16
-  name: Microservices platform
+  name: Logistics microservices for a French carrier
   needs: [containers, relational_db, cache]
+  user_locations: [France]
   availability: high
-  residency: anz
+  residency: eu
   peak_rps: 150
   data_gb: 250
-  budget_nzd_month: 7000
-  expect: {has: [redis]}
+  constraints: [".NET team", "no Kubernetes"]
+  budget_month: 1500
+  currency: EUR
+  expect: {has: [redis, azure_sql], no_service: [aks], region: francecentral}
 
 - id: s17
   name: School newsletter app (tight budget)
@@ -174,37 +219,57 @@
   residency: nz
   peak_rps: 1
   blob_gb: 50
-  budget_nzd_month: 90
+  budget_month: 90
+  currency: NZD
   expect: {max_total: 90}
 
 - id: s18
-  name: Tourism booking engine
-  needs: [web_app, api, relational_db, cache]
-  monthly_users: 80000
-  peak_rps: 70
-  data_gb: 120
+  name: US online store taking card payments
+  needs: [web_app, api, relational_db, object_storage]
+  monthly_users: 60000
+  peak_concurrent_users: 1500
+  user_locations: [United States]
+  peak_rps: 60
+  data_gb: 90
+  data_growth_pct: 20
+  blob_gb: 300
   availability: high
-  pii: true
-  residency: anz
-  budget_nzd_month: 6500
-  expect: {zone_redundant_db: true}
+  residency: us
+  frameworks: [pci_dss]
+  environments: [test, prod]
+  budget_month: 2000
+  currency: USD
+  policies:
+    - {id: P1, check: customer_managed_keys, status: accepted, source: card-data-standard.md, section: "2", quote: "Cardholder data is encrypted with keys we manage."}
+    - {id: P2, check: required_tags, tags: [owner, cost-center], status: accepted, source: card-data-standard.md, section: "5", quote: "Resources carry owner and cost-center tags."}
+  expect: {waf: true, log_days: 365, private_data: true, cmk: true}
 
 - id: s19
-  name: Research document Q&A (any region)
-  needs: [web_app, llm, search, object_storage]
-  residency: any
-  peak_rps: 5
-  blob_gb: 1000
-  llm_input_mtokens: 60
-  llm_output_mtokens: 10
-  budget_nzd_month: 2500
-  expect: {}
+  name: US clinic records with HIPAA
+  needs: [web_app, relational_db, object_storage]
+  user_locations: [United States]
+  availability: high
+  residency: us
+  frameworks: [hipaa]
+  peak_rps: 20
+  data_gb: 150
+  blob_gb: 600
+  environments: [test, prod]
+  budget_month: 2000
+  currency: USD
+  expect: {audit: true, log_days: 2190, geo_backup: true, private_data: true}
 
 - id: s20
-  name: Farm sensor dashboard
-  needs: [web_app, nosql_db, background_jobs]
-  residency: nz
-  peak_rps: 20
-  data_gb: 60
-  budget_nzd_month: 800
-  expect: {all_in: [newzealandnorth], max_total: 800}
+  name: Irish payments ledger (5-minute RPO)
+  needs: [api, relational_db]
+  user_locations: [Ireland]
+  availability: high
+  residency: eu
+  pii: true
+  rpo_minutes: 5
+  rto_minutes: 720
+  peak_rps: 30
+  data_gb: 200
+  budget_month: 1500
+  currency: EUR
+  expect: {region: northeurope, dr_in: [westeurope], db_replica: true}
