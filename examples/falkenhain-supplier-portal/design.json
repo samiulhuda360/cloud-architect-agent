@@ -1,0 +1,91 @@
+{
+ "region": "germanywestcentral",
+ "dr_region": "francecentral",
+ "components": [
+  {
+   "service": "app_service",
+   "tier": "P1v3",
+   "region": "germanywestcentral",
+   "instances": 3,
+   "zone_redundant": true,
+   "purpose": "web app and API, zone redundant"
+  },
+  {
+   "service": "functions",
+   "tier": "flex",
+   "region": "germanywestcentral",
+   "zone_redundant": true,
+   "purpose": "scheduled and queued background jobs, including sync with ERP (queued, with retries)"
+  },
+  {
+   "service": "azure_sql",
+   "tier": "GP_2vcore",
+   "region": "germanywestcentral",
+   "zone_redundant": true,
+   "private_endpoint": true,
+   "purpose": "relational database (SQL Server engine)",
+   "settings": {
+    "backup_days": 35.0,
+    "geo_backup": 1.0
+   }
+  },
+  {
+   "service": "blob_storage",
+   "tier": "hot_grs",
+   "region": "germanywestcentral",
+   "private_endpoint": true,
+   "purpose": "files and documents, deleted after 10 years",
+   "settings": {
+    "delete_after_days": 3650.0
+   }
+  },
+  {
+   "service": "entra_external_id",
+   "tier": "core",
+   "region": "germanywestcentral",
+   "purpose": "customer sign-up and sign-in (first 50,000 monthly users free)"
+  },
+  {
+   "service": "app_service",
+   "tier": "P1v3",
+   "region": "francecentral",
+   "purpose": "warm standby in the DR region, scaled out after failover"
+  },
+  {
+   "service": "azure_sql",
+   "tier": "GP_2vcore",
+   "region": "francecentral",
+   "private_endpoint": true,
+   "purpose": "cross-region replica, promoted on failover",
+   "settings": {
+    "replica": 1.0
+   }
+  },
+  {
+   "service": "front_door",
+   "tier": "premium",
+   "region": "germanywestcentral",
+   "purpose": "global entry point: health probes move traffic to the DR region"
+  },
+  {
+   "service": "key_vault",
+   "tier": "standard",
+   "region": "germanywestcentral",
+   "purpose": "secrets, keys and certificates"
+  },
+  {
+   "service": "log_analytics",
+   "tier": "pay_as_you_go",
+   "region": "germanywestcentral",
+   "purpose": "logs and metrics for every component, with audit logs from every data store",
+   "settings": {
+    "audit": 1.0
+   }
+  }
+ ],
+ "rationale": "Rule-based design for dev, test, prod, high availability, EU / EEA (GDPR) residency, in Germany West Central (Frankfurt) with DR in France Central (Paris).",
+ "tags": {
+  "workload": "Falkenhain supplier portal",
+  "environment": "prod"
+ }
+}

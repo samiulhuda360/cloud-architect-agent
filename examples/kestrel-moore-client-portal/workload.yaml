@@ -1,0 +1,67 @@
+# Kestrel & Moore Accountants, a 14-person practice in Brisbane. Emma Walsh (Practice Manager) is moving client files
+# off an office NAS into a secure client portal, with a nightly Xero sync, under the Privacy Act 1988.
+#   python -m cloud_architect design examples/kestrel-moore-client-portal/workload.yaml --rules --out examples/kestrel-moore-client-portal
+name: Kestrel & Moore client portal
+description: Clients upload and download tax documents and sign engagement letters; staff manage files by client.
+needs:
+- web_app
+- relational_db
+- object_storage
+- background_jobs
+monthly_users: 1500
+peak_concurrent_users: 120
+user_locations:
+- Australia
+peak_rps: 5
+read_ratio: 0.8
+data_gb: 8
+data_growth_pct: 15
+blob_gb: 900
+retention_years: 7
+backup_retention_days: 30
+availability: standard
+residency: australia
+pii: true
+identity: entra_external_id
+environments:
+- test
+- prod
+integrations:
+- Xero
+budget_month: 2500
+currency: AUD
+policies:
+- id: P1
+  check: allowed_regions
+  regions:
+  - australiaeast
+  - australiasoutheast
+  source: kestrel-moore-client-data-policy.md
+  section: Where client data lives
+  quote: Client records must remain in Australia.
+  extracted_by: rules
+  status: accepted
+- id: P2
+  check: no_public_endpoints
+  source: kestrel-moore-client-data-policy.md
+  section: Who can see it
+  quote: No client data store may be accessible from the public internet; staff connect through the firm's sign-in and the office network.
+  extracted_by: rules
+  status: accepted
+- id: P3
+  check: min_backup_retention_days
+  days: 30
+  source: kestrel-moore-client-data-policy.md
+  section: Backups
+  quote: Backups must be retained for 30 days, and one restore is tested each month.
+  extracted_by: rules
+  status: accepted
+- id: P4
+  check: max_monthly_spend
+  amount: 2500.0
+  currency: AUD
+  source: kestrel-moore-client-data-policy.md
+  section: Costs
+  quote: The monthly IT hosting cost must stay under A$2,500 including all environments.
+  extracted_by: rules
+  status: accepted

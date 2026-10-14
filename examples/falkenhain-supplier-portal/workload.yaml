@@ -1,0 +1,44 @@
+# Falkenhain Feinwerk GmbH, a precision-parts manufacturer in Ulm. Tom Becker (IT Lead) is replacing a twelve-year-old
+# FTP server with a supplier portal that keeps supplier data inside the EU. Values come from examples/briefs/.
+#   python -m cloud_architect design examples/falkenhain-supplier-portal/workload.yaml --rules --out examples/falkenhain-supplier-portal
+name: Falkenhain supplier portal
+description: Suppliers sign in, upload quotes, delivery notes and quality certificates, and confirm delivery dates; a nightly job syncs
+  dates back to the ERP.
+needs:
+- web_app
+- relational_db
+- object_storage
+- background_jobs
+monthly_users: 1200
+peak_concurrent_users: 150
+user_locations:
+- Germany
+- Austria
+- Poland
+- Italy
+peak_rps: 20
+read_ratio: 0.85
+data_gb: 40
+data_growth_pct: 30
+blob_gb: 1536
+retention_years: 10
+backup_retention_days: 35
+availability: high
+rpo_minutes: 15
+rto_minutes: 240
+residency: eu
+frameworks:
+- gdpr
+- iso27001
+pii: true
+identity: entra_external_id
+environments:
+- dev
+- test
+- prod
+integrations:
+- ERP
+constraints:
+- Our two developers use .NET and our ERP already runs on SQL Server
+budget_month: 3500
+currency: EUR

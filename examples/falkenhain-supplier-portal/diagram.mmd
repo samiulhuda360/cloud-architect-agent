@@ -1,0 +1,43 @@
+%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#e6f2ef", "primaryBorderColor": "#2f6f68", "primaryTextColor": "#13302c", "lineColor": "#5f7471", "secondaryColor": "#f3efe6", "tertiaryColor": "#f7f8f6"}}}%%
+flowchart LR
+  users(["Users<br/><small>Germany, Austria, Poland, Italy</small>"])
+  subgraph global["Global edge"]
+    c4["Microsoft Entra External ID<br/><small>core</small>"]
+    c7["Front Door<br/><small>premium</small>"]
+  end
+  subgraph r_germanywestcentral["Germany West Central (Frankfurt) · primary · 3 availability zones"]
+    c0["App Service<br/><small>P1v3 · x3 · 3 zones</small>"]
+    c1["Functions<br/><small>flex · 3 zones</small>"]
+    c8["Key Vault<br/><small>standard</small>"]
+    c9["Log Analytics workspace<br/><small>pay_as_you_go</small>"]
+    subgraph p_germanywestcentral["Private network · private endpoints"]
+      c2["Azure SQL Database<br/><small>GP_2vcore · 3 zones · private endpoint · geo backup</small>"]
+      c3["Storage account<br/><small>hot_grs · private endpoint</small>"]
+    end
+  end
+  subgraph r_francecentral["France Central (Paris) · disaster recovery"]
+    c5["App Service<br/><small>P1v3</small>"]
+    subgraph p_francecentral["Private network · private endpoints"]
+      c6["Azure SQL Database<br/><small>GP_2vcore · private endpoint · replica</small>"]
+    end
+  end
+  subgraph ext["Outside systems"]
+    x0["ERP<br/><small>integration</small>"]
+  end
+  users -->|HTTPS| c7
+  c7 -->|primary| c0
+  c7 -.->|failover| c5
+  users -.->|sign in| c4
+  c0 --> c2
+  c0 --> c3
+  c1 --> c2
+  c1 --> c3
+  c2 -.->|geo-replication| c6
+  c1 -->|sync, retried| x0
+  c0 -.->|logs| c9
+  style global fill:#f7f8f6,stroke:#5f7471,stroke-dasharray:4 3
+  style r_germanywestcentral fill:#eef6f4,stroke:#2f6f68,stroke-width:2px
+  style p_germanywestcentral fill:#ffffff,stroke:#1f5f8b,stroke-dasharray:5 4
+  style r_francecentral fill:#f3efe6,stroke:#8a7a4f,stroke-width:2px
+  style p_francecentral fill:#ffffff,stroke:#1f5f8b,stroke-dasharray:5 4
+  style ext fill:#f7f7f7,stroke:#8a8a8a,stroke-dasharray:3 3

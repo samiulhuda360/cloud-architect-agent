@@ -1,0 +1,103 @@
+# Hollin & Wren Ltd, an online homeware shop in the UK. Sarah Collins (Head of Ecommerce) needs the shop off the
+# ageing on-premises server that fell over last Black Friday, and PCI DSS in place before the next one.
+#   python -m cloud_architect design examples/hollin-wren-online-shop/workload.yaml --rules --out examples/hollin-wren-online-shop
+name: Hollin & Wren online shop
+description: 'Online homeware shop: product pages, basket and checkout with hosted card fields, customer accounts, order history, and
+  a sync to the warehouse system.'
+needs:
+- web_app
+- api
+- relational_db
+- object_storage
+- background_jobs
+monthly_users: 180000
+peak_concurrent_users: 6000
+user_locations:
+- United Kingdom
+peak_rps: 300
+read_ratio: 0.9
+data_gb: 120
+data_growth_pct: 25
+blob_gb: 800
+retention_years: 6
+backup_retention_days: 35
+availability: high
+rpo_minutes: 15
+rto_minutes: 60
+residency: uk
+frameworks:
+- pci_dss
+- gdpr
+pii: true
+card_data: true
+identity: entra_external_id
+environments:
+- dev
+- test
+- prod
+integrations:
+- warehouse system
+budget_month: 9000
+currency: GBP
+policies:
+- id: P1
+  check: allowed_regions
+  regions:
+  - uksouth
+  - ukwest
+  source: hollin-wren-security-standard.md
+  section: '3'
+  quote: Customer and payment data must be stored and processed only in the United Kingdom.
+  extracted_by: rules
+  status: accepted
+- id: P2
+  check: no_public_endpoints
+  source: hollin-wren-security-standard.md
+  section: '4'
+  quote: Databases and storage accounts that hold Confidential or Restricted data must not be reachable from the public internet.
+  extracted_by: rules
+  status: accepted
+- id: P3
+  check: customer_managed_keys
+  source: hollin-wren-security-standard.md
+  section: '5'
+  quote: Restricted data must be encrypted with customer-managed keys held in our own key vault, and the keys are rotated at least every
+    two years.
+  extracted_by: rules
+  status: accepted
+- id: P4
+  check: min_backup_retention_days
+  days: 35
+  source: hollin-wren-security-standard.md
+  section: '6'
+  quote: Backups of production databases must be retained for at least 35 days.
+  extracted_by: rules
+  status: accepted
+- id: P5
+  check: min_log_retention_days
+  days: 365
+  source: hollin-wren-security-standard.md
+  section: '7'
+  quote: Security and audit logs must be retained for a minimum of 12 months.
+  extracted_by: rules
+  status: accepted
+- id: P6
+  check: max_monthly_spend
+  amount: 9000.0
+  currency: GBP
+  source: hollin-wren-security-standard.md
+  section: '8'
+  quote: Monthly cloud spend for the ecommerce platform must not exceed £9,000 without approval from the Finance Director.
+  extracted_by: rules
+  status: accepted
+- id: P7
+  check: required_tags
+  tags:
+  - owner
+  - cost-centre
+  - data-classification
+  source: hollin-wren-security-standard.md
+  section: '9'
+  quote: Every cloud resource must be tagged with `owner`, `cost-centre` and `data-classification`.
+  extracted_by: rules
+  status: accepted

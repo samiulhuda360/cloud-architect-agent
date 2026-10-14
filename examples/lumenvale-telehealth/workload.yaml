@@ -1,0 +1,109 @@
+# Lumenvale Health, a US telehealth start-up. James Porter (CTO) runs a four-person engineering team and must meet
+# HIPAA before the first hospital contract: video visits, patient records and an AI visit-note summariser.
+#   python -m cloud_architect design examples/lumenvale-telehealth/workload.yaml --rules --out examples/lumenvale-telehealth
+name: Lumenvale virtual care platform
+description: Patients book and join video visits and see their records; clinicians get AI-drafted visit notes to review.
+needs:
+- web_app
+- api
+- relational_db
+- object_storage
+- llm
+- background_jobs
+monthly_users: 25000
+peak_concurrent_users: 900
+user_locations:
+- United States
+peak_rps: 40
+read_ratio: 0.75
+data_gb: 60
+data_growth_pct: 60
+blob_gb: 500
+retention_years: 7
+backup_retention_days: 90
+geo_backup: true
+llm_input_mtokens: 40
+llm_output_mtokens: 8
+availability: high
+rpo_minutes: 60
+rto_minutes: 480
+residency: us
+frameworks:
+- hipaa
+- soc2
+health_data: true
+identity: entra_external_id
+environments:
+- test
+- prod
+budget_month: 7000
+currency: USD
+policies:
+- id: P1
+  check: allowed_regions
+  regions:
+  - centralus
+  - eastus
+  - eastus2
+  - northcentralus
+  - southcentralus
+  - westcentralus
+  - westus
+  - westus2
+  - westus3
+  source: lumenvale-hipaa-security-policy.md
+  section: '2'
+  quote: PHI must be stored only in data centers located in the United States.
+  extracted_by: rules
+  status: accepted
+- id: P2
+  check: approved_services
+  services:
+  - app_service
+  - functions
+  - postgres
+  - blob_storage
+  - key_vault
+  - log_analytics
+  - azure_openai
+  - front_door
+  - entra_external_id
+  - backup_vault
+  source: lumenvale-hipaa-security-policy.md
+  section: '3'
+  quote: 'Engineering may only use the following Azure services for PHI workloads:'
+  extracted_by: rules
+  status: accepted
+- id: P3
+  check: no_public_endpoints
+  source: lumenvale-hipaa-security-policy.md
+  section: '4'
+  quote: Systems that store PHI must not expose public endpoints; they are reached through private networking only.
+  extracted_by: rules
+  status: accepted
+- id: P4
+  check: min_log_retention_days
+  days: 2190
+  source: lumenvale-hipaa-security-policy.md
+  section: '5'
+  quote: Audit logs for systems that store PHI must be retained for six years.
+  extracted_by: rules
+  status: accepted
+- id: P5
+  check: min_backup_retention_days
+  days: 90
+  source: lumenvale-hipaa-security-policy.md
+  section: '6'
+  quote: Database backups must be kept for at least 90 days, with a copy in a second region.
+  extracted_by: rules
+  status: accepted
+- id: P6
+  check: required_tags
+  tags:
+  - owner
+  - phi
+  source: lumenvale-hipaa-security-policy.md
+  section: '7'
+  quote: All Azure resources must carry the tags `owner` and `phi`.
+  extracted_by: rules
+  status: accepted

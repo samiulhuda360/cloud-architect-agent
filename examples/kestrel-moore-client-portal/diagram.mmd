@@ -1,0 +1,33 @@
+%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#e6f2ef", "primaryBorderColor": "#2f6f68", "primaryTextColor": "#13302c", "lineColor": "#5f7471", "secondaryColor": "#f3efe6", "tertiaryColor": "#f7f8f6"}}}%%
+flowchart LR
+  users(["Users<br/><small>Australia</small>"])
+  subgraph global["Global edge"]
+    c4["Microsoft Entra External ID<br/><small>core</small>"]
+  end
+  subgraph r_australiaeast["Australia East (Sydney) · primary"]
+    c0["App Service<br/><small>S1</small>"]
+    c1["Functions<br/><small>flex</small>"]
+    c5["Application Gateway WAF v2<br/><small>waf_v2</small>"]
+    c6["Key Vault<br/><small>standard</small>"]
+    c7["Log Analytics workspace<br/><small>pay_as_you_go</small>"]
+    subgraph p_australiaeast["Private network · private endpoints"]
+      c2["PostgreSQL Flexible Server<br/><small>D2ds_v5 · private endpoint</small>"]
+      c3["Storage account<br/><small>hot_lrs · private endpoint</small>"]
+    end
+  end
+  subgraph ext["Outside systems"]
+    x0["Xero<br/><small>integration</small>"]
+  end
+  users -->|HTTPS| c5
+  c5 --> c0
+  users -.->|sign in| c4
+  c0 --> c2
+  c0 --> c3
+  c1 --> c2
+  c1 --> c3
+  c1 -->|sync, retried| x0
+  c0 -.->|logs| c7
+  style global fill:#f7f8f6,stroke:#5f7471,stroke-dasharray:4 3
+  style r_australiaeast fill:#eef6f4,stroke:#2f6f68,stroke-width:2px
+  style p_australiaeast fill:#ffffff,stroke:#1f5f8b,stroke-dasharray:5 4
+  style ext fill:#f7f7f7,stroke:#8a8a8a,stroke-dasharray:3 3

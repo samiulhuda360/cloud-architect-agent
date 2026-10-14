@@ -1,0 +1,109 @@
+{
+ "region": "uksouth",
+ "dr_region": "ukwest",
+ "components": [
+  {
+   "service": "container_apps",
+   "tier": "1vcpu",
+   "region": "uksouth",
+   "instances": 3,
+   "zone_redundant": true,
+   "purpose": "web front end and API in containers",
+   "settings": {
+    "max_instances": 15.0
+   }
+  },
+  {
+   "service": "functions",
+   "tier": "flex",
+   "region": "uksouth",
+   "zone_redundant": true,
+   "purpose": "scheduled and queued background jobs, including sync with warehouse system (queued, with retries)"
+  },
+  {
+   "service": "postgres",
+   "tier": "D4ds_v5",
+   "region": "uksouth",
+   "zone_redundant": true,
+   "private_endpoint": true,
+   "customer_managed_key": true,
+   "purpose": "relational database",
+   "settings": {
+    "backup_days": 35.0,
+    "geo_backup": 1.0
+   }
+  },
+  {
+   "service": "blob_storage",
+   "tier": "hot_grs",
+   "region": "uksouth",
+   "private_endpoint": true,
+   "customer_managed_key": true,
+   "purpose": "files and documents, deleted after 6 years",
+   "settings": {
+    "delete_after_days": 2190.0
+   }
+  },
+  {
+   "service": "redis",
+   "tier": "standard_c0",
+   "region": "uksouth",
+   "purpose": "cache for hot reads and sessions"
+  },
+  {
+   "service": "entra_external_id",
+   "tier": "core",
+   "region": "uksouth",
+   "purpose": "customer sign-up and sign-in (first 50,000 monthly users free)"
+  },
+  {
+   "service": "container_apps",
+   "tier": "1vcpu",
+   "region": "ukwest",
+   "purpose": "warm standby in the DR region, scaled out after failover"
+  },
+  {
+   "service": "postgres",
+   "tier": "D4ds_v5",
+   "region": "ukwest",
+   "private_endpoint": true,
+   "purpose": "cross-region replica, promoted on failover",
+   "settings": {
+    "replica": 1.0
+   }
+  },
+  {
+   "service": "front_door",
+   "tier": "premium",
+   "region": "uksouth",
+   "purpose": "global entry point: health probes move traffic to the DR region"
+  },
+  {
+   "service": "key_vault",
+   "tier": "standard",
+   "region": "uksouth",
+   "purpose": "secrets, keys and certificates, including the customer-managed encryption keys",
+   "settings": {
+    "cmk_keys": 2.0
+   }
+  },
+  {
+   "service": "log_analytics",
+   "tier": "pay_as_you_go",
+   "region": "uksouth",
+   "purpose": "logs and metrics for every component, kept 365 days, with audit logs from every data store",
+   "settings": {
+    "retention_days": 365.0,
+    "audit": 1.0
+   }
+  }
+ ],
+ "rationale": "Rule-based design for dev, test, prod, high availability, United Kingdom residency, in UK South (London) with DR in UK West (Cardiff).",
+ "tags": {
+  "workload": "Hollin & Wren online shop",
+  "environment": "prod",
+  "cost-centre": "",
+  "data-classification": "",
+  "owner": ""
+ }
+}

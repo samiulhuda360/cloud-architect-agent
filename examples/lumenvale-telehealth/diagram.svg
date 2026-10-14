@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1364" height="576" viewBox="0 0 1364 576" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5f7471"/></marker></defs>
+<rect width="1364" height="576" fill="#ffffff"/>
+<rect x="246" y="20" width="404" height="234" rx="8" fill="#f7f8f6" stroke="#5f7471" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="256" y="41" font-size="12" font-weight="700" fill="#13302c">Global edge</text>
+<rect x="706" y="20" width="602" height="502" rx="8" fill="#eef6f4" stroke="#2f6f68" stroke-width="1.5"/>
+<text x="716" y="41" font-size="12" font-weight="700" fill="#13302c">East US 2 (Virginia) · primary · 3 availability zones</text>
+<rect x="724" y="270" width="566" height="126" rx="8" fill="#ffffff" stroke="#1f5f8b" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="734" y="291" font-size="12" font-weight="700" fill="#13302c">Private network · private endpoints</text>
+<path d="M190,97 C227,97 227,91 264,91" fill="none" stroke="#5f7471" stroke-width="1.3" marker-end="url(#arrow)"/>
+<text x="227" y="90" font-size="10" fill="#5f7471" text-anchor="middle" paint-order="stroke" stroke="#ffffff" stroke-width="3">HTTPS</text>
+<path d="M434,91 C579,91 579,91 724,91" fill="none" stroke="#5f7471" stroke-width="1.3" marker-end="url(#arrow)"/>
+<text x="579" y="87" font-size="10" fill="#5f7471" text-anchor="middle" paint-order="stroke" stroke="#ffffff" stroke-width="3">primary</text>
+<path d="M190,97 C227,97 227,199 264,199" fill="none" stroke="#5f7471" stroke-width="1.3" stroke-dasharray="5 4" marker-end="url(#arrow)"/>
+<text x="227" y="144" font-size="10" fill="#5f7471" text-anchor="middle" paint-order="stroke" stroke="#ffffff" stroke-width="3">sign in</text>
+<path d="M809,128 C818,128 818,304 827,304" fill="none" stroke="#5f7471" stroke-width="1.3" marker-end="url(#arrow)"/>
+<path d="M894,91 C917,91 917,341 940,341" fill="none" stroke="#5f7471" stroke-width="1.3" marker-end="url(#arrow)"/>
+<path d="M809,128 L809,162" fill="none" stroke="#5f7471" stroke-width="1.3" marker-end="url(#arrow)"/>
+<text x="809" y="141" font-size="10" fill="#5f7471" text-anchor="middle" paint-order="stroke" stroke="#ffffff" stroke-width="3">prompts</text>
+<path d="M922,91 C917,91 917,341 912,341" fill="none" stroke="#5f7471" stroke-width="1.3" marker-end="url(#arrow)"/>
+<path d="M1007,128 C1016,128 1016,304 1025,304" fill="none" stroke="#5f7471" stroke-width="1.3" marker-end="url(#arrow)"/>
+<path d="M827,378 C818,378 818,430 809,430" fill="none" stroke="#5f7471" stroke-width="1.3" stroke-dasharray="5 4" marker-end="url(#arrow)"/>
+<text x="818" y="400" font-size="10" fill="#5f7471" text-anchor="middle" paint-order="stroke" stroke="#ffffff" stroke-width="3">weekly backups</text>
+<path d="M894,91 C1007,91 1007,467 1120,467" fill="none" stroke="#5f7471" stroke-width="1.3" stroke-dasharray="5 4" marker-end="url(#arrow)"/>
+<text x="1007" y="275" font-size="10" fill="#5f7471" text-anchor="middle" paint-order="stroke" stroke="#ffffff" stroke-width="3">logs</text>
+<rect x="20" y="60" width="170" height="74" rx="7" fill="#ffffff" stroke="#6b6b6b" stroke-width="1.5"/>
+<rect x="20" y="60" width="5" height="74" rx="2" fill="#6b6b6b"/>
+<text x="32" y="82" font-size="12" font-weight="700" fill="#13302c">Users</text>
+<text x="32" y="99" font-size="10" fill="#5f7471">United States</text>
+<rect x="724" y="54" width="170" height="74" rx="7" fill="#ffffff" stroke="#2f6f68" stroke-width="1.5"/>
+<rect x="724" y="54" width="5" height="74" rx="2" fill="#2f6f68"/>
+<text x="736" y="76" font-size="12" font-weight="700" fill="#13302c">App Service</text>
+<text x="736" y="93" font-size="10" fill="#5f7471">P1v3 · x3 · 3 zones</text>
+<rect x="922" y="54" width="170" height="74" rx="7" fill="#ffffff" stroke="#2f6f68" stroke-width="1.5"/>
+<rect x="922" y="54" width="5" height="74" rx="2" fill="#2f6f68"/>
+<text x="934" y="76" font-size="12" font-weight="700" fill="#13302c">Functions</text>
+<text x="934" y="93" font-size="10" fill="#5f7471">flex · 3 zones</text>
+<rect x="742" y="304" width="170" height="74" rx="7" fill="#ffffff" stroke="#1f5f8b" stroke-width="1.5"/>
+<rect x="742" y="304" width="5" height="74" rx="2" fill="#1f5f8b"/>
+<text x="754" y="326" font-size="12" font-weight="700" fill="#13302c">PostgreSQL Flexible Ser…</text>
+<text x="754" y="343" font-size="10" fill="#5f7471">D2ds_v5 · 3 zones ·</text>
+<text x="754" y="356" font-size="10" fill="#5f7471">private endpoint · geo</text>
+<text x="754" y="369" font-size="10" fill="#5f7471">backup</text>
+<rect x="724" y="430" width="170" height="74" rx="7" fill="#ffffff" stroke="#5f7471" stroke-width="1.5"/>
+<rect x="724" y="430" width="5" height="74" rx="2" fill="#5f7471"/>
+<text x="736" y="452" font-size="12" font-weight="700" fill="#13302c">Backup vault</text>
+<text x="736" y="469" font-size="10" fill="#5f7471">grs</text>
+<rect x="940" y="304" width="170" height="74" rx="7" fill="#ffffff" stroke="#1f5f8b" stroke-width="1.5"/>
+<rect x="940" y="304" width="5" height="74" rx="2" fill="#1f5f8b"/>
+<text x="952" y="326" font-size="12" font-weight="700" fill="#13302c">Storage account</text>
+<text x="952" y="343" font-size="10" fill="#5f7471">hot_grs · private endpoint</text>
+<rect x="724" y="162" width="170" height="74" rx="7" fill="#ffffff" stroke="#8a4b2a" stroke-width="1.5"/>
+<rect x="724" y="162" width="5" height="74" rx="2" fill="#8a4b2a"/>
+<text x="736" y="184" font-size="12" font-weight="700" fill="#13302c">Azure OpenAI</text>
+<text x="736" y="201" font-size="10" fill="#5f7471">o4-mini_datazone</text>
+<rect x="264" y="162" width="170" height="74" rx="7" fill="#ffffff" stroke="#2f6f68" stroke-width="1.5"/>
+<rect x="264" y="162" width="5" height="74" rx="2" fill="#2f6f68"/>
+<text x="276" y="184" font-size="12" font-weight="700" fill="#13302c">Microsoft Entra Externa…</text>
+<text x="276" y="201" font-size="10" fill="#5f7471">core</text>
+<rect x="264" y="54" width="170" height="74" rx="7" fill="#ffffff" stroke="#7a5c12" stroke-width="1.5"/>
+<rect x="264" y="54" width="5" height="74" rx="2" fill="#7a5c12"/>
+<text x="276" y="76" font-size="12" font-weight="700" fill="#13302c">Front Door</text>
+<text x="276" y="93" font-size="10" fill="#5f7471">premium</text>
+<rect x="922" y="430" width="170" height="74" rx="7" fill="#ffffff" stroke="#5f7471" stroke-width="1.5"/>
+<rect x="922" y="430" width="5" height="74" rx="2" fill="#5f7471"/>
+<text x="934" y="452" font-size="12" font-weight="700" fill="#13302c">Key Vault</text>
+<text x="934" y="469" font-size="10" fill="#5f7471">standard</text>
+<rect x="1120" y="430" width="170" height="74" rx="7" fill="#ffffff" stroke="#5f7471" stroke-width="1.5"/>
+<rect x="1120" y="430" width="5" height="74" rx="2" fill="#5f7471"/>
+<text x="1132" y="452" font-size="12" font-weight="700" fill="#13302c">Log Analytics workspace</text>
+<text x="1132" y="469" font-size="10" fill="#5f7471">pay_as_you_go · kept 2190</text>
+<text x="1132" y="482" font-size="10" fill="#5f7471">days</text>
+</svg>

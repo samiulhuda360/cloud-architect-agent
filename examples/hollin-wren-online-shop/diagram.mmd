@@ -1,0 +1,45 @@
+%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#e6f2ef", "primaryBorderColor": "#2f6f68", "primaryTextColor": "#13302c", "lineColor": "#5f7471", "secondaryColor": "#f3efe6", "tertiaryColor": "#f7f8f6"}}}%%
+flowchart LR
+  users(["Users<br/><small>United Kingdom</small>"])
+  subgraph global["Global edge"]
+    c5["Microsoft Entra External ID<br/><small>core</small>"]
+    c8["Front Door<br/><small>premium</small>"]
+  end
+  subgraph r_uksouth["UK South (London) · primary · 3 availability zones"]
+    c0["Container Apps<br/><small>1vcpu · x3 · autoscale to 15 · 3 zones</small>"]
+    c1["Functions<br/><small>flex · 3 zones</small>"]
+    c4["Azure Cache for Redis<br/><small>standard_c0</small>"]
+    c9["Key Vault<br/><small>standard</small>"]
+    c10["Log Analytics workspace<br/><small>pay_as_you_go · kept 365 days</small>"]
+    subgraph p_uksouth["Private network · private endpoints"]
+      c2["PostgreSQL Flexible Server<br/><small>D4ds_v5 · 3 zones · private endpoint · customer key · geo backup</small>"]
+      c3["Storage account<br/><small>hot_grs · private endpoint · customer key</small>"]
+    end
+  end
+  subgraph r_ukwest["UK West (Cardiff) · disaster recovery"]
+    c6["Container Apps<br/><small>1vcpu</small>"]
+    subgraph p_ukwest["Private network · private endpoints"]
+      c7["PostgreSQL Flexible Server<br/><small>D4ds_v5 · private endpoint · replica</small>"]
+    end
+  end
+  subgraph ext["Outside systems"]
+    x0["warehouse system<br/><small>integration</small>"]
+  end
+  users -->|HTTPS| c8
+  c8 -->|primary| c0
+  c8 -.->|failover| c6
+  users -.->|sign in| c5
+  c0 --> c2
+  c0 --> c3
+  c0 --> c4
+  c1 --> c2
+  c1 --> c3
+  c2 -.->|geo-replication| c7
+  c1 -->|sync, retried| x0
+  c0 -.->|logs| c10
+  style global fill:#f7f8f6,stroke:#5f7471,stroke-dasharray:4 3
+  style r_uksouth fill:#eef6f4,stroke:#2f6f68,stroke-width:2px
+  style p_uksouth fill:#ffffff,stroke:#1f5f8b,stroke-dasharray:5 4
+  style r_ukwest fill:#f3efe6,stroke:#8a7a4f,stroke-width:2px
+  style p_ukwest fill:#ffffff,stroke:#1f5f8b,stroke-dasharray:5 4
+  style ext fill:#f7f7f7,stroke:#8a8a8a,stroke-dasharray:3 3

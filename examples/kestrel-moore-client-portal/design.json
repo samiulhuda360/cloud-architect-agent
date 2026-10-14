@@ -1,0 +1,66 @@
+{
+ "region": "australiaeast",
+ "components": [
+  {
+   "service": "app_service",
+   "tier": "S1",
+   "region": "australiaeast",
+   "purpose": "web app and API"
+  },
+  {
+   "service": "functions",
+   "tier": "flex",
+   "region": "australiaeast",
+   "purpose": "scheduled and queued background jobs, including sync with Xero (queued, with retries)"
+  },
+  {
+   "service": "postgres",
+   "tier": "D2ds_v5",
+   "region": "australiaeast",
+   "private_endpoint": true,
+   "purpose": "relational database",
+   "settings": {
+    "backup_days": 30.0
+   }
+  },
+  {
+   "service": "blob_storage",
+   "tier": "hot_lrs",
+   "region": "australiaeast",
+   "private_endpoint": true,
+   "purpose": "files and documents, deleted after 7 years",
+   "settings": {
+    "delete_after_days": 2555.0
+   }
+  },
+  {
+   "service": "entra_external_id",
+   "tier": "core",
+   "region": "australiaeast",
+   "purpose": "customer sign-up and sign-in (first 50,000 monthly users free)"
+  },
+  {
+   "service": "app_gateway",
+   "tier": "waf_v2",
+   "region": "australiaeast",
+   "purpose": "web application firewall in front of the app"
+  },
+  {
+   "service": "key_vault",
+   "tier": "standard",
+   "region": "australiaeast",
+   "purpose": "secrets, keys and certificates"
+  },
+  {
+   "service": "log_analytics",
+   "tier": "pay_as_you_go",
+   "region": "australiaeast",
+   "purpose": "logs and metrics for every component"
+  }
+ ],
+ "rationale": "Rule-based design for test, prod, standard availability, Australia residency, in Australia East (Sydney).",
+ "tags": {
+  "workload": "Kestrel & Moore client portal",
+  "environment": "prod"
+ }
+}

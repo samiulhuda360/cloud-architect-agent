@@ -1,0 +1,32 @@
+%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#e6f2ef", "primaryBorderColor": "#2f6f68", "primaryTextColor": "#13302c", "lineColor": "#5f7471", "secondaryColor": "#f3efe6", "tertiaryColor": "#f7f8f6"}}}%%
+flowchart LR
+  users(["Users<br/><small>United States</small>"])
+  subgraph global["Global edge"]
+    c6["Microsoft Entra External ID<br/><small>core</small>"]
+    c7["Front Door<br/><small>premium</small>"]
+  end
+  subgraph r_eastus2["East US 2 (Virginia) · primary · 3 availability zones"]
+    c0["App Service<br/><small>P1v3 · x3 · 3 zones</small>"]
+    c1["Functions<br/><small>flex · 3 zones</small>"]
+    c3["Backup vault<br/><small>grs</small>"]
+    c5["Azure OpenAI<br/><small>o4-mini_datazone</small>"]
+    c8["Key Vault<br/><small>standard</small>"]
+    c9["Log Analytics workspace<br/><small>pay_as_you_go · kept 2190 days</small>"]
+    subgraph p_eastus2["Private network · private endpoints"]
+      c2["PostgreSQL Flexible Server<br/><small>D2ds_v5 · 3 zones · private endpoint · geo backup</small>"]
+      c4["Storage account<br/><small>hot_grs · private endpoint</small>"]
+    end
+  end
+  users -->|HTTPS| c7
+  c7 -->|primary| c0
+  users -.->|sign in| c6
+  c0 --> c2
+  c0 --> c4
+  c0 -->|prompts| c5
+  c1 --> c2
+  c1 --> c4
+  c2 -.->|weekly backups| c3
+  c0 -.->|logs| c9
+  style global fill:#f7f8f6,stroke:#5f7471,stroke-dasharray:4 3
+  style r_eastus2 fill:#eef6f4,stroke:#2f6f68,stroke-width:2px
+  style p_eastus2 fill:#ffffff,stroke:#1f5f8b,stroke-dasharray:5 4
