@@ -10,10 +10,10 @@ FIXTURE = json.loads((Path(__file__).parent / "fixtures" / "prices.json").read_t
 
 
 class FixtureBook(PriceBook):
-    """Real Azure prices captured from the API (NZ North, Australia East); anything else is 'not sold'."""
+    """Real Azure prices captured from the API (scripts/export_price_fixture.py); anything else is "not sold"."""
 
     def __init__(self):
-        self.offline, self.ttl, self._fx = True, 0, None
+        self.offline, self.ttl, self._fx = True, 0, {}
 
     def items(self, filt, currency="USD"):
         return FIXTURE.get(f"{currency}|{filt}", [])

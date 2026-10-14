@@ -11,6 +11,7 @@ from cloud_architect.config import Settings
 from cloud_architect.evaluate import load_scenarios
 from cloud_architect.models import Component, Design, Workload
 from cloud_architect.pricing import Meter, tiered_cost
+from cloud_architect.regions import sold
 from cloud_architect.rules import architect
 from cloud_architect.terraform import generate
 
@@ -22,7 +23,7 @@ def comp(service, tier, region="newzealandnorth", **kw):
 
 
 def web(**kw):
-    base = {"name": "Test", "needs": ["web_app", "relational_db"], "budget_nzd_month": 5000}
+    base = {"name": "Test", "needs": ["web_app", "relational_db"], "budget_month": 5000, "currency": "NZD"}
     return Workload(**{**base, **kw})
 
 
@@ -36,17 +37,15 @@ def test_fx_is_derived_from_azures_own_prices(book):
     assert 1.4 < book.usd_to_nzd() < 2.2
 
 
-def test_every_catalogue_tier_prices_in_nz_north_or_australia(book):
-    # peak_rps 20 pushes log ingestion past Log Analytics' 5 GB monthly free allowance
-    w = web(blob_gb=100, llm_input_mtokens=10, llm_output_mtokens=2, peak_rps=20)
+def test_every_catalogue_tier_prices_where_the_survey_says_it_is_sold(book):
+    # peak_rps 20 pushes log ingestion past Log Analytics' 5 GB monthly free allowance; 100,000 users pass External ID's free 50,000
+    w = web(blob_gb=100, llm_input_mtokens=10, llm_output_mtokens=2, peak_rps=20, monthly_users=100_000)
     for sid, svc in SERVICES.items():
         for tier in svc.tiers:
-            region = "australiaeast" if sid == "azure_openai" else "newzealandnorth"
-            if sid == "blob_storage" and tier == "hot_grs":
-                region = "australiaeast"  # NZ North has no paired region, so no GRS
+            region = next(r for r in ("newzealandnorth", "australiaeast", "uksouth", "eastus2") if sold(sid, tier, r))
             a = assess(Design(region=region, components=[comp(sid, tier, region)]), w, book)
             assert not [v for v in a.violations if v.rule == "NOT-SOLD"], f"{sid}/{tier}"
-            assert a.total_nzd_month > 0, f"{sid}/{tier} priced at zero"
+            assert a.total_month > 0, f"{sid}/{tier} priced at zero"
 
 
 def test_every_recipe_matches_one_price_per_band(book):
@@ -55,7 +54,7 @@ def test_every_recipe_matches_one_price_per_band(book):
 
 def test_free_allowances_are_applied(book):
     small = assess(Design(region="newzealandnorth", components=[comp("log_analytics", "pay_as_you_go")]), web(peak_rps=1), book)
-    assert small.total_nzd_month == 0  # under 5 GB a month
+    assert small.total_month == 0  # under 5 GB a month
 
 
 # ---------------------------------------------------------------- constraints
@@ -87,7 +86,7 @@ def test_global_ai_deployment_with_personal_data_is_a_violation(book):
 
 def test_budget_and_coverage_violations(book):
     d = Design(region="newzealandnorth", components=[comp("app_service", "P2v3", instances=3)])
-    rules = {v.rule for v in assess(d, web(budget_nzd_month=100), book).violations}
+    rules = {v.rule for v in assess(d, web(budget_month=100), book).violations}
     assert {"BUDGET", "NEED"} <= rules
 
 
@@ -111,9 +110,9 @@ def test_rules_architect_never_breaks_residency_silently(book, sid, w, expect):
 
 
 def test_rules_architect_downsizes_to_fit_a_budget(book):
-    w = web(availability="high", budget_nzd_month=1200)
+    w = web(availability="high", budget_month=800)
     d = architect(w, book)
-    assert assess(d, w, book).total_nzd_month <= 1200 and any("to fit the budget" in t for t in d.tradeoffs)
+    assert assess(d, w, book).total_month <= 800 and any("to fit the budget" in t for t in d.tradeoffs)
 
 
 # ---------------------------------------------------------------- terraform
@@ -186,17 +185,17 @@ def test_agent_submission_with_violations_is_sent_back_once(book, fake_llm):
 
 def test_baseline_parses_design_and_claimed_cost(fake_llm):
     design = {"region": "newzealandnorth", "components": [{"service": "app_service", "tier": "S1", "region": "newzealandnorth"}]}
-    reply = "Here it is: " + json.dumps({"design": design, "estimated_total_nzd_month": 250})
+    reply = "Here it is: " + json.dumps({"design": design, "estimated_total_month": 250})
     run = design_without_tools(web(), CFG, client=fake_llm([reply]))
-    assert run.design and run.claimed_total_nzd == 250
+    assert run.design and run.claimed_total == 250
 
 
 def test_baseline_gets_the_same_knowledge_minus_the_tools(fake_llm):
     design = {"region": "newzealandnorth", "components": [{"service": "app_service", "tier": "S1", "region": "newzealandnorth"}]}
-    llm = fake_llm([json.dumps({"design": design, "estimated_total_nzd_month": 250})])
+    llm = fake_llm([json.dumps({"design": design, "estimated_total_month": 250})])
     design_without_tools(web(residency="nz"), CFG, client=llm)
     system, user = llm.seen[0]["messages"][0]["content"], llm.seen[0]["messages"][1]["content"]
-    assert "newzealandnorth" in system and "residency_note" in system and "[RES-REGION]" in system
+    assert "residency_note" in system and "[RES-REGION]" in system and "Currency: NZD" in user
     assert "Allowed regions for this residency: ['newzealandnorth']" in user and "tools" not in llm.seen[0]
 
 
@@ -262,7 +261,7 @@ def test_zone_redundant_functions_pay_for_two_always_ready_instances(book):
     plain = assess(Design(region="newzealandnorth", components=[comp("functions", "flex")]), w, book)
     zr = assess(Design(region="newzealandnorth", components=[comp("functions", "flex", zone_redundant=True)]), w, book)
     baseline = next(line for line in zr.lines if line.item == "always-ready baseline")
-    assert baseline.quantity == 2 * 2.0 * 730 * 3600 and baseline.nzd_month > 80 and zr.total_nzd_month > plain.total_nzd_month
+    assert baseline.quantity == 2 * 2.0 * 730 * 3600 and baseline.amount > 80 and zr.total_month > plain.total_month
     assert "REL-ZONES" in {f.rule for f in plain.findings} and "REL-ZONES" not in {f.rule for f in zr.findings}
 
 
@@ -277,13 +276,13 @@ def test_free_grant_is_not_counted_twice_where_azure_lists_it_as_a_band(book):
     au = assess(Design(region="australiaeast", components=[comp("functions", "flex", "australiaeast")]), w, book)
     nz = assess(Design(region="newzealandnorth", components=[comp("functions", "flex")]), w, book)
     gb_s = next(line for line in au.lines if line.item == "execution time")
-    assert gb_s.nzd_month == pytest.approx((1_000_000 - 100_000) * 0.000037 * book.usd_to_nzd(), rel=0.01)
-    assert au.total_nzd_month < nz.total_nzd_month
+    assert gb_s.amount == pytest.approx((1_000_000 - 100_000) * 0.000037 * book.usd_to_nzd(), rel=0.01)
+    assert au.total_month < nz.total_month
 
 
 # ---------------------------------------------------------------- disaster recovery
 def bank():
-    return web(needs=["web_app", "relational_db"], residency="anz", availability="critical", pii=True, budget_nzd_month=15000)
+    return web(needs=["web_app", "relational_db"], residency="anz", availability="critical", pii=True, budget_month=15000)
 
 
 def test_naming_a_dr_region_is_not_dr(book):
