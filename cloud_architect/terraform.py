@@ -4,17 +4,23 @@ The output is a starting point a platform team can review and apply: one resourc
 component with its tier, zone redundancy and instance count; managed identities and Key Vault;
 private endpoints with private DNS zones, a virtual network in each region that needs one, and App
 Service VNet integration so the apps can reach them; and, when the design has a DR region, database
-replicas there and Front Door with priority failover between the regions. Secrets are input
+replicas there and Front Door with priority failover between the regions. Compliance settings come
+from the design too: customer-managed keys, backup retention and geo-redundant backups, long-term
+backups in a backup vault, log retention, audit diagnostic settings, record deletion after the
+retention period, autoscale for peak concurrency, and tags on every resource. Secrets are input
 variables, never literals. Every generated file passes `terraform validate` and `terraform fmt`.
 """
 
 from __future__ import annotations
 
+import json
 import re
 from dataclasses import dataclass
 
 from .catalogue import pg_storage_gb
+from .compliance import PITR_MAX_DAYS
 from .models import Component, Design, Workload
+from .regions import ALL
 
 PG_SKU = {"B1ms": "B_Standard_B1ms", "B2s": "B_Standard_B2s", "D2ds_v5": "GP_Standard_D2ds_v5", "D4ds_v5": "GP_Standard_D4ds_v5"}
 SQL_SKU = {"S0": "S0", "S2": "S2", "GP_2vcore": "GP_Gen5_2"}
@@ -22,7 +28,12 @@ APP_SKU = {"B1": "B1", "S1": "S1", "P0v3": "P0v3", "P1v3": "P1v3", "P2v3": "P2v3
 REDIS = {"basic_c0": ("Basic", 0), "standard_c0": ("Standard", 0), "standard_c1": ("Standard", 1)}
 STORAGE = {"hot_lrs": "LRS", "hot_zrs": "ZRS", "hot_grs": "GRS"}
 CA = {"0.5vcpu": (0.5, "1Gi"), "1vcpu": (1, "2Gi"), "2vcpu": (2, "4Gi")}
-OPENAI = {"gpt-4o-mini_global": ("gpt-4o-mini", "2024-07-18", "GlobalStandard"), "o4-mini_datazone": ("o4-mini", "2025-04-16", "DataZoneStandard")}
+OPENAI = {
+    "gpt-4o-mini_global": ("gpt-4o-mini", "2024-07-18", "GlobalStandard"),
+    "o4-mini_datazone": ("o4-mini", "2025-04-16", "DataZoneStandard"),
+    "gpt-4o-mini_regional": ("gpt-4o-mini", "2024-07-18", "Standard"),
+    "o4-mini_regional": ("o4-mini", "2025-04-16", "Standard"),
+}
 VM = {"D2s_v5": "Standard_D2s_v5", "D4s_v5": "Standard_D4s_v5", "standard_d2s": "Standard_D2s_v5", "standard_d4s": "Standard_D4s_v5"}
 PE_GROUP = {"postgres": "postgresqlServer", "azure_sql": "sqlServer", "cosmos_db": "Sql", "blob_storage": "blob"}
 DNS_ZONE = {
@@ -50,6 +61,25 @@ SUBNETS = {  # key: (name, address suffix inside the region's /16, delegation)
 }
 
 
+# Resource types that take tags; every one of them gets the design's tags.
+TAGGED = {
+    "azurerm_resource_group", "azurerm_virtual_network", "azurerm_private_dns_zone", "azurerm_private_endpoint", "azurerm_service_plan",
+    "azurerm_linux_web_app", "azurerm_container_app_environment", "azurerm_container_app", "azurerm_storage_account",
+    "azurerm_function_app_flex_consumption", "azurerm_postgresql_flexible_server", "azurerm_mssql_server", "azurerm_mssql_database",
+    "azurerm_cosmosdb_account", "azurerm_redis_cache", "azurerm_key_vault", "azurerm_log_analytics_workspace", "azurerm_search_service",
+    "azurerm_cognitive_account", "azurerm_cdn_frontdoor_profile", "azurerm_public_ip", "azurerm_web_application_firewall_policy",
+    "azurerm_application_gateway", "azurerm_kubernetes_cluster", "azurerm_network_interface", "azurerm_linux_virtual_machine",
+    "azurerm_data_protection_backup_vault", "azurerm_user_assigned_identity", "azurerm_monitor_autoscale_setting",
+}  # fmt: skip
+DIAG_TARGET = {  # what an audit diagnostic setting attaches to, per data store
+    "postgres": "azurerm_postgresql_flexible_server.postgres_{i}.id",
+    "azure_sql": "azurerm_mssql_database.azure_sql_{i}.id",
+    "cosmos_db": "azurerm_cosmosdb_account.cosmos_db_{i}.id",
+    "blob_storage": '"${{azurerm_storage_account.blob_storage_{i}.id}}/blobServices/default"',
+    "key_vault": "azurerm_key_vault.key_vault_{i}.id",
+}
+
+
 def _slug(text: str, n: int = 18) -> str:
     return (re.sub(r"[^a-z0-9]", "", text.lower()) or "app")[:n]
 
@@ -73,6 +103,19 @@ class Ctx:
     index: dict[int, int]  # id(component) -> its index among components of the same service
     vnets: dict[str, str]  # region -> virtual network key; "main" is the primary region's
     private: bool  # some data sits behind private endpoints, so apps need VNet integration
+    cmk: bool = False  # some data is encrypted with a customer-managed key
+    geo_cmk: bool = False  # ...and has geo-redundant backups, which need a key in the paired region too
+
+    @property
+    def vault(self) -> str:
+        return "azurerm_key_vault.key_vault_0" if self.of("key_vault") else "azurerm_key_vault.cmk"
+
+    def cmk_identity(self) -> str:
+        return """
+  identity {
+    type = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.cmk.id]
+  }"""
 
     def sfx(self, region: str) -> str:
         key = self.vnets.get(region, "main")
@@ -115,27 +158,177 @@ def generate(design: Design, w: Workload) -> str:
             subnets.setdefault(c.region, set()).update(k for k, v in need.items() if v)
     regions = sorted(subnets, key=lambda r: (r != design.region, r))
     vnets = {r: "main" if r == design.region else f"r{n}" for n, r in enumerate(regions)}
-    ctx = Ctx(design, w, _slug(w.name), index, vnets, private)
+    cmk = any(c.customer_managed_key and not replica(c) for c in comps if c.service in PE_GROUP)
+    geo_cmk = cmk and any(c.customer_managed_key and c.settings.get("geo_backup") for c in comps if c.service == "postgres")
+    ctx = Ctx(design, w, _slug(w.name), index, vnets, private, cmk, geo_cmk)
 
-    blocks = [HEADER.format(name=ctx.name, region=design.region)]
+    blocks = [HEADER.format(name=ctx.name, region=design.region), _tags(design)]
     blocks += [_vnet(vnets[r], r, n, subnets[r]) for n, r in enumerate(regions)]
     blocks += [_dns_zone(s, list(vnets.values())) for s in sorted({c.service for c in comps if _private(c)})]
     if not ctx.of("log_analytics") and ctx.of("container_apps"):
-        blocks.append(LOGS.format(i=0, region=design.region))
+        blocks.append(LOGS.format(i=0, region=design.region, days=30))
+    if cmk:
+        blocks.append(_cmk(ctx))
     for c in comps:
         i = index[id(c)]
         if c.service in BUILDERS:
             blocks.append(BUILDERS[c.service](c, i, ctx))
+        if c.service in DIAG_TARGET and not replica(c) and _audit(ctx):
+            blocks.append(_diagnostics(c, i, ctx))
         if _private(c):
             blocks.append(
                 PRIVATE_ENDPOINT.format(
                     svc=c.service, i=i, group=PE_GROUP[c.service], target=TARGET[c.service].format(i=i), region=c.region, sfx=ctx.sfx(c.region)
                 )
             )
-    return _fmt("\n".join(b.strip() + "\n" for b in blocks if b.strip()))
+    return _fmt(_tag_resources("\n".join(b.strip() + "\n" for b in blocks if b.strip())))
 
 
-_ATTR = re.compile(r"^( *)([A-Za-z_][\w-]*) *= *(.*)$")
+def _audit(ctx: Ctx) -> bool:
+    return any(c.settings.get("audit") for c in ctx.of("log_analytics"))
+
+
+def _tags(design: Design) -> str:
+    """Tags for every resource. Tags a policy requires but the design leaves blank become a required input."""
+    fixed = {k: v for k, v in design.tags.items() if v} or {"workload": "app"}
+    required = sorted(k for k, v in design.tags.items() if not v)
+    body = "".join(f'\n    "{k}" = {json.dumps(v)}' for k, v in sorted(fixed.items()))
+    if not required:
+        return f"""
+locals {{
+  tags = {{{body}
+  }}
+}}
+"""
+    keys = ", ".join(f'"{k}"' for k in required)
+    return f"""
+variable "required_tags" {{
+  type = map(string)
+  description = "Tags the company policy requires on every resource: {", ".join(required)}"
+
+  validation {{
+    condition = alltrue([for k in [{keys}] : length(lookup(var.required_tags, k, "")) > 0])
+    error_message = "Set every required tag: {", ".join(required)}."
+  }}
+}}
+
+locals {{
+  tags = merge({{{body}
+  }}, var.required_tags)
+}}
+"""
+
+
+def _tag_resources(code: str) -> str:
+    """Add `tags = local.tags` to the end of every top-level resource block whose type takes tags."""
+    out, current = [], None
+    for line in code.splitlines():
+        m = re.match(r'^resource "(\w+)" "\w+" \{$', line)
+        if m:
+            current = m.group(1)
+        elif line == "}" and current:
+            if current in TAGGED:
+                if out and out[-1].strip() == "}":
+                    out.append("")
+                out.append("  tags = local.tags")
+            current = None
+        out.append(line)
+    return "\n".join(out) + "\n"
+
+
+def _cmk(ctx: Ctx) -> str:
+    """A user-assigned identity and an RSA key in Key Vault that the data stores encrypt with."""
+    out = ""
+    if not ctx.of("key_vault"):
+        out += f'''
+resource "azurerm_key_vault" "cmk" {{
+  name = "kvcmk${{random_string.suffix.result}}"
+  location = "{ctx.design.region}"
+  resource_group_name = azurerm_resource_group.main.name
+  tenant_id = data.azurerm_client_config.current.tenant_id
+  sku_name = "standard"
+  purge_protection_enabled = true
+  soft_delete_retention_days = 90
+  rbac_authorization_enabled = true
+}}
+'''
+    out += _cmk_key("cmk", ctx.vault, ctx.design.region, ctx.name)
+    if ctx.geo_cmk:
+        pair = ALL[ctx.design.region].pair if ctx.design.region in ALL else None
+        out += f'''
+# Geo-redundant backups of a server encrypted with a customer-managed key need a key in the paired region as well.
+resource "azurerm_key_vault" "cmk_geo" {{
+  name = "kvgeo${{random_string.suffix.result}}"
+  location = "{pair}"
+  resource_group_name = azurerm_resource_group.main.name
+  tenant_id = data.azurerm_client_config.current.tenant_id
+  sku_name = "standard"
+  purge_protection_enabled = true
+  soft_delete_retention_days = 90
+  rbac_authorization_enabled = true
+}}
+'''
+        out += _cmk_key("cmk_geo", "azurerm_key_vault.cmk_geo", pair, ctx.name)
+    return out
+
+
+def _cmk_key(key: str, vault: str, region: str | None, name: str) -> str:
+    return f'''
+resource "azurerm_user_assigned_identity" "{key}" {{
+  name = "id-{key.replace("_", "-")}-{name}"
+  location = "{region}"
+  resource_group_name = azurerm_resource_group.main.name
+}}
+
+# Whoever runs Terraform creates the key; the identity only wraps and unwraps data keys with it.
+resource "azurerm_role_assignment" "{key}_officer" {{
+  scope = {vault}.id
+  role_definition_name = "Key Vault Crypto Officer"
+  principal_id = data.azurerm_client_config.current.object_id
+}}
+
+resource "azurerm_role_assignment" "{key}_user" {{
+  scope = {vault}.id
+  role_definition_name = "Key Vault Crypto Service Encryption User"
+  principal_id = azurerm_user_assigned_identity.{key}.principal_id
+}}
+
+resource "azurerm_key_vault_key" "{key}" {{
+  name = "{key.replace("_", "-")}-data"
+  key_vault_id = {vault}.id
+  key_type = "RSA"
+  key_size = 3072
+  key_opts = ["unwrapKey", "wrapKey"]
+  depends_on = [azurerm_role_assignment.{key}_officer]
+
+  rotation_policy {{
+    expire_after = "P2Y"
+    notify_before_expiry = "P30D"
+
+    automatic {{
+      time_before_expiry = "P30D"
+    }}
+  }}
+}}
+'''
+
+
+def _diagnostics(c: Component, i: int, ctx: Ctx) -> str:
+    group = "allLogs" if c.service == "postgres" else "audit"
+    return f'''
+resource "azurerm_monitor_diagnostic_setting" "{c.service}_{i}_audit" {{
+  name = "audit-to-log-analytics"
+  target_resource_id = {DIAG_TARGET[c.service].format(i=i)}
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.log_analytics_0.id
+
+  enabled_log {{
+    category_group = "{group}"
+  }}
+}}
+'''
+
+
+_ATTR = re.compile(r'^( *)("[^"]+"|[A-Za-z_][\w-]*) *= *(.*)$')
 
 
 def _fmt(code: str) -> str:
@@ -276,7 +469,7 @@ resource "azurerm_log_analytics_workspace" "log_analytics_{i}" {{
   location = "{region}"
   resource_group_name = azurerm_resource_group.main.name
   sku = "PerGB2018"
-  retention_in_days = 30
+  retention_in_days = {days}
 }}
 """
 
@@ -329,6 +522,55 @@ resource "azurerm_linux_web_app" "app_service_{i}" {{
   site_config {{
     always_on = {str(c.tier != "B1").lower()}
     minimum_tls_version = "1.2"
+  }}
+}}
+''' + _autoscale(c, i, ctx)
+
+
+def _autoscale(c: Component, i: int, ctx: Ctx) -> str:
+    most = int(c.settings.get("max_instances", 0))
+    if most <= c.instances:
+        return ""
+    rules = "".join(
+        f"""
+
+    rule {{
+      metric_trigger {{
+        metric_name = "CpuPercentage"
+        metric_resource_id = azurerm_service_plan.app_service_{i}.id
+        operator = "{op}"
+        statistic = "Average"
+        threshold = {threshold}
+        time_aggregation = "Average"
+        time_grain = "PT1M"
+        time_window = "PT5M"
+      }}
+
+      scale_action {{
+        cooldown = "PT5M"
+        direction = "{direction}"
+        type = "ChangeCount"
+        value = 1
+      }}
+    }}"""
+        for op, threshold, direction in (("GreaterThan", 70, "Increase"), ("LessThan", 30, "Decrease"))
+    )
+    return f'''
+# Peak concurrency needs up to {most} instances; scale on CPU between {c.instances} and {most}.
+resource "azurerm_monitor_autoscale_setting" "app_service_{i}" {{
+  name = "autoscale-{ctx.name}-{i}"
+  location = "{c.region}"
+  resource_group_name = azurerm_resource_group.main.name
+  target_resource_id = azurerm_service_plan.app_service_{i}.id
+
+  profile {{
+    name = "peak"
+
+    capacity {{
+      default = {c.instances}
+      minimum = {c.instances}
+      maximum = {most}
+    }}{rules}
   }}
 }}
 '''
@@ -463,12 +705,28 @@ resource "azurerm_postgresql_flexible_server" "postgres_{i}" {{
         source = f"azurerm_postgresql_flexible_server.postgres_{ctx.source('postgres')}.id"
         return head + f'\n  create_mode = "Replica"\n  source_server_id = {source}\n}}\n'
     ha = '\n\n  high_availability {\n    mode = "ZoneRedundant"\n    standby_availability_zone = "2"\n  }' if c.zone_redundant else ""
-    return (
-        head
-        + '\n  zone = "1"\n  administrator_login = "pgadmin"\n  administrator_password = var.db_admin_password\n  backup_retention_days = 14'
-        + ha
-        + "\n}\n"
-    )
+    days = int(min(max(c.settings.get("backup_days", 14), 7), PITR_MAX_DAYS))
+    geo = bool(c.settings.get("geo_backup"))
+    extra = f"\n  backup_retention_days = {days}\n  geo_redundant_backup_enabled = {str(geo).lower()}"
+    if ctx.w.data_growth_pct:
+        extra += "\n  auto_grow_enabled = true"
+    cmk = ""
+    if c.customer_managed_key and ctx.cmk:
+        ids = "azurerm_user_assigned_identity.cmk.id" + (", azurerm_user_assigned_identity.cmk_geo.id" if geo and ctx.geo_cmk else "")
+        geo_keys = (
+            "\n    geo_backup_key_vault_key_id = azurerm_key_vault_key.cmk_geo.id"
+            "\n    geo_backup_user_assigned_identity_id = azurerm_user_assigned_identity.cmk_geo.id"
+            if geo and ctx.geo_cmk
+            else ""
+        )
+        cmk = (
+            f'\n\n  identity {{\n    type = "UserAssigned"\n    identity_ids = [{ids}]\n  }}'
+            "\n\n  customer_managed_key {"
+            "\n    key_vault_key_id = azurerm_key_vault_key.cmk.id"
+            "\n    primary_user_assigned_identity_id = azurerm_user_assigned_identity.cmk.id"
+            f"{geo_keys}\n  }}"
+        )
+    return head + '\n  zone = "1"\n  administrator_login = "pgadmin"\n  administrator_password = var.db_admin_password' + extra + ha + cmk + "\n}\n"
 
 
 def _azure_sql(c, i, ctx):
@@ -481,7 +739,7 @@ resource "azurerm_mssql_server" "azure_sql_{i}" {{
   administrator_login = "sqladmin"
   administrator_login_password = var.db_admin_password
   minimum_tls_version = "1.2"
-  public_network_access_enabled = {str(not _private(c)).lower()}
+  public_network_access_enabled = {str(not _private(c)).lower()}{_sql_cmk(c, ctx)}
 }}
 '''
     secondary = (
@@ -496,10 +754,31 @@ resource "azurerm_mssql_database" "azure_sql_{i}" {{
   name = "db-{ctx.name}"
   server_id = azurerm_mssql_server.azure_sql_{i}.id
   sku_name = "{SQL_SKU[c.tier]}"
-  zone_redundant = {str(c.zone_redundant).lower()}{secondary}
+  zone_redundant = {str(c.zone_redundant).lower()}{secondary}{_sql_backup(c)}
 }}
 '''
     )
+
+
+def _sql_cmk(c: Component, ctx: Ctx) -> str:
+    if not (c.customer_managed_key and ctx.cmk) or replica(c):
+        return ""
+    return (
+        "\n  primary_user_assigned_identity_id = azurerm_user_assigned_identity.cmk.id"
+        "\n  transparent_data_encryption_key_vault_key_id = azurerm_key_vault_key.cmk.id\n" + ctx.cmk_identity()
+    )
+
+
+def _sql_backup(c: Component) -> str:
+    if replica(c):
+        return ""
+    storage = "Geo" if c.settings.get("geo_backup") else ("Zone" if c.zone_redundant else "Local")
+    out = f'\n  storage_account_type = "{storage}"'
+    out += f"\n\n  short_term_retention_policy {{\n    retention_days = {int(min(max(c.settings.get('backup_days', 7), 7), PITR_MAX_DAYS))}\n  }}"
+    if c.settings.get("ltr_days"):
+        weeks = min(520, -(-int(c.settings["ltr_days"]) // 7))
+        out += f'\n\n  long_term_retention_policy {{\n    weekly_retention = "P{weeks}W"\n  }}'
+    return out
 
 
 def _cosmos(c, i, ctx):
@@ -525,7 +804,7 @@ resource "azurerm_cosmosdb_account" "cosmos_db_{i}" {{
   resource_group_name = azurerm_resource_group.main.name
   offer_type = "Standard"
   kind = "GlobalDocumentDB"
-  public_network_access_enabled = {str(not _private(c)).lower()}{failover}
+  public_network_access_enabled = {str(not _private(c)).lower()}{failover}{_cosmos_cmk(c, ctx)}
 
   consistency_policy {{
     consistency_level = "Session"
@@ -540,6 +819,15 @@ resource "azurerm_cosmosdb_sql_database" "cosmos_db_{i}" {{
 '''
 
 
+def _cosmos_cmk(c: Component, ctx: Ctx) -> str:
+    if not (c.customer_managed_key and ctx.cmk):
+        return ""
+    return (
+        "\n  key_vault_key_id = azurerm_key_vault_key.cmk.versionless_id"
+        '\n  default_identity_type = "UserAssignedIdentity=${azurerm_user_assigned_identity.cmk.id}"\n' + ctx.cmk_identity()
+    )
+
+
 def _blob(c, i, ctx):
     return f'''
 resource "azurerm_storage_account" "blob_storage_{i}" {{
@@ -551,9 +839,46 @@ resource "azurerm_storage_account" "blob_storage_{i}" {{
   account_replication_type = "{STORAGE[c.tier]}"
   min_tls_version = "TLS1_2"
   allow_nested_items_to_be_public = false
-  public_network_access_enabled = {str(not _private(c)).lower()}
+  public_network_access_enabled = {str(not _private(c)).lower()}{ctx.cmk_identity() if c.customer_managed_key and ctx.cmk else ""}
 }}
-'''
+''' + _blob_extras(c, i, ctx)
+
+
+def _blob_extras(c: Component, i: int, ctx: Ctx) -> str:
+    out = ""
+    if c.customer_managed_key and ctx.cmk:
+        out += f"""
+resource "azurerm_storage_account_customer_managed_key" "blob_storage_{i}" {{
+  storage_account_id = azurerm_storage_account.blob_storage_{i}.id
+  key_vault_id = {ctx.vault}.id
+  key_name = azurerm_key_vault_key.cmk.name
+  user_assigned_identity_id = azurerm_user_assigned_identity.cmk.id
+}}
+"""
+    days = int(c.settings.get("delete_after_days", 0))
+    if days:
+        out += f"""
+# Records are kept for the retention period and then deleted.
+resource "azurerm_storage_management_policy" "blob_storage_{i}" {{
+  storage_account_id = azurerm_storage_account.blob_storage_{i}.id
+
+  rule {{
+    name = "delete-after-retention"
+    enabled = true
+
+    filters {{
+      blob_types = ["blockBlob"]
+    }}
+
+    actions {{
+      base_blob {{
+        delete_after_days_since_modification_greater_than = {days}
+      }}
+    }}
+  }}
+}}
+"""
+    return out
 
 
 def _redis(c, i, ctx):
@@ -582,12 +907,99 @@ resource "azurerm_key_vault" "key_vault_{i}" {{
   sku_name = "standard"
   purge_protection_enabled = true
   soft_delete_retention_days = 90
+  rbac_authorization_enabled = true
 }}
 '''
 
 
 def _logs(c, i, ctx):
-    return LOGS.format(i=i, region=c.region)
+    days = int(c.settings.get("retention_days", 30))
+    out = LOGS.format(i=i, region=c.region, days=min(max(days, 30), 90))
+    if days > 90:
+        out += f"""
+# Interactive for 90 days, then long-term retention up to {days} days in total.
+resource "azurerm_log_analytics_workspace_table" "log_analytics_{i}_diagnostics" {{
+  name = "AzureDiagnostics"
+  workspace_id = azurerm_log_analytics_workspace.log_analytics_{i}.id
+  retention_in_days = 90
+  total_retention_in_days = {_total_retention(days)}
+}}
+"""
+    return out
+
+
+LONG_RETENTION_DAYS = (1095, 1460, 1826, 2191, 2556, 2922, 3288, 3653, 4018, 4383)  # whole years, as Azure accepts them
+
+
+def _total_retention(days: int) -> int:
+    """Total retention Azure accepts: up to 730 days exactly, then whole years from three to twelve."""
+    if days <= 730:
+        return days
+    return next((d for d in LONG_RETENTION_DAYS if d >= days), LONG_RETENTION_DAYS[-1])
+
+
+def _backup_vault(c, i, ctx):
+    """Long-term PostgreSQL backups: a weekly full backup kept in a vault for the retention period."""
+    days = int(c.settings.get("retention_days", ctx.w.backup_retention_days))
+    servers = [k for k, p in enumerate(ctx.of("postgres")) if not replica(p)]
+    out = f'''
+resource "azurerm_data_protection_backup_vault" "backup_vault_{i}" {{
+  name = "bv-{ctx.name}-{i}"
+  location = "{c.region}"
+  resource_group_name = azurerm_resource_group.main.name
+  datastore_type = "VaultStore"
+  redundancy = "{"GeoRedundant" if c.tier == "grs" else "LocallyRedundant"}"
+
+  identity {{
+    type = "SystemAssigned"
+  }}
+}}
+
+resource "azurerm_data_protection_backup_policy_postgresql_flexible_server" "backup_vault_{i}" {{
+  name = "weekly-{days}d"
+  vault_id = azurerm_data_protection_backup_vault.backup_vault_{i}.id
+  backup_repeating_time_intervals = ["R/2026-01-04T02:00:00+00:00/P1W"]
+
+  default_retention_rule {{
+    life_cycle {{
+      duration = "P{days}D"
+      data_store_type = "VaultStore"
+    }}
+  }}
+}}
+
+resource "azurerm_role_assignment" "backup_vault_{i}_reader" {{
+  scope = azurerm_resource_group.main.id
+  role_definition_name = "Reader"
+  principal_id = azurerm_data_protection_backup_vault.backup_vault_{i}.identity[0].principal_id
+}}
+'''
+    for k in servers:
+        out += f'''
+resource "azurerm_role_assignment" "backup_vault_{i}_postgres_{k}" {{
+  scope = azurerm_postgresql_flexible_server.postgres_{k}.id
+  role_definition_name = "PostgreSQL Flexible Server Long Term Retention Backup Role"
+  principal_id = azurerm_data_protection_backup_vault.backup_vault_{i}.identity[0].principal_id
+}}
+
+resource "azurerm_data_protection_backup_instance_postgresql_flexible_server" "backup_vault_{i}_postgres_{k}" {{
+  name = "postgres-{k}"
+  location = "{c.region}"
+  vault_id = azurerm_data_protection_backup_vault.backup_vault_{i}.id
+  server_id = azurerm_postgresql_flexible_server.postgres_{k}.id
+  backup_policy_id = azurerm_data_protection_backup_policy_postgresql_flexible_server.backup_vault_{i}.id
+  depends_on = [azurerm_role_assignment.backup_vault_{i}_reader, azurerm_role_assignment.backup_vault_{i}_postgres_{k}]
+}}
+'''
+    return out
+
+
+def _entra_external_id(c, i, ctx):
+    return """
+# Microsoft Entra External ID (customer sign-in) is an external tenant created in the Microsoft Entra admin
+# center; the azurerm provider has no resource for it. Register the app there and point App Service
+# authentication at the tenant's issuer URL.
+"""
 
 
 def _search(c, i, ctx):
@@ -923,4 +1335,6 @@ BUILDERS = {
     "app_gateway": _app_gateway,
     "aks": _aks,
     "vm": _vm,
+    "backup_vault": _backup_vault,
+    "entra_external_id": _entra_external_id,
 }

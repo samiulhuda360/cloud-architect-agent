@@ -1,9 +1,12 @@
 """Command line: `python -m cloud_architect <command>`.
 
-design   design a workload from a YAML/JSON file (agent if an LLM is configured, else rules)
-eval     evaluate the architects on eval/scenarios.yaml (see evaluate.py for flags)
-serve    web UI and API on http://127.0.0.1:8000
-mcp      MCP server (stdio) exposing pricing, residency and review tools
+design    design a workload from a YAML/JSON file (agent if an LLM is configured, else rules);
+          --out DIR writes the report, diagrams (.drawio, .svg, .mmd) and Terraform
+policies  propose machine-checkable rules from a policy document (PDF, DOCX, Markdown, text)
+brief     propose workload values from a requirements brief or RFP
+eval      evaluate the architects and the policy extractors (see evaluate.py for flags)
+serve     web UI and API on http://127.0.0.1:8000
+mcp       MCP server (stdio) exposing pricing, residency, policy and review tools
 """
 
 from __future__ import annotations
@@ -18,6 +21,26 @@ import yaml
 from .config import settings
 
 
+def write_outputs(out: Path, d, w, a) -> list[Path]:
+    """Report, diagrams, Terraform and the design itself, side by side in one folder."""
+    from .diagram import drawio, mermaid, svg
+    from .report import report
+    from .terraform import generate
+
+    out.mkdir(parents=True, exist_ok=True)
+    files = {
+        "report.md": report(d, w, a, diagram_file="diagram.svg"),
+        "diagram.svg": svg(d, w),
+        "diagram.drawio": drawio(d, w),
+        "diagram.mmd": mermaid(d, w, theme=True) + "\n",
+        "main.tf": generate(d, w),
+        "design.json": d.model_dump_json(indent=1, exclude_defaults=True) + "\n",
+    }
+    for name, text in files.items():
+        (out / name).write_text(text, encoding="utf-8")
+    return [out / n for n in files]
+
+
 def main(argv: list[str] | None = None) -> int:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
@@ -26,47 +49,57 @@ def main(argv: list[str] | None = None) -> int:
     pd = sub.add_parser("design")
     pd.add_argument("workload", help="YAML or JSON file describing the workload")
     pd.add_argument("--rules", action="store_true", help="use the rule-based architect, no model")
-    pd.add_argument("--terraform", help="write the Terraform to this folder")
-    sub.add_parser("eval", help="flags: --only rules,agent,llm_only  --rescore  --no-terraform")
+    pd.add_argument("--terraform", help="write only the Terraform to this folder")
+    pd.add_argument("--out", help="write the report, diagrams, Terraform and design to this folder")
+    pp = sub.add_parser("policies")
+    pp.add_argument("document", help="policy document: .pdf, .docx, .md or .txt")
+    pp.add_argument("--rules", action="store_true", help="use the rule-based extractor, no model")
+    pb = sub.add_parser("brief")
+    pb.add_argument("document", help="requirements brief or RFP: .pdf, .docx, .md or .txt")
+    pb.add_argument("--rules", action="store_true", help="use the rule-based reader, no model")
+    sub.add_parser("eval", help="flags: --only rules,agent,llm_only,extraction  --rescore  --resume  --no-terraform")
     ps = sub.add_parser("serve")
     ps.add_argument("--port", type=int, default=8000)
     sub.add_parser("mcp")
     a, rest = p.parse_known_args(argv)
     if rest and a.cmd != "eval":
         p.error(f"unrecognized arguments: {' '.join(rest)}")
+    cfg = settings()
 
     if a.cmd == "design":
         from .agent import design_with_tools
-        from .assess import assess
-        from .models import Workload
+        from .assess import assess, money
+        from .evaluate import load_workload
         from .pricing import PriceBook
         from .rules import architect
         from .terraform import generate
 
-        cfg = settings()
         book = PriceBook(cfg.price_cache)
-        w = Workload(**yaml.safe_load(Path(a.workload).read_text(encoding="utf-8")))
+        w = load_workload(Path(a.workload))
         d = architect(w, book) if a.rules or not cfg.llm_configured else design_with_tools(w, book, cfg).design
         if d is None:
             print("The agent did not produce a design; falling back to the rule-based architect.")
             d = architect(w, book)
         res = assess(d, w, book)
-        print(
-            json.dumps(
-                {
-                    "design": d.model_dump(),
-                    "total_nzd_month": res.total_nzd_month,
-                    "violations": [v.model_dump() for v in res.violations],
-                    "findings": [f.model_dump() for f in res.findings],
-                },
-                indent=1,
-            )
-        )
+        print(f"{w.name}: {money(res.total_month, res.currency)} a month, {len(res.violations)} hard violations")
+        print(json.dumps({"design": d.model_dump(exclude_defaults=True), "violations": [v.model_dump() for v in res.violations]}, indent=1))
         if a.terraform:
             out = Path(a.terraform)
             out.mkdir(parents=True, exist_ok=True)
             (out / "main.tf").write_text(generate(d, w), encoding="utf-8")
             print(f"Terraform written to {out / 'main.tf'}")
+        if a.out:
+            for f in write_outputs(Path(a.out), d, w, res):
+                print(f"wrote {f}")
+    elif a.cmd in ("policies", "brief"):
+        from . import brief, policies
+
+        path = Path(a.document)
+        mod = policies if a.cmd == "policies" else brief
+        result = mod.extract(path.name, path.read_bytes(), None if a.rules else cfg)
+        print(result["note"], file=sys.stderr)
+        key = "rules" if a.cmd == "policies" else "fields"
+        print(yaml.safe_dump(result[key], sort_keys=False, allow_unicode=True, width=120))
     elif a.cmd == "eval":
         from .evaluate import main as evaluate
 
