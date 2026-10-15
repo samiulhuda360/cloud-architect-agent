@@ -10,6 +10,10 @@
 design for your part of the world: priced in your own currency, checked against your rules, drawn as a diagram and
 ready to build.**
 
+**[Try the live demo](https://cloud.188-245-30-93.sslip.io)**: no sign-up. Pick one of the real-life examples or
+fill in your own, and press **Design it**. The public demo runs the rule-based architect with today's Azure prices;
+the AI agent mode needs your own model key when you run it yourself.
+
 ![Demo: choosing the UK online-shop example, pressing Design it, and scrolling through the diagram, the prices in pounds, the review and the setup files](docs/screenshots/demo.gif)
 
 *The whole flow in under a minute: pick an example (or fill in your own), press **Design it**, and read the result:
